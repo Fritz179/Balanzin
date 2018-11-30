@@ -1,0 +1,45 @@
+doctype html
+html
+  head
+    title Fritz_179
+    link(rel='stylesheet' href='/bower_components/bootstrap/dist/css/bootstrap.css')
+    link(rel='stylesheet' href='/css/style.css')
+  body
+    nav.navbar.navbar-expand-md.navbar-dark.bg-dark.fixed-top
+      a.navbar-brand(href='/') Fritz_179
+      button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarsExampleDefault', aria-controls='navbarsExampleDefault', aria-expanded='false', aria-label='Toggle navigation')
+        span.navbar-toggler-icon
+      #navbarsExampleDefault.collapse.navbar-collapse
+        ul.navbar-nav.mr-auto
+          li.nav-item
+            a.nav-link(href='/') Home
+              span.sr-only (current)
+          if user
+            li.nav-item
+              a.nav-link(href='/articles/add') Add Article
+        ul.navbar-nav.right
+          if user
+            li.nav-item
+              a.nav-link(href='/users/logout') Logout
+          else 
+            li.nav-item
+              a.nav-link(href='/users/register') Register
+            li.nav-item
+              a.nav-link(href='/users/login') Login
+    .container
+      br
+      br
+      br
+      br
+      != messages('message', locals)
+      if errors
+        each error, i in errors
+          div(class='alert alert-danger') #{error.msg}
+      block content
+      br
+      hr
+      footer
+        p Copyright &copy; 2017 by Fritz_179
+      script(src='/bower_components/jquery/dist/jquery.js')  
+      script(src='/bower_components/bootstrap/dist/js/bootstrap.js') 
+      script(src='/js/main.js') 
