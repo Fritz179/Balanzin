@@ -4,24 +4,20 @@ const router = express.Router()
 const Article = require('../models/Article');
 const User = require('../models/User');
 
+const checkErrors = require('../models/checkErrors')
 const {check, validationResult} = require('express-validator/check');
 
 router.get('/', (req, res) => {
-  Article.find({}, (err, doc) => {
-    if (err) {
-      res.send('Nope')
-      console.log(err);
-    } else if (doc) {
-      res.render('index.pug', {articles: doc, title: 'Articles! by Fritz_179!'})
-    } else {
-      res.send('Nope')
-      console.log('Nope');
-    }
-  })
+  Article.find({}, checkErrors(req, res, doc => {
+    res.render('index', {articles: doc, title: 'Articles! by Fritz_179!'})
+  }, () => {
+    req.flash('danger', 'nothing found')
+    res.render('index', {articles: [], title: 'Articles! by Fritz_179!'})
+  }))
 })
 
 router.get('/add', ensureAuthenticated, (req, res) => {
-  res.render('add_Article.pug', {title: 'Add Article'})
+  res.render('add_Article', {title: 'Add Article'})
 })
 
 router.post('/add', ensureAuthenticated, [
@@ -31,7 +27,7 @@ router.post('/add', ensureAuthenticated, [
 ], (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    res.render('add_Article.pug', {title: 'Add Article', errors: errors.array()})
+    res.render('add_Article', {title: 'Add Article', errors: errors.array()})
     return
   }
 
@@ -45,7 +41,7 @@ router.post('/add', ensureAuthenticated, [
       return
     } else {
       req.flash("success", "Article Added");
-      res.redirect('/')
+      res.redirect('/articles')
     }
   })
 })
@@ -57,7 +53,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res) => {
       req.flash('danger', 'Not authorized')
       res.redirect('/')
     } else {
-      res.render('edit_article.pug', {title: 'Edit Article', article: article})
+      res.render('edit_article', {title: 'Edit Article', article: article})
     }
   })
 })
@@ -134,7 +130,7 @@ router.delete('/:id', (req, res) => {
       })
     } else {
       console.log('Nisun articlu: ' + req.params.id);
-      res.render('404.pug')
+      res.render('error', {error: 404})
     }
   })
 })
@@ -147,7 +143,7 @@ router.get('/:id', (req, res) => {
     console.log(`article request by ${user} for ${req.params.id} for ${article ? article.title : '(not valid)'}`);
     if (err) {
       console.log('erur: id miga valid');
-      res.render('404.pug')
+      res.render('error', {error: 404})
     } else if (article) {
       User.findById(article.author, (err, user) => {
         if (err) {
@@ -157,12 +153,12 @@ router.get('/:id', (req, res) => {
           if (user) {
             username = user.username
           }
-          res.render('article.pug', {article: article, author: username})
+          res.render('article', {article: article, author: username})
         }
       })
     } else {
       console.log('Nisun articlu: ' + req.params.id);
-      res.render('404.pug')
+      res.render('error', {error: 404})
     }
   })
 })

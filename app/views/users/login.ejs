@@ -1,0 +1,20 @@
+<%- include('header') %>
+
+<%- include('navbar', {user: user}) %>
+
+<main role="main">
+  <section class="jumbotron restricted">
+    <%- messages('message', locals) %>
+    <h1>Login</h1>
+    <form method="post" action="/users/login">
+      <div class="form-group"><label>Username:</label><input class="form-control" name="username" type="text"></div>
+      <div class="form-group"><label>Password:</label><input class="form-control" name="password" type="password"></div>
+      <input class="btn btn-primary" type="submit" value="Log in">
+    </form>
+    <br>
+    <br>
+    <h6>Do you have an account? <a href='/users/register'>click here to create a new one.</a></h6>
+  </section>
+</main>
+
+<%- include('footer') %>

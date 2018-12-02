@@ -8,7 +8,7 @@ const User = require('../models/User');
 const {check, validationResult} = require('express-validator/check');
 
 router.get('/register', (req, res) => {
-  res.render('register.pug')
+  res.render('register')
 })
 
 router.post('/register', [
@@ -23,7 +23,7 @@ router.post('/register', [
   console.log(req.body.password1, req.body.password2);
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    res.render('register.pug', {errors: errors.array()})
+    res.render('register', {errors: errors.array()})
     return
   }
   bcrypt.genSalt(10, (err, salt) => {
@@ -53,7 +53,7 @@ router.post('/register', [
 })
 
 router.get('/login', (req, res) => {
-  res.render('login.pug')
+  res.render('login')
 })
 
 router.post('/login', (req, res, next) => {

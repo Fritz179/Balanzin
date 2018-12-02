@@ -1,0 +1,16 @@
+<%- include('header') %>
+
+
+<%- include('navbar', {user: user}) %>
+
+<main role="main">
+  <section class="jumbotron">
+    <br>
+    <%- messages('message', locals) %>
+    <h1>Error <%= error %></h1>
+    <p>An error accured :-(</p>
+    <a class="btn btn-success" href="/">Click here to go back to the Homepage</a>
+  </section>
+</main>
+
+<%- include('footer') %>

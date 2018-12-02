@@ -1,0 +1,23 @@
+<%- include('header') %>
+
+<%- include('navbar', {user: user, search: true, nav: [{txt: 'Articles', href: '/articles'}, {txt: 'Add article', href: '/articles/add'}]}) %>
+
+<main role="main">
+  <section class="jumbotron top-margin">
+    <div class="container">
+      <%- messages('message', locals) %>
+      <h1><%= title %></h1>
+      <br>
+      <ul class='list-group'>
+        <% articles.forEach(article => { %>
+          <li class='list-group-item article'>
+            <a href=<%= '/articles/' + article._id %>><%= article.title %></a>
+          </li>
+        <% }) %>
+      </ul>
+      <%- include('copyright') %>
+    </div>
+  </section>
+</main>
+
+<%- include('footer') %>

@@ -9,3 +9,18 @@
   background-color: #dff0d8;
   border-color: #d6e9c6;
 }
+
+.restricted {
+  padding-top: 2%;
+  margin-top: 5%;
+  margin-left: 20%;
+  margin-right: 20%;
+}
+
+.top-margin {
+  margin-top: 6%;
+}
+
+.article {
+  background-color: #f2f2f2;
+}
