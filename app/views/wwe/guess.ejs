@@ -1,0 +1,21 @@
+<%- include('header') %>
+
+<%- include('navbar', {user: user, nav: [{txt: 'WWE', href: '/wwe'}]}) %>
+
+<main role="main">
+  <section class="jumbotron text-center">
+    <div class="container">
+      <br>
+      <%- messages('message', locals) %>
+      <h1 class="jumbotron-heading">Guess the Card</h1>
+    </div>
+  </section>
+</main>
+
+<div class="album py-5 bg-black">
+  <div class="container">
+
+    <%- include('copyright') %>
+  <div>
+
+<%- include('footer') %>

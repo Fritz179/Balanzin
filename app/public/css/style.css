@@ -12,15 +12,26 @@
 
 .restricted {
   padding-top: 2%;
-  margin-top: 5%;
+  margin-top: 76px;
   margin-left: 20%;
   margin-right: 20%;
+  min-width: 550px;
 }
 
 .top-margin {
   margin-top: 6%;
+  margin-left: 3%;
+  margin-right: 3%;
 }
 
 .article {
   background-color: #f2f2f2;
+}
+
+#screen {
+  margin-top: 56px;
+}
+
+.bg-black {
+  background-color: #111;
 }

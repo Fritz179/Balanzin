@@ -8,7 +8,7 @@ module.exports = (app, passport, dirname) => {
   app.use(bodyParser.json())
 
   app.use(session({
-    secret: 'selvatico',
+    secret: process.env.SECRET,
     resave: true,
     saveUninitialized: true
   }))
@@ -19,9 +19,9 @@ module.exports = (app, passport, dirname) => {
     res.locals.messages = require('express-messages')(req, res);
     next();
   });
-
+  
   let paths = [path.join(dirname, 'views')]
-  let l = ['articles', 'users', 'home', 'errors']
+  let l = ['articles', 'users', 'home', 'projects', 'admin', 'wwe']
   l.forEach(obj => {
     paths.push(path.join(dirname, 'views/' + obj))
   })

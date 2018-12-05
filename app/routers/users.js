@@ -5,6 +5,8 @@ const passport = require('passport')
 
 const User = require('../models/User');
 
+const checkErrors = require('../models/checkErrors')
+const ensureAuthenticated = require('../setup/ensureAuthenticated');
 const {check, validationResult} = require('express-validator/check');
 
 router.get('/register', (req, res) => {
@@ -20,10 +22,10 @@ router.post('/register', [
   check('password1').not().isEmpty().withMessage('Password required'),
   check('password2').not().isEmpty().custom((value, {req}) => req.body.password2 === req.body.password1).withMessage('Passwords do not match')
 ], (req, res) => {
-  console.log(req.body.password1, req.body.password2);
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    res.render('register', {errors: errors.array()})
+    req.flash('danger', errors.array()[0].msg)
+    res.render('register')
     return
   }
   bcrypt.genSalt(10, (err, salt) => {

@@ -1,3 +1,5 @@
 node_modules
 .env
 app/public/bower_components
+app/public/p5
+app/public/img

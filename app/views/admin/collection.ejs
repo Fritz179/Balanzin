@@ -1,0 +1,18 @@
+<%- include('header') %>
+
+<%- include('navbar', {user: locals.user}) %>
+
+<main role="main">
+  <section class="jumbotron restricted">
+    <%- messages('message', locals) %>
+    <h1><%= collection %></h1>
+    <form method="post" action="<%= `/admin/${collection}/${type}` %>">
+      <% params.forEach(param => { %>
+        <div class="form-group"><label><%= param %>:</label><input class="form-control" name="<%= param %>" type="text"></div>
+      <% }) %>
+      <input class="btn btn-primary" type="submit" value="Send">
+    </form>
+  </section>
+</main>
+
+<%- include('footer') %>

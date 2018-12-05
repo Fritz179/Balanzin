@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
   }))
 })
 
-let routes = ['articles', 'users'].forEach(route => {
+let routes = ['articles', 'users', 'projects', 'admin', 'wwe'].forEach(route => {
   let router = require(`./routers/${route}.js`)
   app.use('/' + route, router)
 })

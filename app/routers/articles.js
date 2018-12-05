@@ -5,11 +5,12 @@ const Article = require('../models/Article');
 const User = require('../models/User');
 
 const checkErrors = require('../models/checkErrors')
+const ensureAuthenticated = require('../setup/ensureAuthenticated');
 const {check, validationResult} = require('express-validator/check');
 
 router.get('/', (req, res) => {
   Article.find({}, checkErrors(req, res, doc => {
-    res.render('index', {articles: doc, title: 'Articles! by Fritz_179!'})
+    res.render('index', {articles: doc})
   }, () => {
     req.flash('danger', 'nothing found')
     res.render('index', {articles: [], title: 'Articles! by Fritz_179!'})
@@ -17,7 +18,7 @@ router.get('/', (req, res) => {
 })
 
 router.get('/add', ensureAuthenticated, (req, res) => {
-  res.render('add_Article', {title: 'Add Article'})
+  res.render('add_Article')
 })
 
 router.post('/add', ensureAuthenticated, [
@@ -27,7 +28,8 @@ router.post('/add', ensureAuthenticated, [
 ], (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    res.render('add_Article', {title: 'Add Article', errors: errors.array()})
+    req.flash('danger', errors.array()[0].msg)
+    res.redirect('/articles/add')
     return
   }
 
@@ -53,7 +55,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res) => {
       req.flash('danger', 'Not authorized')
       res.redirect('/')
     } else {
-      res.render('edit_article', {title: 'Edit Article', article: article})
+      res.render('edit_article', {article: article})
     }
   })
 })
@@ -84,21 +86,7 @@ router.post('/edit/:id', ensureAuthenticated, [
       req.flash('success', 'Article Updated')
       res.redirect('/articles/' + req.params.id)
     });
-});
-  // const article = new Article({
-  //   title: req.body.title,
-  //   author: req.user._id,
-  //   body: req.body.body
-  // })
-  // Article.updateOne({_id: req.params.id}, article, err => {
-  //   if (err) {
-  //     console.log(err);
-  //     return
-  //   } else {
-  //     req.flash('success', 'Article Updated')
-  //     res.redirect('/')
-  //   }
-  // })
+  });
 })
 
 router.delete('/:id', (req, res) => {
@@ -135,7 +123,6 @@ router.delete('/:id', (req, res) => {
   })
 })
 
-
 //read single article
 router.get('/:id', (req, res) => {
   Article.findById(req.params.id, (err, article) => {
@@ -162,17 +149,5 @@ router.get('/:id', (req, res) => {
     }
   })
 })
-
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next()
-  } else {
-    if (req.method == 'DELETE') {
-      req.method = 'GET'
-    }
-    req.flash('danger', 'Please log in!')
-    res.redirect('/users/login');
-  }
-}
 
 module.exports = router

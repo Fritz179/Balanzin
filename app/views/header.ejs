@@ -4,6 +4,14 @@
     <title>Fritz_179</title>
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/css/style.css">
+    <% if (locals.scripts) { %>
+      <script src="libraries/p5.min.js"></script>
+      <script src="libraries/p5.dom.min.js"></script>
+      <script src="libraries/p5.sound.min.js"></script>
+      <% scripts.forEach(script => { %>
+        <script src="libraries/<%= script %>.js"></script>
+      <% }) %>
+    <% } %>
   </head>
 
   <body>
