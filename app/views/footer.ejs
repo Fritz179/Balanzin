@@ -1,8 +1,21 @@
   </main>
+    <% if (locals.socket) { %>
+      <script src="/socket.io/socket.io.js"></script>
+    <% } %>
 
+    <% if (locals.toInclude) { %>
+      <% toInclude.forEach(include => { %>
+        <% include.scripts.forEach(script => { %>
+          <script src="<%= `${include.path}/${script}.js` %>"></script>
+        <% }) %>
+        <% include.css.forEach(script => { %>
+          <link rel="stylesheet" href="<%= `${include.path}/${script}.css` %>">
+        <% }) %>
+      <% }) %>
+    <% } %>
     <script src="/bower_components/jquery/dist/jquery.js"> </script>
     <script src="/bower_components/bootstrap/dist/js/bootstrap.js"> </script>
     <script src="/js/main.js"> </script>
-  
+
   </body>
 </html>

@@ -3,15 +3,17 @@ const session = require('express-session')
 const path = require('path')
 const express = require('express')
 
-module.exports = (app, passport, dirname) => {
+const sessionMiddleware = session({
+  secret: process.env.SECRET,
+  resave: true,
+  saveUninitialized: true
+})
+
+module.exports = (app, passport, io, dirname) => {
   app.use(bodyParser.urlencoded({extended: false}))
   app.use(bodyParser.json())
 
-  app.use(session({
-    secret: process.env.SECRET,
-    resave: true,
-    saveUninitialized: true
-  }))
+  app.use(sessionMiddleware);
 
   app.use(require('connect-flash')());
 
@@ -19,7 +21,11 @@ module.exports = (app, passport, dirname) => {
     res.locals.messages = require('express-messages')(req, res);
     next();
   });
-  
+
+  io.use(function(socket, next) {
+    sessionMiddleware(socket.request, socket.request.res, next);
+});
+
   let paths = [path.join(dirname, 'views')]
   let l = ['articles', 'users', 'home', 'projects', 'admin', 'wwe']
   l.forEach(obj => {

@@ -151,3 +151,5 @@ router.get('/:id', (req, res) => {
 })
 
 module.exports = router
+
+console.log('200: Articles ready to serve.');

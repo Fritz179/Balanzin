@@ -2,20 +2,40 @@
 
 <%- include('navbar', {user: user, nav: [{txt: 'WWE', href: '/wwe'}]}) %>
 
-<main role="main">
+
+<%# <main role="main">
   <section class="jumbotron text-center">
     <div class="container">
       <br>
-      <%- messages('message', locals) %>
       <h1 class="jumbotron-heading">Guess the Card</h1>
     </div>
   </section>
-</main>
+</main> %>
+// <%- messages('message', locals) %>
+
 
 <div class="album py-5 bg-black">
+  <div class="container text-center">
+    <img id='img' class="logo" alt="Logo alt">
+    <div class="card-body">
+      <h4 class="card-text white">who's logo is this?</h4>
+      <br>
+      <br>
+      <div class="d-flex justify-content-between centered">
+        <div class="btn-group centered" id='ul'>
+          <button type="button" class="btn btn-sm btn-outline-secondary white">Placeholder?</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary white">Placeholder?</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary white">Placeholder?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="py-5 bg-light">
   <div class="container">
-
     <%- include('copyright') %>
-  <div>
+  </div>
+</div>
 
-<%- include('footer') %>
+<%- include('footer', {toInclude: [{path: '/wwe', scripts: ['guess'], css: ['style']}], socket: true}) %>

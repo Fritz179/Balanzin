@@ -13,16 +13,17 @@
       </p>
     </div>
   </section>
-</main>
 
-<div class="album py-5 bg-light">
-  <div class="container">
-    <ul class='list-group'>
-      <% cards.forEach(card => { %>
-        <%- include('card', {card: card}) %>
-      <% }) %>
-    </ul>
-    <%- include('copyright') %>
-  <div>
+  <div class="album py-5 bg-light">
+    <div class="container">
+      <div class="row">
+        <% cards.forEach(card => { %>
+          <%- include('card', {card: card}) %>
+        <% }) %>
+      </div>
+      <%- include('copyright') %>
+    </div>
+  </div>
+</main>
 
 <%- include('footer') %>

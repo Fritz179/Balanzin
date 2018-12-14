@@ -1,0 +1,17 @@
+.white {
+  color: white;
+  display: inline-block;
+}
+
+.centered {
+  text-align: center;
+  margin: auto;
+}
+
+.logo {
+  height: 60vh;
+}
+
+body {
+  overflow: hidden;
+}

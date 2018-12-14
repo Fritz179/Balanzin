@@ -16,6 +16,13 @@ const userSchema = mongoose.Schema({
   email: {
     type: String,
     required: true
+  },
+  wwe: {
+    required: true,
+    type: {},
+    default: {
+      score: 0
+    }
   }
 })
 

@@ -10,7 +10,6 @@ const {check, validationResult} = require('express-validator/check');
 
 router.get('/:name', (req, res) => {
   Project.findOne({name: req.params.name}, checkErrors(req, res, project => {
-    console.log(project);
     res.render('project', {project: project})
   }))
 })
