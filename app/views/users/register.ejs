@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: locals.user}) %>
+<%- include('../navbar', {user: locals.user}) %>
 
 <main role="main">
   <section class="jumbotron restricted">
@@ -13,11 +13,12 @@
       <div class="form-group"><label>Password:</label><input class="form-control" name="password1" type="password"></div>
       <div class="form-group"><label>Confirm Password:</label><input class="form-control" name="password2" type="password"></div>
       <input class="btn btn-primary" type="submit" value="Submit">
-      <br>
-      <br>
-      <h6>Do you alredy have an account? <a href='/users/login'>click here to log in.</a></h6>
     </form>
+    <br>
+    <br>
+    <h6>Do you alredy have an account? <a href='/users/login'>click here to log in.</a></h6>
+    <%- include('../copyright') %>
   </section>
 </main>
 
-<%- include('footer') %>
+<%- include('../footer') %>

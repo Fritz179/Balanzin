@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user, nav: [{txt: 'WWE', href: '/wwe'}]}) %>
+<%- include('../navbar', {user: user, nav: [{txt: 'WWE', href: '/wwe'}]}) %>
 
 <main role="main">
   <section class="jumbotron text-center">
@@ -9,7 +9,7 @@
       <%- messages('message', locals) %>
       <h1 class="jumbotron-heading">WWE</h1>
       <p class="lead text-muted">In this projet you can lear a lot about the WWE! and you can even play a game made in collaboration with CUSTASCH!<br>
-        <a href='/wwe/game'>clicking here to give it a try</a>
+        <a href='/wwe/logo'>clicking here to give it a try</a>
       </p>
     </div>
   </section>
@@ -18,12 +18,12 @@
     <div class="container">
       <div class="row">
         <% cards.forEach(card => { %>
-          <%- include('card', {card: card}) %>
+          <%- include('../card', {card: card}) %>
         <% }) %>
       </div>
-      <%- include('copyright') %>
+      <%- include('../copyright') %>
     </div>
   </div>
 </main>
 
-<%- include('footer') %>
+<%- include('../footer') %>

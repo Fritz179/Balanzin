@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user}) %>
+<%- include('../navbar', {user: user}) %>
 
 <main role="main">
   <section class="jumbotron restricted">
@@ -14,7 +14,8 @@
     <br>
     <br>
     <h6>Do you have an account? <a href='/users/register'>click here to create a new one.</a></h6>
+    <%- include('../copyright') %>
   </section>
 </main>
 
-<%- include('footer') %>
+<%- include('../footer') %>

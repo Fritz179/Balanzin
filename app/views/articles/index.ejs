@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user, search: true, nav: [{txt: 'Articles', href: '/articles'}, {txt: 'Add article', href: '/articles/add'}]}) %>
+<%- include('../navbar', {user: user, search: true, nav: [{txt: 'Articles', href: '/articles'}, {txt: 'Add article', href: '/articles/add'}]}) %>
 
 <main role="main">
   <section class="jumbotron text-center">
@@ -23,8 +23,8 @@
           </li>
         <% }) %>
       </ul>
-      <%- include('copyright') %>
+      <%- include('../copyright') %>
     <div>
 </main>
 
-<%- include('footer') %>
+<%- include('../footer') %>

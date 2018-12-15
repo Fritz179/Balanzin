@@ -1,15 +1,16 @@
+//get .env
 require('dotenv').config();
+
 //setup express
-const passport = require('passport');
 const express = require('express')
 const io = require('socket.io')()
 const app = express()
-require('./setup/express.js')(app, passport, io, __dirname)
+require('./setup/express.js')(app, io, __dirname)
 
 const Card = require('./models/Card');
 const checkErrors = require('./models/checkErrors')
 
-//start mongoose
+//connect to mongoDB Atlaswith mongoose
 const mongoose = require('mongoose')
 mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
   console.log('200: Connection with mongoDB Atlas established.');
@@ -17,10 +18,18 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
   console.error('503: Connection with mongoDB Atlas failed!.');
 })
 
+let cards
+Card.find({}, (err, doc) => {
+  if (err) {
+    console.log('503: Home cards not responding!.');
+  } else {
+    cards = doc
+    console.log('200: Home card redy to be shown.');
+  }
+})
+
 app.get('/', (req, res) => {
-  Card.find({}, checkErrors(req, res, cards => {
-    res.render('home', {cards: cards})
-  }))
+  res.render('home/home', {cards: cards})
 })
 
 let routes = ['articles', 'users', 'projects', 'admin'].forEach(route => {
@@ -44,5 +53,6 @@ const Server = app.listen(process.env.PORT || 1234, () => {
 
 //tothpick, calculator, wordfinder,
 //v1 articles
-//v1.1 7segment
-//v1.2 WWE
+//v1.1.1 7segment
+//v1.1.2 WWE
+//v1.2 Refactored routes

@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user, search: true}) %>
+<%- include('../navbar', {user: user, search: true}) %>
 
 <main role="main">
   <section class="jumbotron text-center">
@@ -20,12 +20,12 @@
     <div class="container">
       <div class="row">
         <% cards.forEach(card => { %>
-          <%- include('card', {card: card}) %>
+          <%- include('../card', {card: card}) %>
         <% }) %>
       </div>
-      <%- include('copyright') %>
+      <%- include('../copyright') %>
     </div>
   </div>
 </main>
 
-<%- include('footer') %>
+<%- include('../footer') %>

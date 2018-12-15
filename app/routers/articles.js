@@ -1,24 +1,23 @@
-const express = require('express');
-const router = express.Router()
-
-const Article = require('../models/Article');
-const User = require('../models/User');
+const router = require('express').Router()
 
 const checkErrors = require('../models/checkErrors')
 const ensureAuthenticated = require('../setup/ensureAuthenticated');
 const {check, validationResult} = require('express-validator/check');
 
+const Article = require('../models/Article');
+const User = require('../models/User');
+
 router.get('/', (req, res) => {
   Article.find({}, checkErrors(req, res, doc => {
-    res.render('index', {articles: doc})
+    res.render('articles/index', {articles: doc})
   }, () => {
     req.flash('danger', 'nothing found')
-    res.render('index', {articles: [], title: 'Articles! by Fritz_179!'})
+    res.render('articles/index', {articles: [], title: 'Articles! by Fritz_179!'})
   }))
 })
 
 router.get('/add', ensureAuthenticated, (req, res) => {
-  res.render('add_Article')
+  res.render('articles/add_Article')
 })
 
 router.post('/add', ensureAuthenticated, [
@@ -55,7 +54,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res) => {
       req.flash('danger', 'Not authorized')
       res.redirect('/')
     } else {
-      res.render('edit_article', {article: article})
+      res.render('articles/edit_article', {article: article})
     }
   })
 })
@@ -66,17 +65,16 @@ router.post('/edit/:id', ensureAuthenticated, [
   check('body').not().isEmpty().withMessage('Body required')
 ], (req, res) => {
   const errors = validationResult(req)
-
   if (!errors.isEmpty()) {
     req.flash('danger', errors.array()[0].msg )
     res.redirect('/articles/edit/' + req.params.id)
     return
   }
+
   Article.findById(req.params.id, (err, article) => {
     if (err) {
       console.log(err)
     };
-
     article.title = req.body.title
     article.body = req.body.body
     article.save((err, updatedTank) => {
@@ -89,19 +87,8 @@ router.post('/edit/:id', ensureAuthenticated, [
   });
 })
 
-router.delete('/:id', (req, res) => {
-  if (!req.user) {
-    req.flash('danger', 'Please log in')
-    res.send('/users/login')
-    return
-  }
-
-  Article.findById(req.params.id, (err, article) => {
-    if (err) {
-      req.flash('danger', 'Erur articles:102')
-      res.send('/articles')
-      return
-    }
+router.delete('/:id', ensureAuthenticated, (req, res) => {
+  Article.findById(req.params.id, checkErrors(req, res, article => {
     if (article.author != req.user._id) {
       req.flash('danger', 'Invalid credentials')
       res.send('/articles')
@@ -113,41 +100,24 @@ router.delete('/:id', (req, res) => {
         } else {
           console.log('deleted: ' + req.params.id);
           req.flash('danger', 'Message Deleted')
-          res.send('/articles')
+          res.redirect('/articles')
         }
       })
-    } else {
-      console.log('Nisun articlu: ' + req.params.id);
-      res.render('error', {error: 404})
     }
-  })
+  }))
 })
 
 //read single article
 router.get('/:id', (req, res) => {
-  Article.findById(req.params.id, (err, article) => {
+  Article.findById(req.params.id, checkErrors(req, res, article => {
     let user = req.user ? req.user.id : '(not logged in)'
-    console.log(`article request by ${user} for ${req.params.id} for ${article ? article.title : '(not valid)'}`);
-    if (err) {
-      console.log('erur: id miga valid');
-      res.render('error', {error: 404})
-    } else if (article) {
-      User.findById(article.author, (err, user) => {
-        if (err) {
-          console.log(err);
-        } else {
-          let username = 'ERUR => article.js:118'
-          if (user) {
-            username = user.username
-          }
-          res.render('article', {article: article, author: username})
-        }
-      })
-    } else {
-      console.log('Nisun articlu: ' + req.params.id);
-      res.render('error', {error: 404})
-    }
-  })
+    console.log(`article request by ${user} for ${article.title}`);
+
+    User.findById(article.author, checkErrors(req, res, user => {
+      username = user.username
+      res.render('articles/article', {article: article, author: username})
+    }))
+  }))
 })
 
 module.exports = router

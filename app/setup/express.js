@@ -2,6 +2,7 @@ const bodyParser  = require('body-parser')
 const session = require('express-session')
 const path = require('path')
 const express = require('express')
+const passport = require('passport');
 
 const sessionMiddleware = session({
   secret: process.env.SECRET,
@@ -9,7 +10,7 @@ const sessionMiddleware = session({
   saveUninitialized: true
 })
 
-module.exports = (app, passport, io, dirname) => {
+module.exports = (app, io, dirname) => {
   app.use(bodyParser.urlencoded({extended: false}))
   app.use(bodyParser.json())
 
@@ -26,12 +27,7 @@ module.exports = (app, passport, io, dirname) => {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
 
-  let paths = [path.join(dirname, 'views')]
-  let l = ['articles', 'users', 'home', 'projects', 'admin', 'wwe']
-  l.forEach(obj => {
-    paths.push(path.join(dirname, 'views/' + obj))
-  })
-  app.set('views', paths)
+  app.set('views', path.join(dirname, 'views'))
   app.set('view engine', 'ejs')
 
   app.use(express.static(path.join(dirname, 'public')))

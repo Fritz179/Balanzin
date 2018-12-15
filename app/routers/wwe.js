@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router()
+const router = require('express').Router()
 
 const User = require('../models/User');
 const Wwe_Card = require('../models/Wwe_Card');
@@ -9,33 +8,24 @@ const checkErrors = require('../models/checkErrors')
 const ensureAuthenticated = require('../setup/ensureAuthenticated');
 const {check, validationResult} = require('express-validator/check');
 
+let games;
+Wwe_Card.find({}, (err, doc) => {
+  if (err) {
+    console.log('503: WEE card not responding!.');
+  } else {
+    games = doc
+    console.log('200: WWE card redy to be clicked.');
+  }
+})
 router.get('/', (req, res) => {
-  Wwe_Card.find({}, checkErrors(req, res, cards => {
-    res.render('wwe', {cards: cards})
-  }))
+  res.render('wwe/wwe', {cards: games})
 })
 
 router.get('/logo', ensureAuthenticated, (req, res) => {
-  Wwe_Game.find({}, checkErrors(req, res, cards => {
-    const params = getGuess(cards)
-    res.render('guess', {card: params})
-
+    res.render('wwe/guess', {card: {}})
     //set callback
     credentials[req.session.id] = req.user._id
-  }))
 })
-
-function getGuess(cards) {
-  let r = Math.round(Math.randon)
-}
-
-function r(max) {
-  if (typeof max == 'Array') {
-    return r(max.length)
-  } else {
-    return Math.round(Math.random() * max)
-  }
-}
 
 const credentials = {}
 

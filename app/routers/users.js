@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs');
-const express = require('express');
-const router = express.Router()
+const router = require('express').Router()
 const passport = require('passport')
 
 const User = require('../models/User');
@@ -10,7 +9,7 @@ const ensureAuthenticated = require('../setup/ensureAuthenticated');
 const {check, validationResult} = require('express-validator/check');
 
 router.get('/register', (req, res) => {
-  res.render('register')
+  res.render('users/register')
 })
 
 router.post('/register', [
@@ -25,9 +24,10 @@ router.post('/register', [
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     req.flash('danger', errors.array()[0].msg)
-    res.render('register')
+    res.render('users/register')
     return
   }
+  
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(req.body.password1, salt, (err, hash) => {
       if (err) {
@@ -55,7 +55,7 @@ router.post('/register', [
 })
 
 router.get('/login', (req, res) => {
-  res.render('login')
+  res.render('users/login')
 })
 
 router.post('/login', (req, res, next) => {

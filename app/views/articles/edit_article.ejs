@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user, nav: [{txt: 'Articles', href: '/articles'}]}) %>
+<%- include('../navbar', {user: user, nav: [{txt: 'Articles', href: '/articles'}]}) %>
 
 <main role="main">
   <section class="jumbotron top-margin">
@@ -12,9 +12,9 @@
           <div class="form-group"><label>Body:</label><textarea class="form-control" name="body"><%= article.body %></textarea></div>
           <br><input class="btn btn-primary" type="submit" value="Save changes">
        </form>
-       <%- include('copyright') %>
+       <%- include('../copyright') %>
     </div>
   </section>
 </main>
 
-<%- include('footer') %>
+<%- include('../footer') %>

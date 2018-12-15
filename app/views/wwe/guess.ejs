@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user, nav: [{txt: 'WWE', href: '/wwe'}]}) %>
+<%- include('../navbar', {user: user, nav: [{txt: 'WWE', href: '/wwe'}]}) %>
 
 
 <%# <main role="main">
@@ -23,9 +23,9 @@
       <br>
       <div class="d-flex justify-content-between centered">
         <div class="btn-group centered" id='ul'>
-          <button type="button" class="btn btn-sm btn-outline-secondary white">Placeholder?</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary white">Placeholder?</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary white">Placeholder?</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary white">La mama da umberto!</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary white">La mama da umberto!</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary white">La mama da umberto!</button>
         </div>
       </div>
     </div>
@@ -34,8 +34,8 @@
 
 <div class="py-5 bg-light">
   <div class="container">
-    <%- include('copyright') %>
+    <%- include('../copyright') %>
   </div>
 </div>
 
-<%- include('footer', {toInclude: [{path: '/wwe', scripts: ['guess'], css: ['style']}], socket: true}) %>
+<%- include('../footer', {toInclude: [{path: '/wwe', scripts: ['guess'], css: ['style']}], socket: true}) %>

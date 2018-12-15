@@ -8,7 +8,7 @@
         <% include.scripts.forEach(script => { %>
           <script src="<%= `${include.path}/${script}.js` %>"></script>
         <% }) %>
-        <% if (locals.toInclude.css) { %>
+        <% if (include.css) { %>
           <% include.css.forEach(script => { %>
             <link rel="stylesheet" href="<%= `${include.path}/${script}.css` %>">
           <% }) %>

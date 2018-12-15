@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user, nav: [{txt: 'Articles', href: '/articles'}]}) %>
+<%- include('../navbar', {user: user, nav: [{txt: 'Articles', href: '/articles'}]}) %>
 
 <main role="main">
   <section class="jumbotron top-margin">
@@ -21,9 +21,9 @@
           <a class='btn btn-danger delete-article' href=<%= '' + article._id %> data-id=<%= article._id %>>Delete</a>
         <% } %>
       <% } %>
-      <%- include('copyright') %>
+      <%- include('../copyright') %>
     </div>
   </section>
 </main>
 
-<%- include('footer') %>
+<%- include('../footer') %>

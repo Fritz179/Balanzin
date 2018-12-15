@@ -1,6 +1,6 @@
-<%- include('header') %>
+<%- include('../header') %>
 
-<%- include('navbar', {user: user}) %>
+<%- include('../navbar', {user: user}) %>
   <link href="../projects/style.css" rel="stylesheet"></link>
 
   <div id='screen'></div>
@@ -10,4 +10,4 @@
   <script src="../p5/p5.sound.min.js"></script>
   <script src="../projects/project.js"></script>
 
-<%- include('footer', {toInclude: [{path: project.path, scripts: project.scripts}]}) %>
+<%- include('../footer', {toInclude: [{path: project.path, scripts: project.scripts}]}) %>
