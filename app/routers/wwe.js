@@ -52,55 +52,42 @@ Wwe_Game.find({}, (err, doc) => {
 module.exports = (io, dir) => {
   io.of(dir + 'logo').on('connect', socket => {
     getUserBySessionId(socket, user => {
-      console.log(`${user.username} just connected to logo!`);
-      socket.on('get_new_guess', () => {
-        socket.emit('new_guess', createGuess(socket))
-      })
-
-      socket.on('guess', name => {
-        if (cards[socket.right].name == name) {
-          user.wwe.score += 1
-          socket.emit('new_guess', createGuess(socket))
-        }
-      })
-
-      socket.on('disconnect', () => {
-        console.log(`new score for ${user.username} of ${user.wwe.score}`);
-        user.save(err => {
-          console.log(`${user.username} just diconnncted from guess, data ${err ? 'not saved!': 'saved succesfully (hopefully)'}`);
-        })
-      })
-      socket.emit('ready')
+      setupGuessSocket(socket, user, 'logo')
     })
   })
 
-  // io.of(dir + 'player').on('connect', socket => {
-  //   getUserBySessionId(socket, user => {
-  //     console.log(`${user.username} just connected to player!`);
-  //     socket.on('get_new_guess', () => {
-  //       socket.emit('new_guess', createGuess(socket))
-  //     })
-  //
-  //     socket.on('guess', name => {
-  //       if (cards[socket.right].name == name) {
-  //         user.wwe.score += 1
-  //         socket.emit('new_guess', createGuess(socket))
-  //       }
-  //     })
-  //
-  //     socket.on('disconnect', () => {
-  //       console.log(`new score for ${user.username} of ${user.wwe.score}`);
-  //       user.save(err => {
-  //         console.log(`${user.username} just diconnncted from guess, data ${err ? 'not saved!': 'saved succesfully (hopefully)'}`);
-  //       })
-  //     })
-  //     socket.emit('ready')
-  //   })
-  // })
+  io.of(dir + 'player').on('connect', socket => {
+    getUserBySessionId(socket, user => {
+      setupGuessSocket(socket, user, 'player')
+    })
+  })
   return router
 }
 
-function createGuess(socket) {
+function setupGuessSocket(socket, user, mode) {
+  console.log(`${user.username} just connected to ${mode}!`);
+
+  socket.on('get_new_guess', () => {
+    socket.emit('new_guess', createGuess(socket, mode))
+  })
+
+  socket.on('guess', name => {
+    if (cards[socket.right].name == name) {
+      user.wwe.score += 1
+      socket.emit('new_guess', createGuess(socket, mode))
+    }
+  })
+
+  socket.on('disconnect', () => {
+    console.log(`new score for ${user.username} of ${user.wwe.score}`);
+    user.save(err => {
+      console.log(`${user.username} just diconnncted from ${mode}, data ${err ? 'not saved!': 'saved succesfully (hopefully)'}`);
+    })
+  })
+  socket.emit('ready')
+}
+
+function createGuess(socket, mode = 'logo') {
   const max = 3
   let num = []
   for (let i = 0; i < max; i++) {
@@ -109,7 +96,7 @@ function createGuess(socket) {
 
   socket.right = num[r(max)]
   let guess = {
-    url: cards[socket.right].logo,
+    url: cards[socket.right][mode],
     options: num.map(n => cards[n].name)
   }
   return guess

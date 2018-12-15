@@ -43,3 +43,6 @@ const Server = app.listen(process.env.PORT || 1234, () => {
 })
 
 //tothpick, calculator, wordfinder,
+//v1 articles
+//v1.1 7segment
+//v1.2 WWE

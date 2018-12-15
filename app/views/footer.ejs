@@ -8,9 +8,11 @@
         <% include.scripts.forEach(script => { %>
           <script src="<%= `${include.path}/${script}.js` %>"></script>
         <% }) %>
-        <% include.css.forEach(script => { %>
-          <link rel="stylesheet" href="<%= `${include.path}/${script}.css` %>">
-        <% }) %>
+        <% if (locals.toInclude.css) { %>
+          <% include.css.forEach(script => { %>
+            <link rel="stylesheet" href="<%= `${include.path}/${script}.css` %>">
+          <% }) %>
+        <% } %>
       <% }) %>
     <% } %>
     <script src="/bower_components/jquery/dist/jquery.js"> </script>
