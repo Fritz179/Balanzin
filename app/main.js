@@ -51,7 +51,7 @@ const Server = app.listen(process.env.PORT || 1234, () => {
   io.attach(Server)
 })
 
-//tothpick, calculator, wordfinder,
+//tothpick, calculator, wordfinder, boids
 //v1 articles
 //v1.1.1 7segment
 //v1.1.2 WWE

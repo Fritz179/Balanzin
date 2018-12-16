@@ -49,7 +49,6 @@ router.post('/add', ensureAuthenticated, [
 
 router.get('/edit/:id', ensureAuthenticated, (req, res) => {
   Article.findById(req.params.id, (err, article) => {
-    console.log('55');
     if (article.author != req.user._id) {
       req.flash('danger', 'Not authorized')
       res.redirect('/')
@@ -98,7 +97,7 @@ router.delete('/:id', ensureAuthenticated, (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          console.log('deleted: ' + req.params.id);
+          console.log('410: deleted: ' + req.params.id);
           req.flash('danger', 'Message Deleted')
           res.redirect('/articles')
         }
@@ -108,10 +107,10 @@ router.delete('/:id', ensureAuthenticated, (req, res) => {
 })
 
 //read single article
-router.get('/:id', (req, res) => {
+router.get('/:id', ensureAuthenticated, (req, res) => {
   Article.findById(req.params.id, checkErrors(req, res, article => {
-    let user = req.user ? req.user.id : '(not logged in)'
-    console.log(`article request by ${user} for ${article.title}`);
+    let user = req.user ? req.user.username : '(not logged in)'
+    console.log(`102: article requested by ${user} for ${article.title}`);
 
     User.findById(article.author, checkErrors(req, res, user => {
       username = user.username

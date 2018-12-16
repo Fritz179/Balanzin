@@ -24,7 +24,6 @@ router.get('/:collection/:type', (req, res) => {
   if (req.params.type == 'edit') {
     params.push('id')
   }
-  console.log(params);
   res.render('collection', {params: params, type: req.params.type, collection: req.params.collection})
 })
 

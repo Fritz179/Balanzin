@@ -55,7 +55,7 @@ module.exports = (io, dir) => {
 }
 
 function setupGuessSocket(socket, user, mode) {
-  console.log(`${user.username} just connected to ${mode}!`);
+  console.log(`100: ${user.username} just connected to ${mode}!`);
 
   socket.on('get_new_guess', () => {
     socket.emit('new_guess', createGuess(socket, mode))
@@ -69,9 +69,9 @@ function setupGuessSocket(socket, user, mode) {
   })
 
   socket.on('disconnect', () => {
-    console.log(`new score for ${user.username} of ${user.wwe.score}`);
+    console.log(`100: new score for ${user.username} of ${user.wwe.score}`);
     user.save(err => {
-      console.log(`${user.username} just diconnncted from ${mode}, data ${err ? 'not saved!': 'saved succesfully (hopefully)'}`);
+      console.log(`100: ${user.username} just diconnncted from ${mode}, data ${err ? 'not saved!': 'saved succesfully (hopefully)'}`);
     })
   })
   socket.emit('ready')
@@ -103,7 +103,7 @@ function r(max, excluded = []) {
 function getUserBySessionId(socket, callback) {
   const id = credentials[socket.request.session.id]
   if (!id) {
-    socket.emit('redirect', '/users/login')
+    socket.emit('redirect', '/users/login?from=/wwe')
     console.log('400: failed attempt to log in logo');
   } else {
     delete credentials[socket.request.session.id]

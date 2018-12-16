@@ -27,7 +27,7 @@ router.post('/register', [
     res.render('users/register')
     return
   }
-  
+
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(req.body.password1, salt, (err, hash) => {
       if (err) {
@@ -55,12 +55,12 @@ router.post('/register', [
 })
 
 router.get('/login', (req, res) => {
-  res.render('users/login')
+  res.render('users/login', {from: req.query.from || '/'})
 })
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', {
-    successRedirect: '/',
+    successRedirect: req.query.from || '/',
     failureRedirect: '/users/login',
     failureFlash: true,
     successFlash: true

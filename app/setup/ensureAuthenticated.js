@@ -6,6 +6,6 @@ module.exports = function ensureAuthenticated(req, res, next) {
       req.method = 'GET'
     }
     req.flash('danger', 'Please log in!')
-    res.redirect('/users/login');
+    res.redirect('/users/login?from=' + req.originalUrl);
   }
 }

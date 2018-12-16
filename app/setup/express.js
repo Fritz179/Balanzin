@@ -42,3 +42,5 @@ module.exports = (app, io, dirname) => {
     next()
   })
 }
+
+console.log('200: Express setted up succesfully');
