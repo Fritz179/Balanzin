@@ -2,9 +2,13 @@ let fritzs = []
 let count = 0
 let speedSlider
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
+
 function setup() {
-  const canvas = createCanvas(windowWidth, windowHeight - ynav)
-  canvas.parent('screen');
+  createCanvas(windowWidth, windowHeight)
 
                       //x,   y,   w,    q,  s,  toDisplay = '',  r
   fritzs.push(new Fritz(50,  500, 1200, 14, 50, 'abcdefhilnopru'  ))
@@ -14,10 +18,10 @@ function setup() {
 
   speedSlider = createSlider(0.05, 10, 1, 0.1)
   speedSlider.position(50, 700)
+
 }
 
 function draw() {
-  //background(52, 58, 64);
   background(51);
 
   fritzs[2].display(Math.round(count))
@@ -28,5 +32,6 @@ function draw() {
 
   count += speedSlider.value()
 
+  line(0, 0, windowWidth, windowHeight)
   line(0, 0, width, height)
 }

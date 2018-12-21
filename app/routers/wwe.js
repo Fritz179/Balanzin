@@ -40,7 +40,7 @@ Wwe_Game.find({}, (err, doc) => {
 })
 
 module.exports = (io, dir) => {
-  io.of(dir + 'logo').on('connect', socket => {
+  io.of(dir + 'logo/').on('connect', socket => {
     getUserBySessionId(socket, user => {
       setupGuessSocket(socket, user, 'logo')
     })
@@ -86,7 +86,7 @@ function createGuess(socket, mode = 'logo') {
 
   socket.right = num[r(max)]
   let guess = {
-    url: cards[socket.right][mode],
+    url: `/wwe/${mode}/${cards[socket.right]._id}.png`,
     options: num.map(n => cards[n].name)
   }
   return guess

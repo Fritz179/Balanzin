@@ -23,7 +23,8 @@ Card.find({}, (err, doc) => {
   if (err) {
     console.log('503: Home cards not responding!.');
   } else {
-    cards = doc
+    let projects = Projects.map(project => { return {name: project, src: `/home/${project}.png`, body: 'A p5 project!'}})
+    cards = doc.concat(projects)
     console.log('200: Home card redy to be shown.');
   }
 })
@@ -42,6 +43,23 @@ let sockets = ['wwe'].forEach(route => {
   app.use('/' + route, router(io, `/${route}/`))
 })
 
+const Projects = ['Seven_Segment_Display']
+const projects = Projects.map(project => project.toLowerCase())
+
+app.get('/:name', (req, res, next) => {
+  let name = req.params.name
+  if (Projects.includes(name)) {
+    res.render('projects/project', {projectName: name})
+  } else {
+    let index = projects.indexOf(req.params.name.toLowerCase())
+    if (index != -1) {
+      res.redirect('/' + Projects[index])
+    } else {
+      next()
+    }
+  }
+})
+
 app.get('*', (req, res) => {
   res.render('error', {error: 404})
 })
@@ -51,8 +69,9 @@ const Server = app.listen(process.env.PORT || 1234, () => {
   io.attach(Server)
 })
 
-//tothpick, calculator, wordfinder, boids
+//tothpick, calculator, wordfinder, boids, chess, tris
 //v1 articles
 //v1.1.1 7segment
 //v1.1.2 WWE
-//v1.2 Refactored routes
+//v1.2.1 Refactored routes
+//v1.2.2 Refactored all :-)

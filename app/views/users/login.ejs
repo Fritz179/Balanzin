@@ -7,7 +7,7 @@
     <%- messages('message', locals) %>
     <h1>Login</h1>
     <form method="post" action="<%= '/users/login?from=' + from %>">
-      <div class="form-group"><label>Username:</label><input class="form-control" name="username" type="text"></div>
+      <div class="form-group"><label>Username:</label><input class="form-control" name="username" type="text" autofocus></div>
       <div class="form-group"><label>Password:</label><input class="form-control" name="password" type="password"></div>
       <input class="btn btn-primary" type="submit" value="Log in">
     </form>

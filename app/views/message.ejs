@@ -5,11 +5,3 @@
     <% }) %>
   <% }) %>
 </div>
-
-
-//messages
-Object.keys(messages).forEach(type => {
-  messages[type].forEach(message => {
-    return   div class='alert alert-%= type %'%= message %/div
-  })
-})

@@ -35,3 +35,21 @@
 .bg-black {
   background-color: #111;
 }
+
+body {
+  height: 100%;
+}
+
+html {
+  height: 100vh;
+}
+
+#iframeContainer {
+  height: inherit;
+}
+
+iframe {
+  border: 0;
+  width: 100%;
+  height: inherit;
+}

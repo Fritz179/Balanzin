@@ -1,13 +1,25 @@
-<%- include('../header') %>
+<%- include('../header', {title: projectName}) %>
 
-<%- include('../navbar', {user: user}) %>
-  <link href="../projects/style.css" rel="stylesheet"></link>
+<%- include('../navbar', {notFixed: true}) %>
 
-  <div id='screen'></div>
+  <link rel="stylesheet" href="/projects/style.css">
 
-  <script src="../p5/p5.min.js"></script>
-  <script src="../p5/p5.dom.min.js"></script>
-  <script src="../p5/p5.sound.min.js"></script>
-  <script src="../projects/project.js"></script>
 
-<%- include('../footer', {toInclude: [{path: project.path, scripts: project.scripts}]}) %>
+  <div id="iframeContainer">
+    <iframe id='iframe' src="<%= `/projects/${projectName}/index.html` %>">
+      <p>Your browser does not support iframes. :-(</p>
+    </iframe>
+  </div>
+
+  <script>
+    window.onresize = () => {
+      nav = document.getElementById('nav').clientHeight
+      // con = document.getElementById('iframeContainer').clientHeight
+      // document.getElementById('nav-placeholder').style.height = nav + 'px'
+      document.getElementById('iframe').style.height = (window.innerHeight - nav) + 'px'
+      // console.log(window.innerHeight, nav, window.innerHeight - nav);
+    }
+    window.onresize()
+  </script>
+
+<%- include('../footer') %>

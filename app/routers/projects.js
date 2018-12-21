@@ -7,11 +7,12 @@ const checkErrors = require('../models/checkErrors')
 const ensureAuthenticated = require('../setup/ensureAuthenticated');
 const {check, validationResult} = require('express-validator/check');
 
+const projects = ['Sevem_Segment_Display']
 
 router.get('/:name', (req, res) => {
-  Project.findOne({name: req.params.name}, checkErrors(req, res, project => {
-    res.render('projects/project', {project: project})
-  }))
+  if (projects.has(req.params.name)) {
+    res.render('projects/project')
+  }
 })
 
 module.exports = router

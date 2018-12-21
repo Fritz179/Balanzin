@@ -99,7 +99,7 @@ router.delete('/:id', ensureAuthenticated, (req, res) => {
         } else {
           console.log('410: deleted: ' + req.params.id);
           req.flash('danger', 'Message Deleted')
-          res.redirect('/articles')
+          res.send('/articles')
         }
       })
     }

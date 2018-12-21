@@ -5,19 +5,21 @@
 
     <% if (locals.toInclude) { %>
       <% toInclude.forEach(include => { %>
-        <% include.scripts.forEach(script => { %>
-          <script src="<%= `${include.path}/${script}.js` %>"></script>
-        <% }) %>
+        <% if (include.scripts) { %>
+          <% include.scripts.forEach(script => { %>
+            <script type='module' src="<%= `${include.path}/${script}.js` %>"></script>
+          <% }) %>
+        <% } %>
         <% if (include.css) { %>
-          <% include.css.forEach(script => { %>
-            <link rel="stylesheet" href="<%= `${include.path}/${script}.css` %>">
+          <% include.css.forEach(style => { %>
+            <link rel="stylesheet" href="<%= `${include.path}/${style}.css` %>">
           <% }) %>
         <% } %>
       <% }) %>
     <% } %>
     <script src="/bower_components/jquery/dist/jquery.js"> </script>
     <script src="/bower_components/bootstrap/dist/js/bootstrap.js"> </script>
-    <script src="/js/main.js"> </script>
+    <script src="/main.js"> </script>
 
   </body>
 </html>
