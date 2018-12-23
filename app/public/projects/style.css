@@ -6,3 +6,97 @@ body {
   padding: 0;
   margin: 0;
 }
+
+#sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  font-size: 36px;
+  margin-left: 5%;
+  padding-left: 0;
+  padding-bottom: 10%;
+}
+
+#sidenav {
+  height: auto;
+  max-height: 85%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 10%;
+  right: 0;
+  background-color: #343a40;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+  border-style: solid none solid solid;
+  border-color: black;
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+  border-width: thick;
+}
+
+#sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #ddd;
+  display: block;
+  transition: 0.3s;
+}
+
+#sidenav a:hover {
+  color: #fff;
+}
+
+#sidenav ul {
+  padding-left: 0;
+  overflow-y: auto;
+}
+
+.slider {
+  color: #eee;
+  font-size: 20px;
+  width: 100%;
+  padding-bottom: 10%
+}
+
+.slider input {
+  margin-left: 5%;
+  -webkit-appearance: none;
+  width: 70%;
+  height: 15px;
+  border-radius: 5px;
+  background: white;
+  outline: none;
+  opacity: .85;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider input:hover {
+  opacity: 1;
+}
+
+.slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #47ff36;
+  cursor: pointer;
+}
+
+.slider input::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider label {
+  margin-left: 5%;
+}
+.slider p {
+  margin-left: 5%;
+}

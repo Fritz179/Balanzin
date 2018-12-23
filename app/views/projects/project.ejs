@@ -3,23 +3,18 @@
 <%- include('../navbar', {notFixed: true}) %>
 
   <link rel="stylesheet" href="/projects/style.css">
+  <script src="/projects/projects.js"></script>
 
-
-  <div id="iframeContainer">
-    <iframe id='iframe' src="<%= `/projects/${projectName}/index.html` %>">
+  <div id="iframeContainer" disabled>
+    <iframe id='iframe' src="<%= `/projects/${projectName}/index.html` %>" disabled>
       <p>Your browser does not support iframes. :-(</p>
     </iframe>
   </div>
 
-  <script>
-    window.onresize = () => {
-      nav = document.getElementById('nav').clientHeight
-      // con = document.getElementById('iframeContainer').clientHeight
-      // document.getElementById('nav-placeholder').style.height = nav + 'px'
-      document.getElementById('iframe').style.height = (window.innerHeight - nav) + 'px'
-      // console.log(window.innerHeight, nav, window.innerHeight - nav);
-    }
-    window.onresize()
-  </script>
+  <nav id="sidenav">
+    <ul id="options">
+      <li><a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a></li>
+    </ul>
+  </nav>
 
 <%- include('../footer') %>

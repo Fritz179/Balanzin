@@ -23,9 +23,11 @@ Card.find({}, (err, doc) => {
   if (err) {
     console.log('503: Home cards not responding!.');
   } else {
-    let projects = Projects.map(project => { return {name: project, src: `/home/${project}.png`, body: 'A p5 project!'}})
+    let projects = Projects.map(project => {
+      return {name: project, src: `/home/${project}.png`, body: 'A p5 project!', redirect: `/${project}`}
+    })
     cards = doc.concat(projects)
-    console.log('200: Home card redy to be shown.');
+    console.log('200: Home cards redy to be shown.');
   }
 })
 
@@ -43,7 +45,7 @@ let sockets = ['wwe'].forEach(route => {
   app.use('/' + route, router(io, `/${route}/`))
 })
 
-const Projects = ['Seven_Segment_Display']
+const Projects = ['Seven_Segment_Display', 'Circle_Filler']
 const projects = Projects.map(project => project.toLowerCase())
 
 app.get('/:name', (req, res, next) => {
@@ -55,7 +57,7 @@ app.get('/:name', (req, res, next) => {
     if (index != -1) {
       res.redirect('/' + Projects[index])
     } else {
-      next()
+      next() //404
     }
   }
 })
@@ -69,9 +71,13 @@ const Server = app.listen(process.env.PORT || 1234, () => {
   io.attach(Server)
 })
 
-//tothpick, calculator, wordfinder, boids, chess, tris
-//v1 articles
-//v1.1.1 7segment
-//v1.1.2 WWE
-//v1.2.1 Refactored routes
-//v1.2.2 Refactored all :-)
+/*
+  tothpick, calculator, wordfinder, boids, chess, tris
+  v1 articles
+  v1.1.1 7segment
+  v1.1.2 WWE
+  v1.2.1 Refactored routes
+  v1.2.2 Refactored all :-)
+  NCSC = non credo siano coincidenze
+  CIGC = credo in gesù carota
+*/
