@@ -1,56 +1,43 @@
-var cerchi = []
-var w
-var ws
-var q = 1
+let circles = []
+let validPos = []
+var speed = 1
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(window.innerWidth, window.innerHeight);
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight)
+  createCanvas(window.innerWidth, window.innerHeight)
   background(51)
-
-  /*
-  if (windowWidth < windowHeight) {
-    w = windowWidth
-  } else {
-    w = windowHeight
+  let min = 4
+  for (let x = min; x < width - min; x++) {
+    for (let y = min; y < height - min; y++) {
+      validPos.push({x: x, y: y})
+    }
   }
-  */
 
-  let x = random(windowWidth)
-  let y = random(windowHeight)
-  cerchi[cerchi.length] = new circle(x, y)
+  circles.push(new Circle(random(validPos)))
 }
 
 function draw() {
   background(51)
-  for (let i = 0; i < q; i++) {
-    cerchi[cerchi.length - 1].ingrandisci()
+
+  for (let i = 0; i < speed; i++) {
+    circles[circles.length - 1].update()
   }
-  for (let i = 0; i < cerchi.length; i++) {
-    cerchi[i].mostra()
+  options.updatePixelsCount(validPos.length)
+  for (let i = 0; i < circles.length; i++) {
+    circles[i].mostra()
   }
 }
 
-function nuovo() {
-  let xx = random(windowWidth)
-  let yy = random(windowHeight)
-  let temp = {
-    x: xx,
-    y: yy,
-    r: 3
-  }
-  let buono = true
-  for (let i = 0; i < cerchi.length; i++) {
-    if (sopra(temp, cerchi[i])) {
-      buono = false
+function restartButtonPressed() {
+  circles.splice(0, circles.length - 1)
+  let min = 4
+  for (let x = min; x < width - min; x++) {
+    for (let y = min; y < height - min; y++) {
+      validPos.push({x: x, y: y})
     }
   }
-  if (buono) {
-    cerchi[cerchi.length] = new circle(xx, yy)
-  } else {
-    nuovo()
-  }
+  loop()
 }

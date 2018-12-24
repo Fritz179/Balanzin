@@ -1,12 +1,33 @@
-const Options = window.parent.document.getElementById('options')
+const options = {div: window.parent.document.getElementById('options')}
 
-window.onload = () => {
-
+function preload() {
+  window.parent.window.onresize()
   if (typeof insertOptions == 'function') {
     insertOptions()
   } else {
     console.log('nientUpzion() :-(');
   }
+
+}
+
+function insertButton(value = 'button', callback) {
+  const div = Li()
+  div.classList.add("button");
+  const button = Button(value)
+  button.onclick = callback
+  div.appendChild(button)
+
+  options.div.appendChild(div)
+}
+
+function insertP(value = '', callbackName) {
+  const div = Li()
+  div.classList.add("p");
+  const p = P(value)
+  options[callbackName] = input => p.innerHTML = value + input
+  div.appendChild(p)
+
+  options.div.appendChild(div)
 }
 
 function insertSlider(tag, min, max, step, value, oninput) {
@@ -36,7 +57,7 @@ function insertSlider(tag, min, max, step, value, oninput) {
     oninput(input)
   }
 
-  Options.appendChild(div)
+  options.div.appendChild(div)
 }
 
 function lol() {
@@ -83,4 +104,10 @@ function Label(txt = 'Placeholder') {
   const label = document.createElement('label')
   label.innerHTML = txt
   return label
+}
+
+function Button(txt = 'Placeholder') {
+  const button = document.createElement('button')
+  button.innerHTML = txt
+  return button
 }

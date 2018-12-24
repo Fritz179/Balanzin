@@ -1,30 +1,34 @@
-class circle {
-  constructor(x, y) {
+class Circle {
+  constructor({x, y}) {
     this.x = x
     this.y = y
     this.r = 1
+    this.min = 4
+    if (circles.length) {
+      // let map = circles.map(circle => dist(circle.x, circle.y, x, y) - circle.r)
+      // this.nearest = circles[map.indexOf(Math.min(...map))]
+      let record = 9999999
+      circles.forEach(circle => {
+        let d = dist(circle.x, circle.y, x, y) - circle.r
+        if (d < record) {
+          record = d
+          this.nearest = circle
+        }
+      })
+    }
   }
 
-  ingrandisci() {
-    let tocca = false
-    for (let i = 0; i < cerchi.length - 1; i++) {
-      if(sopra(cerchi[i], cerchi[cerchi.length - 1])) {
-        tocca = true
-      }
-    }
-    let x = this.x
-    let y = this.y
-    let r = this.r
-    if (x - r > 1 && x + r < windowWidth - 1 && y - r > 1 && y + r < windowHeight - 1) {
-
+  update() {
+    if (this.validateCircle()) { //can grow
+      this.r ++
     } else {
-      tocca = true
-    }
-    if (!tocca) {
-      this.r += 1
-    }
-    else {
-      nuovo()
+      validPos = validPos.filter(pos => dist(this.x, this.y, pos.x, pos.y) > this.r + this.min)
+      options.updatePixelsCount(validPos.length)
+      if (validPos.length) {
+        circles.push(new Circle(random(validPos)))
+      } else {
+        noLoop()
+      }
     }
   }
 
@@ -33,13 +37,19 @@ class circle {
     stroke(255)
     ellipse(this.x, this.y, this.r * 2, this.r * 2)
   }
-}
 
-function sopra(a, b) {
-  let d = dist(a.x, a.y, b.x, b.y)
-  if (d < a.r + b.r) {
-    return true
-  } else {
-    return false
+  validateCircle(circle) {
+    if (this.nearest) {
+      return (dist(this.nearest.x, this.nearest.y, this.x, this.y) > this.r + this.nearest.r && this.edge())
+    } else {
+      return this.edge()
+    }
+  }
+
+  edge() {
+    return (this.x + this.r < windowWidth &&
+            this.x - this.r > 0 &&
+            this.y + this.r < windowHeight &&
+            this.y - this.r > 0)
   }
 }
