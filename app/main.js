@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
   res.render('home/home', {cards: cards})
 })
 
-let routes = ['articles', 'users', 'projects', 'admin'].forEach(route => {
+let routes = ['articles', 'users', 'admin'].forEach(route => {
   let router = require(`./routers/${route}.js`)
   app.use('/' + route, router)
 })
@@ -72,6 +72,7 @@ const Server = app.listen(process.env.PORT || 1234, () => {
 })
 
 /*
+  //todo: fix bug, iframe rewuest ending in 404 with a second header (loopable)
   tothpick, calculator, wordfinder, boids, chess, tris
   v1 articles
   v1.1.1 7segment

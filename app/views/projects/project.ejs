@@ -3,7 +3,7 @@
 <%- include('../navbar', {notFixed: true}) %>
 
   <script src="/projects/projects.js"></script>
-  <link href="/projects/style.css" rel="stylesheet"></link>
+  <style> body {overflow: hidden;} </style>
 
   <div id="iframeContainer" disabled>
     <iframe id='iframe' src="<%= `/projects/${projectName}/index.html` %>" disabled>

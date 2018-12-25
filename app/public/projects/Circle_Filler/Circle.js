@@ -47,9 +47,9 @@ class Circle {
   }
 
   edge() {
-    return (this.x + this.r < windowWidth &&
+    return (this.x + this.r < width &&
             this.x - this.r > 0 &&
-            this.y + this.r < windowHeight &&
+            this.y + this.r < height &&
             this.y - this.r > 0)
   }
 }

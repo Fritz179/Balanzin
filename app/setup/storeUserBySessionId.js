@@ -5,7 +5,7 @@ const credentials = {}
 module.exports.getUser = (socket, callback) => {
   const id = credentials[socket.request.session.id]
   if (!id) {
-    socket.emit('redirect', '/users/login?from=/wwe')
+    socket.emit('redirect', '/users/login?from=')
     console.log('400: failed attempt to log in logo');
   } else {
     delete credentials[socket.request.session.id]
@@ -25,6 +25,7 @@ module.exports.getUser = (socket, callback) => {
 
 module.exports.storeUser = (req, res, next) => {
   //set callback
+  // console.log(req.session.id);
   credentials[req.session.id] = req.user._id
   next()
 }

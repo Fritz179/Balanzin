@@ -12,7 +12,7 @@ const setupPlayerSocket = require('./setupPlayerSocket')
 const setupSingleSocket = require('./setupSingleSocket')
 
 let cards;
-Card.find({type: 'wwe'}, (err, doc) => {
+Card.find({type: 'chess'}, (err, doc) => {
   if (err) {
     console.log('503: Chess card not responding!.');
   } else {
@@ -22,23 +22,23 @@ Card.find({type: 'wwe'}, (err, doc) => {
 })
 
 router.get('/', (req, res) => {
-  res.render('chess/chess')
+  res.render('chess/chess', {cards: cards})
 })
 
 router.get('/ai', ensureAuthenticated, storeUser, (req, res) => {
-    res.render('chess/ai', {card: {}})
+  res.render('projects/project', {projectName: `chess/ai`})
 })
 
 router.get('/player', ensureAuthenticated, storeUser, (req, res) => {
-    res.render('chess/player', {card: {}})
+  res.render('projects/project', {projectName: `chess/player`})
 })
 
 router.get('/single', ensureAuthenticated, storeUser, (req, res) => {
-    res.render('chess/single', {card: {}})
+  res.render('projects/project', {projectName: `chess/single`})
 })
 
 module.exports = (io, dir) => {
-  io.of(dir + 'ai/').on('connect', socket => {
+  io.of(dir + 'ai').on('connect', socket => {
     getUser(socket, user => {
       setupAiSocket(socket, user)
     })

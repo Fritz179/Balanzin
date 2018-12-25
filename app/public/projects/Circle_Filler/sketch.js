@@ -3,6 +3,7 @@ let validPos = []
 var speed = 1
 
 function setup() {
+  insertNav()
   changeTitle('Cerchi!')
   insertSlider('Speed: ', 1, 100, 1, 2, input => speed = input.value)
   insertP('Pixels left: ', 'updatePixelsCount')
@@ -22,7 +23,6 @@ function setup() {
 
 function draw() {
   background(51)
-
   for (let i = 0; i < speed; i++) {
     circles[circles.length - 1].update()
   }

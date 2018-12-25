@@ -10,15 +10,21 @@
       <h1 class="jumbotron-heading">CHESS!</h1>
       <p class="lead text-muted">If you already know how to play chess and you would like to challenge yorself<br>
         by playing against my artificial intelligence, you are welcome!<br>
-        <a href='/wwe/logo'>clicking here to lose againt my AI</a><br>
+        <a href='/chess/ai'>clicking here to lose againt my AI</a><br>
         or if you want to have a chance to win,<br>
-        <a href='/wwe/logo'>clicking here to challenge another player</a>
+        <a href='/chess/player'>clicking here to challenge another player</a>
       </p>
     </div>
   </section>
 
-  <div class="py-5 bg-light">
+  <div class="album py-5 bg-light">
     <div class="container">
+      <div class="row">
+        <% cards.forEach(card => { %>
+          <%- include('../card', {card: card}) %>
+        <% }) %>
+      </div>
+      <%- include('../copyright') %>
     </div>
   </div>
 </main>
