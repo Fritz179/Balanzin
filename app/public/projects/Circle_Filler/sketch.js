@@ -2,11 +2,12 @@ let circles = []
 let validPos = []
 var speed = 1
 
-function windowResized() {
-  resizeCanvas(window.innerWidth, window.innerHeight);
-}
-
 function setup() {
+  changeTitle('Cerchi!')
+  insertSlider('Speed: ', 1, 100, 1, 2, input => speed = input.value)
+  insertP('Pixels left: ', 'updatePixelsCount')
+  insertButton('Restart', restartButtonPressed)
+
   createCanvas(window.innerWidth, window.innerHeight)
   background(51)
   let min = 4
@@ -33,6 +34,7 @@ function draw() {
 
 function restartButtonPressed() {
   circles.splice(0, circles.length - 1)
+  validPos = []
   let min = 4
   for (let x = min; x < width - min; x++) {
     for (let y = min; y < height - min; y++) {

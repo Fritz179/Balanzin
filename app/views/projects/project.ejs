@@ -2,19 +2,13 @@
 
 <%- include('../navbar', {notFixed: true}) %>
 
-  <link rel="stylesheet" href="/projects/style.css">
   <script src="/projects/projects.js"></script>
+  <link href="/projects/style.css" rel="stylesheet"></link>
 
   <div id="iframeContainer" disabled>
     <iframe id='iframe' src="<%= `/projects/${projectName}/index.html` %>" disabled>
       <p>Your browser does not support iframes. :-(</p>
     </iframe>
   </div>
-
-  <nav id="sidenav">
-    <ul id="options">
-      <li><a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a></li>
-    </ul>
-  </nav>
 
 <%- include('../footer') %>

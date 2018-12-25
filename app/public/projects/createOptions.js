@@ -1,14 +1,60 @@
-const options = {div: window.parent.document.getElementById('options')}
+const options = {}
 
 function preload() {
-  window.parent.window.onresize()
-  if (typeof insertOptions == 'function') {
-    insertOptions()
-  } else {
-    console.log('nientUpzion() :-(');
+  options.div = document.getElementById('options')
+
+  addEvent(document)
+  if (window.parent != window) { //iframe
+    window.parent.window.onresize()
+    addEvent(window.parent.document)
   }
 
+  insertTitle('Options:')
+  // if (typeof insertOptions == 'function') { // insertOption if exist
+  //   insertOptions()
+  // } else {
+  //   console.log('al manca al insertOptions() :-(');
+  // }
+  typeof insertOptions == 'function' ? insertOptions() : console.log('al manca al insertOptions() :-(');
 }
+
+function windowResized() {
+  resizeCanvas(window.innerWidth, window.innerHeight);
+  if (typeof onresize == 'function') { // insertOption if exist
+    onresize()
+  }
+}
+
+function addEvent(doc) {
+  doc.addEventListener('keydown', e => {
+    keyDown(e)
+  }, false);
+}
+
+function keyDown(e) {
+  var nav = document.getElementById("sidenav")
+
+  if (e.key == 'f') { //fullscreen
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  } else if (e.key == 'Alt') {  //options
+    e.preventDefault() //doesn't focus the options menu of chrome
+    if (this.isOpen) {
+      this.isOpen = false
+      nav.style.width = "0";
+    } else {
+      this.isOpen = true
+      nav.style.width = "300px";
+    }
+  }
+}
+
+// --- OPTIONS API --- --- OPTIONS API --- --- OPTIONS API --- --- OPTIONS API --- --- OPTIONS API --- --- OPTIONS API --- //
 
 function insertButton(value = 'button', callback) {
   const div = Li()
@@ -28,6 +74,19 @@ function insertP(value = '', callbackName) {
   div.appendChild(p)
 
   options.div.appendChild(div)
+}
+
+function insertTitle(title = 'Options:') {
+  const div = Li()
+  div.classList.add("title");
+  const h1 = H1(title)
+  div.appendChild(h1)
+  options.title = h1
+  options.div.appendChild(div)
+}
+
+function changeTitle(title = 'Options:') {
+  options.title.innerHTML = title
 }
 
 function insertSlider(tag, min, max, step, value, oninput) {
@@ -60,10 +119,6 @@ function insertSlider(tag, min, max, step, value, oninput) {
   options.div.appendChild(div)
 }
 
-function lol() {
-  console.log('lol');
-}
-
 function test(...values) {
   let valid = values.every(val => typeof val != 'undefined')
 
@@ -73,6 +128,8 @@ function test(...values) {
     throw new Error('Invalid arguments')
   }
 }
+
+// --- DOM API --- --- DOM API --- --- DOM API --- --- DOM API --- --- DOM API --- --- DOM API --- //
 
 function Div() {
   return document.createElement('div')
@@ -87,7 +144,9 @@ function Br() {
 }
 
 function Li() {
-  return document.createElement('li')
+  var li = document.createElement('li')
+  li.classList.add("li");
+  return li
 }
 
 function Hr() {
@@ -98,6 +157,12 @@ function P(txt) {
   const p = document.createElement('p')
   p.innerHTML = txt
   return p
+}
+
+function H1(txt) {
+  const h1 = document.createElement('h1')
+  h1.innerHTML = txt
+  return h1
 }
 
 function Label(txt = 'Placeholder') {

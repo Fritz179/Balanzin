@@ -1,15 +1,15 @@
 const router = require('express').Router()
 
-const User = require('../models/User');
-const Wwe_Card = require('../models/Wwe_Card');
-const Wwe_Game = require('../models/Wwe_Game');
+const Card = require('../../models/Card');
+const Wwe_Game = require('../../models/Wwe_Game');
 
-const checkErrors = require('../models/checkErrors')
-const ensureAuthenticated = require('../setup/ensureAuthenticated');
+const checkErrors = require('../../models/checkErrors')
+const ensureAuthenticated = require('../../setup/ensureAuthenticated');
+const {getUser, storeUser} = require('../../setup/storeUserBySessionId');
 const {check, validationResult} = require('express-validator/check');
 
 let games;
-Wwe_Card.find({}, (err, doc) => {
+Card.find({type: 'wwe'}, (err, doc) => {
   if (err) {
     console.log('503: WEE card not responding!.');
   } else {
@@ -21,13 +21,9 @@ router.get('/', (req, res) => {
   res.render('wwe/wwe', {cards: games})
 })
 
-router.get('/logo', ensureAuthenticated, (req, res) => {
+router.get('/logo', ensureAuthenticated, storeUser, (req, res) => {
     res.render('wwe/guess', {card: {}})
-    //set callback
-    credentials[req.session.id] = req.user._id
 })
-
-const credentials = {}
 
 let cards;
 Wwe_Game.find({}, (err, doc) => {
@@ -41,13 +37,13 @@ Wwe_Game.find({}, (err, doc) => {
 
 module.exports = (io, dir) => {
   io.of(dir + 'logo/').on('connect', socket => {
-    getUserBySessionId(socket, user => {
+    getUser(socket, user => {
       setupGuessSocket(socket, user, 'logo')
     })
   })
 
   io.of(dir + 'player').on('connect', socket => {
-    getUserBySessionId(socket, user => {
+    getUser(socket, user => {
       setupGuessSocket(socket, user, 'player')
     })
   })
@@ -98,25 +94,4 @@ function r(max, excluded = []) {
     output = Math.floor(Math.random() * max)
   } while (excluded.includes(output))
   return output
-}
-
-function getUserBySessionId(socket, callback) {
-  const id = credentials[socket.request.session.id]
-  if (!id) {
-    socket.emit('redirect', '/users/login?from=/wwe')
-    console.log('400: failed attempt to log in logo');
-  } else {
-    delete credentials[socket.request.session.id]
-    const user = User.findOne({_id: id}, (err, doc) => {
-      if (err) {
-        socket.emit('redirect', '/errors')
-        console.log(err);
-      } else if (doc) {
-        callback(doc)
-      } else {
-        socket.emit('redirect', '/errors')
-        console.log('nodoc');
-      }
-    })
-  }
 }

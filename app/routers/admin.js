@@ -5,7 +5,6 @@ const Article = require('../models/Article');
 const User = require('../models/User');
 const Project = require('../models/Project');
 const Card = require('../models/Card');
-const Wwe_Card = require('../models/Wwe_Card');
 const Wwe_Game = require('../models/Wwe_Game');
 
 const checkErrors = require('../models/checkErrors')
@@ -14,8 +13,7 @@ const {check, validationResult} = require('express-validator/check');
 
 const collections = {
   Project: ['path', 'scripts', 'name'],
-  Card: ['title', 'body', 'redirect', 'src'],
-  Wwe_Card: ['title', 'body', 'redirect', 'src'],
+  Card: ['type', 'title', 'body', 'redirect', 'src'],
   Wwe_Game: ['name', 'foto', 'logo', 'move']
 }
 
@@ -24,7 +22,7 @@ router.get('/:collection/:type', (req, res) => {
   if (req.params.type == 'edit') {
     params.push('id')
   }
-  res.render('collection', {params: params, type: req.params.type, collection: req.params.collection})
+  res.render('admin/collection', {params: params, type: req.params.type, collection: req.params.collection})
 })
 
 router.post('/:collection/:type', [

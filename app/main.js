@@ -19,7 +19,7 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
 })
 
 let cards
-Card.find({}, (err, doc) => {
+Card.find({type: 'home'}, (err, doc) => {
   if (err) {
     console.log('503: Home cards not responding!.');
   } else {
@@ -40,8 +40,8 @@ let routes = ['articles', 'users', 'projects', 'admin'].forEach(route => {
   app.use('/' + route, router)
 })
 
-let sockets = ['wwe'].forEach(route => {
-  let router = require(`./routers/${route}.js`)
+let sockets = ['wwe', 'chess'].forEach(route => {
+  let router = require(`./routers/${route}/${route}.js`)
   app.use('/' + route, router(io, `/${route}/`))
 })
 
