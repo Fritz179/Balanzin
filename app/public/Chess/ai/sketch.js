@@ -5,8 +5,8 @@ function onload() {
   pieces = {}
   let toLoad = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'].forEach(piece => {
     pieces[piece] = {
-      white: loadImage(`/projects/chess/pieces/${piece}_white.png`),
-      black: loadImage(`/projects/chess/pieces/${piece}_black.png`)
+      white: loadImage(`/public/chess/pieces/${piece}_white.png`),
+      black: loadImage(`/public/chess/pieces/${piece}_black.png`)
     }
   })
 }
@@ -31,7 +31,7 @@ socket.on('ready', () => {
 
 socket.on('redirect', url => {
   if (window.parent != window) { //iframe
-    window.parent.window.location.assign(url + window.location.pathname)
+    window.parent.window.location.assign(url + window.parent.window.location.pathname)
   }
 })
 

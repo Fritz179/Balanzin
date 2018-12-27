@@ -1,0 +1,22 @@
+{
+  "toAuthenticate": true,
+  "iframe": true,
+  "socket": true,
+  "cards": [
+    {
+      "title": "Artificial intelligence",
+      "body": "Play against an artificial intelligence",
+      "path": "ai"
+    },
+    {
+      "title": "Challenge a human",
+      "body": "Search a match against a real player",
+      "path": "player"
+    },
+    {
+      "title": "Singleplayer",
+      "body": "Play against yourserl",
+      "path": "single"
+    }
+  ]
+}

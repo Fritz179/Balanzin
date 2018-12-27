@@ -7,19 +7,19 @@
       <% toInclude.forEach(include => { %>
         <% if (include.scripts) { %>
           <% include.scripts.forEach(script => { %>
-            <script type='module' src="<%= `${include.path}/${script}.js` %>"></script>
+            <script type='module' src="<%= `/public${include.path}/${script}.js` %>"></script>
           <% }) %>
         <% } %>
         <% if (include.css) { %>
           <% include.css.forEach(style => { %>
-            <link rel="stylesheet" href="<%= `${include.path}/${style}.css` %>">
+            <link rel="stylesheet" href="<%= `/public${include.path}/${style}.css` %>">
           <% }) %>
         <% } %>
       <% }) %>
     <% } %>
-    <script src="/bower_components/jquery/dist/jquery.js"> </script>
-    <script src="/bower_components/bootstrap/dist/js/bootstrap.js"> </script>
-    <script src="/main.js"> </script>
 
+    <script src="/public/bower_components/jquery/dist/jquery.js"> </script>
+    <script src="/public/bower_components/bootstrap/dist/js/bootstrap.js"> </script>
+    <script src="/public/main.js"> </script>
   </body>
 </html>

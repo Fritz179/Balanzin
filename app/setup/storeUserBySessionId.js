@@ -17,7 +17,7 @@ module.exports.getUser = (socket, callback) => {
         callback(doc)
       } else {
         socket.emit('redirect', '/errors')
-        console.log('nodoc');
+        console.log('storeUserBySessionId:20 nodoc');
       }
     })
   }
@@ -25,7 +25,7 @@ module.exports.getUser = (socket, callback) => {
 
 module.exports.storeUser = (req, res, next) => {
   //set callback
-  // console.log(req.session.id);
+  //console.log(req.session.id);
   credentials[req.session.id] = req.user._id
   next()
 }

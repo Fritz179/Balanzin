@@ -25,12 +25,16 @@ module.exports = (app, io, dirname) => {
 
   io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
-});
+  });
 
-  app.set('views', path.join(dirname, 'views'))
   app.set('view engine', 'ejs')
+  app.set('views', path.join(dirname, 'views'))
 
-  app.use(express.static(path.join(dirname, 'public')))
+  app.use('/public' , express.static(path.join(dirname, 'public')))
+
+  app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(dirname, 'public/favicon.ico'))
+  })
 
   require('./passport')(passport)
 
@@ -43,4 +47,4 @@ module.exports = (app, io, dirname) => {
   })
 }
 
-console.log('200: Express setted up succesfully');
+console.log('200: Express setup run succesfully!');

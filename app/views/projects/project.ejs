@@ -1,12 +1,12 @@
-<%- include('../header', {title: projectName}) %>
+<%- include('../header', {title: card.title}) %>
 
 <%- include('../navbar', {notFixed: true}) %>
 
-  <script src="/projects/projects.js"></script>
+  <script src="/public/projects/projects.js"></script>
   <style> body {overflow: hidden;} </style>
 
   <div id="iframeContainer" disabled>
-    <iframe id='iframe' src="<%= `/projects/${projectName}/index.html` %>" disabled>
+    <iframe id='iframe' src="<%= `/public/${card.route}/${card.path}/index.html` %>" disabled>
       <p>Your browser does not support iframes. :-(</p>
     </iframe>
   </div>

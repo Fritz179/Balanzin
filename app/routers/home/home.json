@@ -1,0 +1,21 @@
+{
+  "pathRedirect": true,
+  "unhandeled": true,
+  "cards": [
+    {
+      "title": "Chess!",
+      "body": "Play Chess against another human, yourself or an algorithm (Artificial intelligence)",
+      "path": "chess"
+    },
+    {
+      "title": "Articles!",
+      "body": "Read and write articles",
+      "path": "articles"
+    },
+    {
+      "title": "WWE Game",
+      "body": "Play a game made in collaboration with Custasch!",
+      "path": "wwe"
+    }
+  ]
+}
