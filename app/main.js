@@ -54,4 +54,6 @@ const Server = app.listen(process.env.PORT || 1234, () => {
   v1.3.1.2 createCardRouter
   NCSC = non credo siano coincidenze
   CIGC = credo in gesù carota
+
+  remove unused models (User and articles in use)
 */

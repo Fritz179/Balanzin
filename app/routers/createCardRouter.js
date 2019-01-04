@@ -1,6 +1,6 @@
 const checkErrors = require('../models/checkErrors')
 const ensureAuthenticated = require('../setup/ensureAuthenticated');
-const {getUser, storeUser} = require('../setup/storeUserBySessionId');
+const {getUser} = require('../setup/storeUserBySessionId');
 const {check, validationResult} = require('express-validator/check');
 
 module.exports = (route, io) => {
@@ -9,6 +9,7 @@ module.exports = (route, io) => {
 
   //get the json file and parse it, set defaults
   const cards = createCards(route)
+
 
   //Display all cards
   router.get('/', (req, res) => {
@@ -19,8 +20,7 @@ module.exports = (route, io) => {
 
     //if it has to handle the path that the cards leads to, it displays them as a project
     if (card.handleCard) {
-      router.get('/' + card.path, card.toAuthenticate ? ensureAuthenticated : pass, card.socket ? storeUser : pass, (req, res) => {
-        console.log(card.cardRenderer);
+      router.get('/' + card.path, card.toAuthenticate ? ensureAuthenticated : [], (req, res) => {
         res.render(card.cardRenderer, {card: card})
       })
     }
@@ -54,19 +54,14 @@ function createCards(route) {
 
 //parse the cards
 function createCard(cards, card, route) {
-  this.route = route
+  this.route = route == 'home' ? 'projects' : route
   this.path = card.path
   this.title = card.title
   this.body = card.body || card.title + ' project!'
   this.redirect = (card.pathRedirect || cards.pathRedirect) ? `/${card.path}` : `/${route}/${card.path}`
   this.src = card.src || `public/cards/${route}/${card.path}.png`
-  this.toAuthenticate = card.socket || cards.socket || (typeof card.toAuthenticate == 'boolean' ? card.toAuthenticate : cards.toAuthenticate || false)
-  this.handleCard = !(card.unhandeled || cards.unhandeled)
+  this.toAuthenticate = card.socket || (typeof card.toAuthenticate == 'boolean' ? card.toAuthenticate : cards.socket || cards.toAuthenticate || false)
+  this.handleCard = (card.handeled || cards.handeled) || !(card.unhandeled || cards.unhandeled) || false
   this.cardRenderer = (card.iframe || cards.iframe) ? 'projects/project' : `${route}/${card.path}`
-  this.socket = (card.socket || cards.socket) ? `./${route}/setupSocket_${card.path}` : false
-}
-
-//ugly solution for ternary operator on line 22
-function pass(req, res, next) {
-  next()
+  this.socket = ((card.socket || cards.socket) && !card.noSocket) ? `./${route}/setupSocket_${card.path}` : false
 }

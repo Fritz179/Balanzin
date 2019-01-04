@@ -3,6 +3,8 @@ const router = require('express').Router()
 const passport = require('passport')
 
 const User = require('../models/User');
+const {storeUser} = require('../setup/storeUserBySessionId');
+
 
 const checkErrors = require('../models/checkErrors')
 const ensureAuthenticated = require('../setup/ensureAuthenticated');
@@ -60,11 +62,11 @@ router.get('/login', (req, res) => {
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', {
-    successRedirect: req.query.from || '/',
-    failureRedirect: '/users/login',
+    failureRedirect: req.originalUrl || '/users/login',
     failureFlash: true,
-    successFlash: true
   })(req, res, next)
+}, storeUser, (req, res, next) => {
+  res.redirect(req.query.from || '/')
 })
 
 router.get('/logout', (req, res) => {

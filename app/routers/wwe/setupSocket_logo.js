@@ -1,8 +1,9 @@
 const getGuess = require('./getGuess');
 
 module.exports = (socket, user) => {
+  console.log(`100: ${user.username} just connected to wwe Logo!`);
+
   socket.on('get_new_guess', () => {
-    console.log('first');
     socket.emit('new_guess', getGuess(socket, 'logo'))
   })
 

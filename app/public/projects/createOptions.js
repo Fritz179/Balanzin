@@ -8,6 +8,39 @@ function preload() {
   }
 }
 
+const mouseListeners = []
+
+function addMouseListener(listener) {
+  mouseListeners.push(listener)
+}
+
+function mousePressed() {
+  mouseListeners.forEach(listener => {
+    listener.mousePressed()
+  })
+  if (typeof mPressed == 'function') {
+    mPressed()
+  }
+}
+
+function mouseDragged() {
+  mouseListeners.forEach(listener => {
+    listener.mouseDragged()
+  })
+  if (typeof mDragged == 'function') {
+    mDragged()
+  }
+}
+
+function mouseReleased() {
+  mouseListeners.forEach(listener => {
+    listener.mouseReleased()
+  })
+  if (typeof mReleased == 'function') {
+    mReleased()
+  }
+}
+
 let navIsInserted = false
 let toggleFullscreen = true
 let nav
@@ -25,7 +58,7 @@ function insertNav() {
   function Nb() {
     const nav = Nav()
     nav.id = 'sidenav'
-    nav.innerHTML = `<ul id="options"><li class="btnli"><a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a></li></ul>`
+    nav.innerHTML = `<ul id="options"><li class="btnli"><a href="javascript:void(0)" class="closebtn" onclick="toggleNav()">&times;</a></li></ul>`
     return nav
   }
 
@@ -181,8 +214,6 @@ function addEvent(doc) {
 }
 
 function keyDown(e) {
-  var nav = document.getElementById("sidenav")
-
   if (e.key == 'f' && toggleFullscreen) { //fullscreen
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -193,12 +224,18 @@ function keyDown(e) {
     }
   } else if (e.key == 'Alt' && navIsInserted) {  //options
     e.preventDefault() //doesn't focus the options menu of chrome
-    if (this.isOpen) {
-      this.isOpen = false
-      nav.style.width = "0";
-    } else {
-      this.isOpen = true
-      nav.style.width = "300px";
-    }
+    toggleNav()
+  }
+}
+
+function toggleNav() {
+  var nav = document.getElementById("sidenav")
+
+  if (this.isOpen) {
+    this.isOpen = false
+    nav.style.width = "0";
+  } else {
+    this.isOpen = true
+    nav.style.width = "300px";
   }
 }

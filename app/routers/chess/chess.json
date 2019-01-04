@@ -14,6 +14,8 @@
       "path": "player"
     },
     {
+      "toAuthenticate": false,
+      "noSocket": true,
       "title": "Singleplayer",
       "body": "Play against yourserl",
       "path": "single"

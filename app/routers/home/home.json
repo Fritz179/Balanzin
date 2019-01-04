@@ -16,6 +16,20 @@
       "title": "WWE Game",
       "body": "Play a game made in collaboration with Custasch!",
       "path": "wwe"
+    },
+    {
+      "handeled": true,
+      "iframe": true,
+      "title": "Circle Filler!",
+      "body": "A circle filling algorithem",
+      "path": "circle_filler"
+    },
+    {
+      "handeled": true,
+      "iframe": true,
+      "title": "Seven Segment Display!",
+      "body": "An attemp to reproduce Seven Segment Displays",
+      "path": "seven_segment_display"
     }
   ]
 }

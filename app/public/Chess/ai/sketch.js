@@ -1,5 +1,10 @@
+if (typeof io == 'undefined') {
+  throw new Error('No Server connection!')
+}
+
 const socket = io.connect('/chess/ai')
-let board, pieces
+
+let board, pieces, xOff = 100, yOff = 100
 
 function onload() {
   pieces = {}
@@ -14,19 +19,19 @@ function onload() {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight)
   board = new Chessboard(pieces)
+  addMouseListener(board)
+
+  socket.emit('getBoard')
 }
 
 function draw() {
-  translate(100, 100)
+  translate(xOff, yOff)
   board.draw()
 }
 
-socket.on('update', updates => {
-  board.update(updates)
-})
-
-socket.on('ready', () => {
-  console.log('Connection established');
+socket.on('update', update => {
+  console.log(update);
+  board.update(update)
 })
 
 socket.on('redirect', url => {

@@ -5,6 +5,8 @@
   <script src="/public/projects/projects.js"></script>
   <style> body {overflow: hidden;} </style>
 
+  <%- messages('message', locals) %>
+
   <div id="iframeContainer" disabled>
     <iframe id='iframe' src="<%= `/public/${card.route}/${card.path}/index.html` %>" disabled>
       <p>Your browser does not support iframes. :-(</p>
