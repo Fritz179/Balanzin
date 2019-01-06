@@ -2,6 +2,9 @@ const order = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 
 
 class Chessboard {
   constructor() {
+    this.w = 80
+    this.space = this.w * 0.05
+    this.boardGraphic = createGraphics(round(this.w * 8 + this.space * 2), round(this.w * 8 + this.space * 2))
     this.board = []
     for (let x = 0; x < 8; x++) {
       this.board[x] = []
@@ -9,25 +12,31 @@ class Chessboard {
         this.board[x][y] = new Piece(null, x, y)
       }
     }
-    this.w = 80
     this.handPos = createVector(-1, -1)
     this.isWhiteTurn = true
+    this.changed = true
   }
 
   draw() {
-    fill(255)
-    stroke(0)
-    strokeWeight(10)
-    rect(0, 0, this.w * 8, this.w * 8)
-    noStroke()
-    this.board.forEach((row, x) => {
-      row.forEach((piece, y) => {
-        (x + y) % 2 != 0 ? fill(102, 51, 0) : fill(204, 153, 0)
-        rect(x * this.w, y * this.w, this.w, this.w)
-
-        piece.draw()
+    if (this.changed) {
+      console.log('updating boardGraphic');
+      this.boardGraphic.push()
+      this.boardGraphic.translate(this.space, this.space)
+      this.changed = false
+      this.boardGraphic.background(0)
+      this.boardGraphic.noStroke()
+      this.board.forEach((row, x) => {
+        row.forEach((piece, y) => {
+          (x + y) % 2 != 0 ? this.boardGraphic.fill(102, 51, 0) : this.boardGraphic.fill(204, 153, 0)
+          this.boardGraphic.rect(x * this.w, y * this.w, this.w, this.w)
+          piece.draw(this.boardGraphic)
+        })
       })
-    })
+      this.boardGraphic.pop()
+    }
+
+    image(this.boardGraphic, 0, 0)
+
     if (this.handPos.x != -1) {
       this.board[this.handPos.x][this.handPos.y].draw()
     }
@@ -76,6 +85,7 @@ class Chessboard {
     if (piece.name) {
       piece.inHand = true
       this.handPos.set(x, y)
+      this.changed = true
     }
 
     if (this.mousePressed_child) {
@@ -95,11 +105,15 @@ class Chessboard {
     const piece = this.board[this.handPos.x][this.handPos.y]
     piece.inHand = false
 
+    this.changed = true
+
     if (x == -1 || y == -1) {
+      this.handPos.set(-1, -1)
       return
     }
 
     if (!piece.canMoveTo(x, y)) {
+      this.handPos.set(-1, -1)
       return
     }
 
@@ -111,9 +125,8 @@ class Chessboard {
     piece.pos.set(x, y)
     this.board[x][y] = piece
     this.board[this.handPos.x][this.handPos.y] = new Piece(null, x, y)
-
-    this.isWhiteTurn = !this.isWhiteTurn
     this.handPos.set(-1, -1)
+    this.isWhiteTurn = !this.isWhiteTurn
   }
 
   getMouseTile() {
@@ -141,6 +154,7 @@ class Chessboard {
         }
       }
     }
+    this.changed = true
   }
 
   move(move) {

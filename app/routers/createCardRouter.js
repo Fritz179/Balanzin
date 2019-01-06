@@ -30,7 +30,25 @@ module.exports = (route, io) => {
       const setupSocket = require(card.socket);
       io.of(`${route}/${card.path}`).on('connect', socket => {
         getUser(socket, user => {
-          setupSocket(socket, user)
+          setupSocket(socket, user, io)
+        })
+      })
+    }
+
+    if (card.sub_views) {
+      card.sub_views.forEach(view => {
+
+        //render all sub_views with projet
+        router.get(`/${card.path}/${view}` , card.toAuthenticate ? ensureAuthenticated : [], (req, res) => {
+          res.render('projects/project', {card: card})
+        })
+
+        //gives socket to all sub_views
+        const setupSocket = require(`${card.socket}_${view}`);
+        io.of(`${route}/${card.path}/${view}`).on('connect', socket => {
+          getUser(socket, user => {
+            setupSocket(socket, user)
+          })
         })
       })
     }
@@ -46,6 +64,14 @@ function createCards(route) {
   const output = []
 
   cards.cards.forEach(card => {
+    const keys = Object.keys(cards).filter(key => key != 'cards')
+
+    keys.forEach(key => {
+      if (typeof card[key] == 'undefined') {
+        card[key] = cards[key]
+      }
+    })
+
     output.push(new createCard(cards, card, route))
   })
 
@@ -58,10 +84,11 @@ function createCard(cards, card, route) {
   this.path = card.path
   this.title = card.title
   this.body = card.body || card.title + ' project!'
-  this.redirect = (card.pathRedirect || cards.pathRedirect) ? `/${card.path}` : `/${route}/${card.path}`
+  this.redirect = card.pathRedirect ? `/${card.path}` : `/${route}/${card.path}`
   this.src = card.src || `public/cards/${route}/${card.path}.png`
-  this.toAuthenticate = card.socket || (typeof card.toAuthenticate == 'boolean' ? card.toAuthenticate : cards.socket || cards.toAuthenticate || false)
-  this.handleCard = (card.handeled || cards.handeled) || !(card.unhandeled || cards.unhandeled) || false
-  this.cardRenderer = (card.iframe || cards.iframe) ? 'projects/project' : `${route}/${card.path}`
-  this.socket = ((card.socket || cards.socket) && !card.noSocket) ? `./${route}/setupSocket_${card.path}` : false
+  this.toAuthenticate = card.socket || card.toAuthenticate || false
+  this.handleCard = !card.unhandeled
+  this.cardRenderer = card.iframe && !card.sub_views ? 'projects/project' : `${route}/${card.path}`
+  this.socket = card.socket ? `./${route}/setupSocket_${card.path}` : false
+  this.sub_views = card.sub_views
 }

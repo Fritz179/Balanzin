@@ -2,7 +2,6 @@
 
 <%- include('../navbar', {user: user}) %>
 
-<main role="main">
   <section class="jumbotron restricted">
     <%- messages('message', locals) %>
     <h1>Login</h1>
@@ -16,6 +15,5 @@
     <h6>Do you have an account? <a href='/users/register'>click here to create a new one.</a></h6>
     <%- include('../copyright') %>
   </section>
-</main>
 
 <%- include('../footer') %>

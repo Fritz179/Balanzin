@@ -18,14 +18,14 @@
       "path": "wwe"
     },
     {
-      "handeled": true,
+      "unhandeled": false,
       "iframe": true,
       "title": "Circle Filler!",
       "body": "A circle filling algorithem",
       "path": "circle_filler"
     },
     {
-      "handeled": true,
+      "unhandeled": false,
       "iframe": true,
       "title": "Seven Segment Display!",
       "body": "An attemp to reproduce Seven Segment Displays",

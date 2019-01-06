@@ -38,4 +38,7 @@
   </div>
 </div>
 
-<%- include('../footer', {toInclude: [{path: '/wwe', scripts: ['guess'], css: ['style']}], socket: true}) %>
+<link rel="stylesheet" href="/public/wwe/style.css">
+<script type='module' src="/public/wwe/guess.js"></script>
+
+<%- include('../footer', {socket: true}) %>

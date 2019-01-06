@@ -2,7 +2,7 @@ if (typeof io == 'undefined') {
   throw new Error('No Server connection!')
 }
 
-const socket = io.connect('/chess/player')
+const socket = connect('/chess/player/play')
 
 let chessboard, pieces
 let xOff = 100, yOff = 100
@@ -20,7 +20,6 @@ function onload() {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight)
   chessboard = new PlayerChessboard()
-  chessboard.startNewBoard()
   addMouseListener(chessboard)
 
   socket.emit('loaded')
@@ -30,6 +29,14 @@ function draw() {
   translate(xOff, yOff)
   chessboard.draw()
 }
+
+socket.on('update', key => {
+  if (typeof chessboard[key] == 'function') {
+    chessboard[key]()
+  } else {
+    console.warn('update not found: ' + key);
+  }
+})
 
 socket.on('reloadBoard', board => {
   chessboard.reloadBoard(board)

@@ -1,4 +1,4 @@
-const socket = io.connect(window.location.href)
+const socket = connect(window.location.href)
 const img = document.getElementById('img')
 const ul = document.getElementById('ul')
 
@@ -19,12 +19,3 @@ for (let i = 0; i < 3; i++) {
     socket.emit('guess', ul.children[i].innerHTML)
   }
 }
-
-socket.on('redirect', url => {
-  console.log('redirecting to: ' + url);
-  window.location.assign(url)
-})
-
-socket.on('log', data => {
-  console.log(data);
-})

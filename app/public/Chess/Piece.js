@@ -7,12 +7,12 @@ class Piece {
     this.firstMove = true
   }
 
-  draw() {
+  draw(context) {
     if (this.name) {
       if (this.inHand) {
         image(pieces[this.name][this.isWhite ? 'white' : 'black'], mouseX - this.w / 2 - xOff, mouseY - this.w / 2 - yOff, this.w, this.w)
       } else {
-        image(pieces[this.name][this.isWhite ? 'white' : 'black'], this.pos.x * this.w, this.pos.y * this.w, this.w, this.w)
+        context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], this.pos.x * this.w, this.pos.y * this.w, this.w, this.w)
       }
     }
   }
@@ -23,7 +23,7 @@ class Piece {
 
   getAllPossibleMoves() {
     let moves = []
-    
+
     moves = this[`getAllPossibleMoves_${this.name}`](moves)
 
     return moves
@@ -34,11 +34,11 @@ class Piece {
     const {x, y} = this.pos
     const dir = this.isWhite ? 1 : -1
 
-    if (isIn(x, y + dir)) {
+    if (chessboard.isEmpty(x, y + dir) || this.isEnemy(x, y + dir)) {
       moves.push({x: x, y: y + dir})
-    }
-    if (this.firstMove && isIn(x, y + dir)) {
-      moves.push({x: x, y: y + dir * 2})
+      if (this.firstMove && chessboard.isEmpty(x, y + dir * 2) || this.isEnemy(x, y + dir * 2)) {
+        moves.push({x: x, y: y + dir * 2})
+      }
     }
 
     if (isIn(x - 1, y + dir) && this.isEnemy(x - 1, y + dir)) {
