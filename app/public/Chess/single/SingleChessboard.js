@@ -4,7 +4,7 @@ class SingleChessboard extends Chessboard {
   }
 
   mouseReleased_child(x, y, piece) {
-    
+
   }
 
   isMyTurn() {

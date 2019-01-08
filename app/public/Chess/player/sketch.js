@@ -21,7 +21,7 @@ function setup() {
   createCanvas(window.innerWidth, window.innerHeight)
   chessboard = new PlayerChessboard()
   addMouseListener(chessboard)
-
+  console.log('emitting loaded');
   socket.emit('loaded')
 }
 
@@ -30,9 +30,11 @@ function draw() {
   chessboard.draw()
 }
 
-socket.on('update', key => {
+socket.on('update', update => {
+  const {key, data} = update
+  console.log(update, key, update.key);
   if (typeof chessboard[key] == 'function') {
-    chessboard[key]()
+    chessboard[key](data)
   } else {
     console.warn('update not found: ' + key);
   }

@@ -15,23 +15,33 @@ class Chessboard {
     this.handPos = createVector(-1, -1)
     this.isWhiteTurn = true
     this.changed = true
+    this.IAmWhite = true
   }
 
   draw() {
     if (this.changed) {
-      console.log('updating boardGraphic');
+      console.log(`updating boardGraphic as: ${this.IAmWhite ? 'white' : 'black'}`);
       this.boardGraphic.push()
       this.boardGraphic.translate(this.space, this.space)
       this.changed = false
       this.boardGraphic.background(0)
       this.boardGraphic.noStroke()
+
+      //draw checkerboard
       this.board.forEach((row, x) => {
         row.forEach((piece, y) => {
           (x + y) % 2 != 0 ? this.boardGraphic.fill(102, 51, 0) : this.boardGraphic.fill(204, 153, 0)
           this.boardGraphic.rect(x * this.w, y * this.w, this.w, this.w)
-          piece.draw(this.boardGraphic)
         })
       })
+
+      // draw tiles
+      this.board.forEach((row, x) => {
+        row.forEach((piece, y) => {
+          piece.draw(this.boardGraphic, this.IAmWhite)
+        })
+      })
+
       this.boardGraphic.pop()
     }
 
@@ -39,16 +49,6 @@ class Chessboard {
 
     if (this.handPos.x != -1) {
       this.board[this.handPos.x][this.handPos.y].draw()
-    }
-  }
-
-  update(update) {
-    if (typeof update == 'string') {
-      Chessboard[update](this)
-    } else {
-      update.tiles.forEach(tile => {
-        this.board[tile.x][tile.y] = tile.newTile
-      })
     }
   }
 
@@ -112,26 +112,39 @@ class Chessboard {
       return
     }
 
-    if (!piece.canMoveTo(x, y)) {
+    const {canMove, specialMove} = piece.getMoveTo(x, y)
+
+    if (!canMove) {
       this.handPos.set(-1, -1)
       return
     }
 
-    if (this.board[x][y].name) {
-      console.log('eated', this.board[x][y]);
+    if (specialMove) {
+      const {type, fromX, toX, y} = specialMove
+      if (type  == 'castle') {
+        this.movePiece(this.board[fromX][y], fromX, y, toX, y)
+      }
     }
 
-    piece.firstMove = false
-    piece.pos.set(x, y)
-    this.board[x][y] = piece
-    this.board[this.handPos.x][this.handPos.y] = new Piece(null, x, y)
-    this.handPos.set(-1, -1)
+    if (typeof this.onMove == 'function') {
+      this.onMove({
+        from: {x: this.handPos.x, y: this.handPos.y},
+        to: {x: x, y: y},
+        specialMove: specialMove
+      })
+    }
+
+    this.movePiece(piece, this.handPos.x, this.handPos.y, x, y)
     this.isWhiteTurn = !this.isWhiteTurn
+
+    this.handPos.set(-1, -1)
   }
 
   getMouseTile() {
-    const x = floor((mouseX - xOff) / this.w)
-    const y = floor((mouseY - yOff) / this.w)
+    let x = floor((mouseX - xOff) / this.w)
+    let y = floor((mouseY - yOff) / this.w)
+
+    this.IAmWhite ? y = 7 - y : x = 7 - x
 
     return isIn(x, y) ? {x: x, y: y} : {x: -1, y: -1}
   }
@@ -170,25 +183,42 @@ class Chessboard {
       return
     }
 
-    if (!piece.canMoveTo(move.to.x, move.to.y)) {
+    const {canMove, specialMove} = piece.getMoveTo(move.to.x, move.to.y)
+
+    if (!canMove) {
       inpossibleMove('Not able to move there')
       return
     }
 
-    if (this.board[move.to.x][move.to.y].name) {
-      console.log('eated', this.board[move.to.x][move.to.y]);
-    }
-
-    piece.firstMove = false
-    piece.pos.set(move.to.x, move.to.y)
-    this.board[move.to.x][move.to.y] = piece
-    this.board[move.from.x][move.from.y] = new Piece(null, move.from.x, move.from.y)
-
-    this.isWhiteTurn = !this.isWhiteTurn
-
     function inpossibleMove(reason) {
       console.log(move, 'cannot be performes because: ' + reason);
     }
+
+    if (specialMove) {
+      const {type, fromX, toX, y} = specialMove
+      if (type  == 'castle') {
+        this.movePiece(this.board[fromX][y], fromX, y, toX, y)
+      }
+    }
+
+    this.movePiece(this.board[move.from.x][move.from.y], move.from.x, move.from.y, move.to.x, move.to.y)
+    this.isWhiteTurn = !this.isWhiteTurn
+
+    this.changed = true
+  }
+
+  movePiece(piece, x1, y1, x2, y2) {
+    if (this.board[x2][y2].name) {
+      console.log('eated', this.board[x2][y2]);
+      if (typeof this.onEated == 'function') {
+        this.onEated(x2, y2)
+      }
+    }
+
+    piece.firstMove = false
+    piece.pos.set(x2, y2)
+    this.board[x2][y2] = piece
+    this.board[x1][y1] = new Piece(null, x1, y1)
   }
 
   isMyTurn() {

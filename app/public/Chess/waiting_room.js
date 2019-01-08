@@ -8,7 +8,6 @@ const alreadyInvited = []
 let invites = []
 
 socket.on('updateUsers', users => {
-  console.log(users);
   userList.innerHTML = ''
   if (users.length) {
     usersTitle.innerHTML = 'Choose a player to play against'
@@ -26,7 +25,6 @@ socket.on('add_invite', user => {
 })
 
 socket.on('remove_invite', userId => {
-  console.log(invites, userId);
   invites = invites.filter(invite => invite.id != userId)
   displayInvites()
 })
@@ -47,13 +45,13 @@ function createItem(user, isInvite = false, userId) {
   link.href = '#'
   link.onclick = () => {
     if (isInvite) {
-      socket.emit('invite_accepted', user)
+      socket.emit('invite_accepted', user.id)
       link.innerHTML = user.username + ' (already accepted!)'
     } else {
       if (!alreadyInvited.includes(user.username)) {
         alreadyInvited.push(user.username)
         link.innerHTML = user.username + ' (already invited!)'
-        socket.emit('invite_user', user)
+        socket.emit('invite_user', user.id)
       } else {
         link.innerHTML = user.username + ' (already invited!)'
       }

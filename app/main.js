@@ -20,13 +20,13 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
 app.use('/', createCardRouter('home'))
 
 //connect all intermidied routes (createCardRouter)
-let sockets = ['wwe', 'chess'].forEach(route => {
+const sockets = ['wwe', 'chess'].forEach(route => {
   app.use('/' + route, createCardRouter(route, io))
 })
 
 //connect all routes that require an advanced routing system
-let routes = ['articles', 'users', 'admin'].forEach(route => {
-  let router = require(`./routers/${route}.js`)
+const routes = ['articles', 'users', 'admin'].forEach(route => {
+  const router = require(`./routers/${route}.js`)
   app.use('/' + route, router)
 })
 

@@ -3,19 +3,11 @@ class PlayerChessboard extends Chessboard {
     super()
   }
 
-  mouseReleased_child(x, y, piece) {
-
+  setColor(isWhite) {
+    this.IAmWhite = isWhite
   }
 
-  isMyTurn() {
-    return true
-  }
-
-  canMoveWhite() {
-    return this.isWhiteTurn
-  }
-
-  canMoveBlack() {
-    return !this.isWhiteTurn
+  onMove(move) {
+    socket.emit('move', move)
   }
 }

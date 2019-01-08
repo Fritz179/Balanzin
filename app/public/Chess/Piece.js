@@ -12,13 +12,25 @@ class Piece {
       if (this.inHand) {
         image(pieces[this.name][this.isWhite ? 'white' : 'black'], mouseX - this.w / 2 - xOff, mouseY - this.w / 2 - yOff, this.w, this.w)
       } else {
-        context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], this.pos.x * this.w, this.pos.y * this.w, this.w, this.w)
+        if (chessboard.IAmWhite) {
+          context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], this.pos.x * this.w, (7 - this.pos.y) * this.w, this.w, this.w)
+        } else {
+          context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], (7 - this.pos.x) * this.w, this.pos.y * this.w, this.w, this.w)
+        }
       }
     }
   }
 
-  canMoveTo(x, y) {
-    return this.getAllPossibleMoves().some(p => p.x == x && p.y == y)
+  getMoveTo(x, y) {
+    let output = {canMove: false, specialMove: null}
+
+    this.getAllPossibleMoves().forEach(move => {
+      if (move.x == x && move.y == y) {
+        output = {canMove: true, specialMove: move.specialMove}
+      }
+    })
+
+    return output
   }
 
   getAllPossibleMoves() {
@@ -34,9 +46,9 @@ class Piece {
     const {x, y} = this.pos
     const dir = this.isWhite ? 1 : -1
 
-    if (chessboard.isEmpty(x, y + dir) || this.isEnemy(x, y + dir)) {
+    if (chessboard.isEmpty(x, y + dir)) {
       moves.push({x: x, y: y + dir})
-      if (this.firstMove && chessboard.isEmpty(x, y + dir * 2) || this.isEnemy(x, y + dir * 2)) {
+      if (this.firstMove && chessboard.isEmpty(x, y + dir * 2)) {
         moves.push({x: x, y: y + dir * 2})
       }
     }
@@ -111,6 +123,24 @@ class Piece {
           continue
         } else if (chessboard.isEmpty(this.pos.x + x, this.pos.y + y) || this.isEnemy(this.pos.x + x, this.pos.y + y)) {
           moves.push({x: this.pos.x + x, y: this.pos.y + y})
+        }
+      }
+    }
+
+    if (this.firstMove) {
+      checkCastle(0, this.pos.y, [1, 2, 3])
+      checkCastle(7, this.pos.y, [5, 6])
+
+      function checkCastle(x, y, toCheck) {
+        if (!chessboard.isEmpty(x, y) && chessboard.board[x][y].firstMove) {
+          if (toCheck.every(xx => chessboard.isEmpty(xx, y))) { //castle
+            moves.push({x: x == 0 ? 2 : 6, y: y, specialMove: {
+              type: 'castle',
+              fromX: x,
+              toX: x == 0 ? 3 : 5,
+              y: y
+            }})
+          }
         }
       }
     }
