@@ -14,13 +14,15 @@ function onload() {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight)
   chessboard = new SingleChessboard()
-  chessboard.startNewBoard()
   addMouseListener(chessboard)
+  messagesPos(width / 3, height * 0.8)
 }
 
 function draw() {
+  background(255)
   translate(xOff, yOff)
   chessboard.draw()
+  showMessages()
 }
 
 function touchStarted() {
@@ -29,7 +31,7 @@ function touchStarted() {
 }
 
 function touchMoved() {
-  if (chessboard.handPos.x != -1) {
+  if (chessboard.pieces.hand) {
     background(0, 255, 0)
     return false
   }

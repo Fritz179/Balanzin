@@ -21,18 +21,21 @@ function setup() {
   createCanvas(window.innerWidth, window.innerHeight)
   chessboard = new PlayerChessboard()
   addMouseListener(chessboard)
-  console.log('emitting loaded');
   socket.emit('loaded')
+  messagesPos(width / 3, height * 0.8)
 }
 
 function draw() {
+  background(255)
   translate(xOff, yOff)
   chessboard.draw()
+  showMessages()
 }
 
 socket.on('update', update => {
+  clearMessage()
   const {key, data} = update
-  console.log(update, key, update.key);
+  console.log(update);
   if (typeof chessboard[key] == 'function') {
     chessboard[key](data)
   } else {

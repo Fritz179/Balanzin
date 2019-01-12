@@ -32,7 +32,9 @@ const routes = ['articles', 'users', 'admin'].forEach(route => {
 
 //connect the error page to all remaining requests (404)
 app.get('*', (req, res) => {
-  res.render('error', {error: 404})
+  if (!res._header) {
+    res.render('error', {error: 404})
+  }
 })
 
 //connect Server to localhost

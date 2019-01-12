@@ -22,11 +22,14 @@ function setup() {
   addMouseListener(board)
 
   socket.emit('getBoard')
+  messagesPos(width / 3, height * 0.8)
 }
 
 function draw() {
+  background(255)
   translate(xOff, yOff)
   board.draw()
+  showMessages()
 }
 
 socket.on('update', update => {

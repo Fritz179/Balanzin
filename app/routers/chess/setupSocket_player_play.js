@@ -39,7 +39,6 @@ module.exports = (socket, user) => {
     socket.start = () => {
       console.log('starting:' + user.username);
       socket.started = true
-      socket.emit('update', {key: 'startNewBoard'})
       socket.emit('update', {key: 'setColor', data: isWhite})
       game.moves.forEach(move => {
         socket.move(move)
@@ -61,7 +60,7 @@ module.exports = (socket, user) => {
   })
 
   socket.on('disconnect', () => {
-    if (socket.disconnected && matches[gameId][opColor].socket.disconnected)
+    matches[gameId][myColor] = null
     setTimeout(() => {
       if (socket.disconnected && matches[gameId][opColor].socket.disconnected) {
         console.log('ending game: ' + gameId);

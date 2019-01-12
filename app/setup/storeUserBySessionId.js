@@ -12,6 +12,7 @@ module.exports.getUser = (socket, callback) => {
     const off = offlineUsers.findOneById(userId)
     if (off) {
       callback(off)
+      return
     }
 
     const user = User.findOne({_id: userId}, (err, doc) => {

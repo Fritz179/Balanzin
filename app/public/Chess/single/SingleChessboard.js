@@ -3,10 +3,6 @@ class SingleChessboard extends Chessboard {
     super()
   }
 
-  mouseReleased_child(x, y, piece) {
-
-  }
-
   isMyTurn() {
     return true
   }

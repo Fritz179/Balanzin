@@ -4,7 +4,8 @@ class PlayerChessboard extends Chessboard {
   }
 
   setColor(isWhite) {
-    this.IAmWhite = isWhite
+    this.whiteBoard = isWhite
+    this.changed = true
   }
 
   onMove(move) {

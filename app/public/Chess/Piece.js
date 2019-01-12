@@ -3,22 +3,21 @@ class Piece {
     this.name = name
     this.pos = createVector(x, y)
     this.isWhite = isWhite
-    this.inHand = false
     this.firstMove = true
   }
 
-  draw(context) {
+  draw(context, isWhite) {
     if (this.name) {
-      if (this.inHand) {
-        image(pieces[this.name][this.isWhite ? 'white' : 'black'], mouseX - this.w / 2 - xOff, mouseY - this.w / 2 - yOff, this.w, this.w)
+      if (isWhite) {
+        context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], this.pos.x * this.w, (7 - this.pos.y) * this.w, this.w, this.w)
       } else {
-        if (chessboard.IAmWhite) {
-          context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], this.pos.x * this.w, (7 - this.pos.y) * this.w, this.w, this.w)
-        } else {
-          context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], (7 - this.pos.x) * this.w, this.pos.y * this.w, this.w, this.w)
-        }
+        context.image(pieces[this.name][this.isWhite ? 'white' : 'black'], (7 - this.pos.x) * this.w, this.pos.y * this.w, this.w, this.w)
       }
     }
+  }
+
+  drawHand() {
+    image(pieces[this.name][this.isWhite ? 'white' : 'black'], mouseX - this.w / 2 - xOff, mouseY - this.w / 2 - yOff, this.w, this.w)
   }
 
   getMoveTo(x, y) {
@@ -132,7 +131,7 @@ class Piece {
       checkCastle(7, this.pos.y, [5, 6])
 
       function checkCastle(x, y, toCheck) {
-        if (!chessboard.isEmpty(x, y) && chessboard.board[x][y].firstMove) {
+        if (!chessboard.isEmpty(x, y) && chessboard.pieces[y * 8 + x].firstMove) {
           if (toCheck.every(xx => chessboard.isEmpty(xx, y))) { //castle
             moves.push({x: x == 0 ? 2 : 6, y: y, specialMove: {
               type: 'castle',
@@ -168,7 +167,7 @@ class Piece {
   }
 
   isEnemy(x, y) {
-    return isIn(x, y) && chessboard.board[x][y].name && this.isWhite != chessboard.board[x][y].isWhite
+    return isIn(x, y) && chessboard.pieces[y * 8 + x] && this.isWhite != chessboard.pieces[y * 8 + x].isWhite
   }
 
   get w() {

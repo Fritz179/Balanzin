@@ -41,6 +41,35 @@ function mouseReleased() {
   }
 }
 
+let messageFrames = 0
+let message = {}
+let messagePos = {x: window.innerWidth / 2, y: window.innerHeight / 2}
+
+function showMessage(type, msg, frames) {
+  messageFrames = frames || 180
+  message = {type: type, msg: msg}
+}
+
+function showMessages() {
+  if (messageFrames > 0) {
+    textSize(100)
+    textAlign(CENTER)
+    noStroke()
+    a = messageFrames < 50 ? 255 / 50 * messageFrames : messageFrames > 150 ? (180 - messageFrames) * 255 / 30 : 255 / 50 * messageFrames
+    message.type == 'success' ? fill(0, 255, 0, a) : fill(255, 0, 0, a)
+    text(message.msg, messagePos.x, messagePos.y)
+    messageFrames -= 1
+  }
+}
+
+function clearMessage(remaining) {
+  messageFrames = remaining || 0
+}
+
+function messagesPos(x, y) {
+  messagePos = {x: x, y: y}
+}
+
 let navIsInserted = false
 let toggleFullscreen = true
 let nav

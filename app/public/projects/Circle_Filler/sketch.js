@@ -19,6 +19,7 @@ function setup() {
   }
 
   circles.push(new Circle(random(validPos)))
+  showMessage('danger', 'lol')
 }
 
 function draw() {
@@ -30,6 +31,7 @@ function draw() {
   for (let i = 0; i < circles.length; i++) {
     circles[i].mostra()
   }
+  showMessages()
 }
 
 function restartButtonPressed() {

@@ -11,5 +11,3 @@ function connect(path) {
 
   return socket
 }
-
-console.log('socket utils');
