@@ -3,11 +3,6 @@ class PlayerChessboard extends Chessboard {
     super()
   }
 
-  setColor(isWhite) {
-    this.whiteBoard = isWhite
-    this.changed = true
-  }
-
   onMove(move) {
     socket.emit('move', move)
   }

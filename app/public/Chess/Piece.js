@@ -1,3 +1,161 @@
+function createChildBoard(board, move) {
+  const childBoard = {}
+
+  childBoard.pieces = board.pieces.slice()
+  childBoard.castleRights = board.castleRights.slice()
+  childBoard.isWhite = !board.isWhite
+  childBoard.enPassant = 0
+
+  if (move.flag) {
+    if (move.flag == 'castle') {
+      if (move.qs) {
+        childBoard.pieces[move.to + 1] = childBoard.pieces[move.from - 4]
+        childBoard.pieces[move.from - 4] = 0
+      } else {
+        childBoard.pieces[move.to - 1] = childBoard.pieces[move.from + 3]
+        childBoard.pieces[move.from + 3] = 0
+      }
+    }
+  }
+
+  childBoard.pieces[move.to] = childBoard.pieces[move.from]
+  childBoard.pieces[move.from] = 0
+
+  return childBoard
+}
+
+const Moves = {
+  getAllBoardMoves: board => {
+    const moves = []
+
+    board.pieces.forEach((piece, i) => {
+      if (piece != 99 && piece != 0 && (piece > 0 ) == board.isWhite) {
+        moves.push({moves: Moves[`getAllPieceMoves_${tiles[Math.abs(piece)]}`](board, i), from: i})
+      }
+    })
+
+    return moves
+  },
+
+  getAllPieceMoves: (board, x, y) => {
+    const i = (y + 2) * 10 + x + 1
+    return Moves[`getAllPieceMoves_${tiles[Math.abs(board.pieces[i])]}`](board, i)
+  },
+
+  canPieceMoveTo: (board, from, to) => {
+    const x1 = from % 8
+    const y1 = (from - (from % 8)) / 8
+    const x2 = to % 8
+    const y2 = (to - (to % 8)) / 8
+    from = (y1 + 2) * 10 + x1 + 1
+    to = (y2 + 2) * 10 + x2 + 1
+    return Moves[`getAllPieceMoves_${tiles[Math.abs(board.pieces[from])]}`](board, from).some(x => x.to == to)
+  },
+
+  movePiece: (board, move) => {
+    const x1 = move.from % 8
+    const y1 = (move.from - (move.from % 8)) / 8
+    const x2 = move.to % 8
+    const y2 = (move.to - (move.to % 8)) / 8
+    const from = (y1 + 2) * 10 + x1 + 1
+    const to = (y2 + 2) * 10 + x2 + 1
+
+    auth = Moves[`getAllPieceMoves_${tiles[Math.abs(board.pieces[from])]}`](board, from).filter(x => x.to == to)[0]
+    auth.from = from
+    return createChildBoard(board, auth)
+  },
+
+  getAllPieceMoves_pawn: (board, index) => {
+    const moves = []
+    const dir = board.isWhite ? 10 : -10
+
+    if (board.pieces[index + dir] == 0) {
+      moves.push({to: index + dir})
+
+      const rank = (index - index % 10) / 10
+      if (dir == 10 ? rank == 3 : rank == 8) {
+        if (board.pieces[index + dir * 2] == 0) {
+          moves.push({to: index + dir * 2})
+        }
+      }
+    }
+
+    let toCheck = [index + dir + 1, index + dir - 1].forEach(i => {
+      if (board.pieces[i] != 99 && board.pieces[i] != 0 && board.isWhite != Math.sign(board.pieces[i]) > 0) {
+        moves.push({to: i})
+      }
+    })
+
+    return moves
+  },
+
+  getAllPieceMoves_knight: (board, index) => {
+    const moves = []
+
+    let toCheck = [-21, -19, -12, -8, 8, 12, 19, 21].forEach(i => {
+      let p = index + i
+      if (board.pieces[p] == 0 || (board.pieces[p] != 99 && board.isWhite != Math.sign(board.pieces[p]) > 0)) {
+        moves.push({to: p})
+      }
+    })
+
+    return moves
+  },
+
+  getAllPieceMoves_bishop: (board, index) => {
+    return Moves.searchDir(board, index, [-11, -9, 9, 11])
+  },
+
+  getAllPieceMoves_rook: (board, index) => {
+    return Moves.searchDir(board, index, [-10, -1, 1, 10])
+  },
+
+  getAllPieceMoves_queen: (board, index) => {
+    return Moves.searchDir(board, index, [-11, -9, 9, 11, -10, -1, 1, 10])
+  },
+
+  getAllPieceMoves_king: (board, index) => {
+    const moves = []
+
+    const toCheck = [-11, -10, -9, -1, 1, 9, 10, 11].forEach(i => {
+      let p = index + i
+      if (board.pieces[p] == 0 || (board.pieces[p] != 99 && board.isWhite != Math.sign(board.pieces[p]) > 0)) {
+        moves.push({to: p})
+      }
+    })
+
+    const toCheck2 = (board.isWhite ? [0, 1] : [2, 3]).forEach(dir => {
+      if (board.castleRights[dir]) {
+        if ((dir % 2 == 0 ? [-1, -2, -3] : [1, 2]).every(off => board.pieces[index + off] == 0)) {
+          moves.push({to: index + (dir % 2 == 0 ? -2 : 2), flag: 'castle', qs: dir % 2 == 0})
+        }
+      }
+    })
+
+    return moves
+  },
+
+  searchDir: (board, index, dirs) => {
+    const moves = []
+    const sign = Math.sign(board.pieces[index])
+
+    dirs.forEach(dir => {
+      let current = index + dir
+
+      while (board.pieces[current] == 0) {
+        moves.push({to: current})
+        current += dir
+      }
+
+      if (board.pieces[current] != 99 && sign != Math.sign(board.pieces[current])) {
+        moves.push({to: current})
+      }
+    })
+
+    return moves
+  }
+}
+
 class Piece {
   constructor(name = null, x, y, isWhite = true) {
     this.name = name
