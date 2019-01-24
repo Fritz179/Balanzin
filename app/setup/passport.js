@@ -7,10 +7,12 @@ module.exports = passport => {
 
   //local Strategy
   passport.use(new localStrategy((username, password, done) => {
-    const off = offlineUsers.findOne(username, password)
-    if (off) {
-      return done(null, off, {message: 'You are logged in'})
-    }
+    offlineUsers.findOne(username, password, user => {
+      if (user) {
+        console.log(user, 'sd');
+        return done(null, user, {message: 'You are logged in'})
+      }
+    })
 
     User.findOne({username: username}, (err, user) => {
       if (err) {
@@ -40,12 +42,13 @@ module.exports = passport => {
   });
 
   passport.deserializeUser(function(id, done) {
-    const off = offlineUsers.findOneById(id)
-    if (off) {
-      done(null, off);
-    }
+    offlineUsers.findById(id, user => {
+      if (user) {
+        done(null, user);
+      }
+    })
 
-    User.findById(id, function(err, user) {
+    User.findById(id, (err, user) => {
       done(err, user);
     });
   });

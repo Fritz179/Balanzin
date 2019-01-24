@@ -9,11 +9,12 @@ module.exports.getUser = (socket, callback) => {
     socket.emit('redirect', '/users/login?from=')
     console.log('400: failed attempt to log in with socket');
   } else {
-    const off = offlineUsers.findOneById(userId)
-    if (off) {
-      callback(off)
-      return
-    }
+    offlineUsers.findById(userId, user => {
+      if (user) {
+        callback(user)
+        return
+      }
+    })
 
     const user = User.findOne({_id: userId}, (err, doc) => {
       if (err) {
@@ -21,6 +22,7 @@ module.exports.getUser = (socket, callback) => {
         console.log(err);
       } else if (doc) {
         callback(doc)
+        return
       } else {
         socket.emit('redirect', '/errors')
         console.log('storeUserBySessionId:20 nodoc');

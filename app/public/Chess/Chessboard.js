@@ -204,5 +204,6 @@ function createChessboard(board) {
       chessboard[y * 8 + x] = {name: tiles[Math.abs(piece)], isWhite: piece > 0, x: x, y: y}
     }
   })
+
   return chessboard
 }

@@ -1,4 +1,6 @@
+let cTime = 0
 function createChildBoard(board, move) {
+  cTime -= Date.now()
   const childBoard = {}
 
   childBoard.pieces = board.pieces.slice()
@@ -15,12 +17,21 @@ function createChildBoard(board, move) {
         childBoard.pieces[move.to - 1] = childBoard.pieces[move.from + 3]
         childBoard.pieces[move.from + 3] = 0
       }
+    } else if (move.flag == 'promote') {
+      console.log('detected');
+      childBoard.pieces[move.from] = board.pieces[move.from] == 1 ? 5 : -5
+    } else if (move.flag == 'rook') {
+       childBoard.castleRights[move.perm] = false
+    } else if (move.flag == 'king') {
+      move.perms.forEach(perm => {
+        childBoard.castleRights[perm] = false
+      })
     }
   }
 
   childBoard.pieces[move.to] = childBoard.pieces[move.from]
   childBoard.pieces[move.from] = 0
-
+  cTime += Date.now()
   return childBoard
 }
 
@@ -86,6 +97,13 @@ const Moves = {
       }
     })
 
+    moves.forEach(move => {
+      if ((move.to > 20 && move.to < 29) || (move.to > 90 && move.to < 99)) {
+        move.flag = 'promote'
+      }
+    })
+
+
     return moves
   },
 
@@ -107,7 +125,23 @@ const Moves = {
   },
 
   getAllPieceMoves_rook: (board, index) => {
-    return Moves.searchDir(board, index, [-10, -1, 1, 10])
+    const moves = Moves.searchDir(board, index, [-10, -1, 1, 10])
+    let first = [21, 28, 91, 98].forEach(pos => {
+      if (pos == index) {
+        moves.forEach(move => {
+          move.flag = 'rook'
+          switch (pos) {
+            case 21: move.perm = 0; break;
+            case 28: move.perm = 1; break;
+            case 91: move.perm = 2; break;
+            case 98: move.perm = 3; break;
+            default: debugger;
+          }
+        })
+      }
+    })
+
+    return moves
   },
 
   getAllPieceMoves_queen: (board, index) => {
@@ -120,7 +154,13 @@ const Moves = {
     const toCheck = [-11, -10, -9, -1, 1, 9, 10, 11].forEach(i => {
       let p = index + i
       if (board.pieces[p] == 0 || (board.pieces[p] != 99 && board.isWhite != Math.sign(board.pieces[p]) > 0)) {
-        moves.push({to: p})
+        if (index ==  25) {
+          moves.push({to: p, flag: 'king', perms: [0, 1]})
+        } else if (index == 95) {
+          moves.push({to: p, flag: 'king', perms: [2, 3]})
+        } else {
+          moves.push({to: p})
+        }
       }
     })
 

@@ -14,6 +14,7 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
   console.log('200: Connection with mongoDB Atlas established.');
 }, err => {
   console.error('503: Connection with mongoDB Atlas failed!.');
+  console.error('503: Es tacu al wifi? (bambursa)');
 })
 
 //connect homepage with all cards
@@ -46,7 +47,7 @@ const Server = app.listen(process.env.PORT || 1234, () => {
 /*
   //todo: fix bug, iframe rewuest ending in 404 with a second header (loopable), check all have /puclic, change footer.ejs
 
-  //projects ideas: tothpick, calculator, wordfinder, boids, chess, tris
+  //projects ideas: tothpick, calculator, wordfinder, boids, chess(kübel), tris, nostalgia, terraria
   v1 articles
   v1.1.1 7segment
   v1.1.2 WWE
