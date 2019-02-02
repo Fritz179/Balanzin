@@ -8,6 +8,15 @@
       "path": "chess"
     },
     {
+      "unhandeled": false,
+      "toAuthenticate": true,
+      "socket": true,
+      "iframe": true,
+      "title": "Block Racer!",
+      "body": "An attemp to create a geme with levels, and a more complicated game logic!",
+      "path": "block_racer"
+    },
+    {
       "title": "Articles!",
       "body": "Read and write articles",
       "path": "articles"
@@ -16,6 +25,20 @@
       "title": "WWE Game",
       "body": "Play a game made in collaboration with Custasch!",
       "path": "wwe"
+    },
+    {
+      "unhandeled": false,
+      "iframe": true,
+      "title": "Nostalgia!",
+      "body": "My first 'game'",
+      "path": "nostalgia"
+    },
+    {
+      "unhandeled": false,
+      "iframe": true,
+      "title": "Blocky!",
+      "body": "Not exactly like terraria but inspired by it.",
+      "path": "blocky"
     },
     {
       "unhandeled": false,
@@ -30,6 +53,13 @@
       "title": "Seven Segment Display!",
       "body": "An attemp to reproduce Seven Segment Displays",
       "path": "seven_segment_display"
+    },
+    {
+      "unhandeled": false,
+      "iframe": true,
+      "title": "Sinus",
+      "body": "An attemp to reproduce Sinus Wave!",
+      "path": "sinus_wave"
     }
   ]
 }

@@ -18,7 +18,7 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
 })
 
 //connect homepage with all cards
-app.use('/', createCardRouter('home'))
+app.use('/', createCardRouter('home', io))
 
 //connect all intermidied routes (createCardRouter)
 const sockets = ['wwe', 'chess'].forEach(route => {
@@ -38,8 +38,14 @@ app.get('*', (req, res) => {
   }
 })
 
+//Add variables for ejs
+app.locals.site = {
+  title: 'Fritz_179'
+}
+
 //connect Server to localhost
 const Server = app.listen(process.env.PORT || 1234, () => {
+  console.log(app.locals);
   console.log(`200: Server online on: http://localhost:${Server.address().port} !!`);
   io.attach(Server)
 })

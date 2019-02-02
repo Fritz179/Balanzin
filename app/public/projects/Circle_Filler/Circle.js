@@ -23,7 +23,7 @@ class Circle {
       this.r ++
     } else {
       validPos = validPos.filter(pos => dist(this.x, this.y, pos.x, pos.y) > this.r + this.min)
-      options.updatePixelsCount(validPos.length)
+      updatePixelsCount(validPos.length)
       if (validPos.length) {
         circles.push(new Circle(random(validPos)))
       } else {

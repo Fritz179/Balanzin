@@ -1,6 +1,5 @@
 module.exports.findOne = (username, password, callback) => {
   for (var i = 0; i < users.length; i++) {
-    console.log(i);
     if (users[i].password == password && users[i].username == username) {
       callback(users[i])
       return

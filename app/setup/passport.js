@@ -9,7 +9,7 @@ module.exports = passport => {
   passport.use(new localStrategy((username, password, done) => {
     offlineUsers.findOne(username, password, user => {
       if (user) {
-        console.log(user, 'sd');
+        console.log(user, 'sd on line 12 passport.js');
         return done(null, user, {message: 'You are logged in'})
       }
     })

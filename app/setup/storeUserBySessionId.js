@@ -32,7 +32,6 @@ module.exports.getUser = (socket, callback) => {
 }
 
 module.exports.storeUser = (req, res, next) => {
-  console.log(req.user._id);
   if (credentials[req.session.id]) {
     console.log('500: credentials already has a key for session id!');
     console.log(credentials);
