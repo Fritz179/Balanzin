@@ -1,0 +1,36 @@
+{
+  "title": "Welcome to Balanzin",
+  "p": "BALANZA",
+  "cards": [
+    {
+      "title": "Chess",
+      "p": "Play Chess against another human, yourself or my artificial intelligence!",
+      "extend": "chess"
+    },
+    {
+      "title": "WWE Game",
+      "p": "Play a game made in collaboration with Custasch!",
+      "extend": "wwe"
+    },
+    {
+      "title": "Articles",
+      "p": "Read and write articles",
+      "path": "articles"
+    },
+    {
+      "title": "Sinus",
+      "p": "Sinus Wave",
+      "path": "sinus_wave"
+    },
+    {
+      "title": "Circle Filler",
+      "p": "Fill the screen with circles",
+      "path": "circle_filler"
+    },
+    {
+      "title": "SSD",
+      "p": "Seven Segment Display",
+      "path": "ssd"
+    }
+  ]
+}

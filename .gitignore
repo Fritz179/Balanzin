@@ -1,8 +1,8 @@
 .env
 
 node_modules
-app/public/bower_components
-testing
+app/template/libraries/bower_components
+app/template/public
 
 app/public/projects/p5.dom.min.js
 app/public/projects/p5.sound.min.js

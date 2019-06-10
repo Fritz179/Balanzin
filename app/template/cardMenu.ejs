@@ -1,0 +1,27 @@
+<%- include('header') %>
+
+<%- include('navbar', {user: user, search: true}) %>
+
+<main role="main">
+  <section class="jumbotron text-center">
+    <div class="container">
+      <br>
+      <%- messages('message', locals) %>
+      <h1 class="jumbotron-heading"><%- cards.title %></h1>
+      <p class="lead text-muted"><%- cards.p %></p>
+    </div>
+  </section>
+
+  <div class="album py-5 bg-light">
+    <div class="container">
+      <div class="row">
+        <% cards.cards.forEach(card => { %>
+          <%- include('card', {card: card}) %>
+        <% }) %>
+      </div>
+      <%- include('copyright') %>
+    </div>
+  </div>
+</main>
+
+<%- include('footer') %>

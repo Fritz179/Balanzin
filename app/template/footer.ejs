@@ -1,0 +1,26 @@
+  </main>
+    <% if (locals.socket) { %>
+      <script src="/socket.io/socket.io.js"></script>
+      <script src="/libraries/socketUtils.js"></script>
+    <% } %>
+
+    <% if (locals.toInclude) { %>
+      <% toInclude.forEach(include => { %>
+        <% if (include.scripts) { %>
+          <% include.scripts.forEach(script => { %>
+            <script type='module' src="<%= `/libraries${include.path}/${script}.js` %>"></script>
+          <% }) %>
+        <% } %>
+        <% if (include.css) { %>
+          <% include.css.forEach(style => { %>
+            <link rel="stylesheet" href="<%= `/libraries${include.path}/${style}.css` %>">
+          <% }) %>
+        <% } %>
+      <% }) %>
+    <% } %>
+
+    <script src="/libraries/bower_components/jquery/dist/jquery.js"> </script>
+    <script src="/libraries/bower_components/bootstrap/dist/js/bootstrap.js"> </script>
+    <script src="/libraries/main.js"> </script>
+  </body>
+</html>

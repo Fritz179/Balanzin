@@ -1,0 +1,16 @@
+<% if (typeof p5 != 'boolean' || p5) { %>
+  <script src="/libraries/p5.min.js"></script>
+  <script src="/libraries/p5.dom.min.js"></script>
+  <script src="/libraries/p5.sound.min.js"></script>
+  <script src="/libraries/createOptions.js"></script>
+  <link href="/libraries/style.css" rel="stylesheet"></link>
+<% } %>
+
+<% if (locals.socket) { %>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/libraries/socketUtils.js"></script>
+<% } %>
+
+<% if (locals.fritz) { %>
+  <script> console.error('NO FRITZ LIBRARIE'); </script>
+<% } %>

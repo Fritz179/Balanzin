@@ -28,9 +28,10 @@ module.exports = (app, io, dirname) => {
   });
 
   app.set('view engine', 'ejs')
-  app.set('views', path.join(dirname, 'views'))
+  app.set('views', [path.join(dirname, 'home'), path.join(dirname, 'template')])
 
-  app.use('/public' , express.static(path.join(dirname, 'public')))
+  app.use('/libraries' , express.static(path.join(dirname, 'template/libraries')))
+  app.use(express.static(path.join(dirname, 'home')))
 
   app.get('/favicon.ico', (req, res) => {
     res.sendFile(path.join(dirname, 'public/favicon.ico'))

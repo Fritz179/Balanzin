@@ -1,0 +1,22 @@
+{
+  "title": "CHESS!",
+  "p": "If you already know how to play chess and you would like to challenge yorself<br> by playing against my artificial intelligence, you are welcome!<br><a href='/chess/ai'>clicking here to lose againt my AI</a><br>or if you want to have a chance to win,<br><a href='/chess/player'>clicking here to challenge another player</a>",
+  "cards": [
+    {
+      "title": "Artificial intelligence",
+      "P": "Play against an artificial intelligence",
+      "path": "ai"
+    },
+    {
+      "title": "Challenge a human",
+      "P": "Search a match against a real player",
+      "load": "player",
+      "socket": true
+    },
+    {
+      "title": "Singleplayer",
+      "P": "Play against yourself",
+      "path": "single"
+    }
+  ]
+}
