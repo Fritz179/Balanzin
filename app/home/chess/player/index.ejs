@@ -1,14 +1,26 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <%- include('libraries', {socket: true}) %>
+<%- include('header') %>
 
-    <script src="../Chessboard.js"></script>
-    <script src="../Piece.js"></script>
-    <script src="./PlayerChessboard.js"></script>
-    <script src="./sketch.js"></script>
+<%- include('navbar', {user: user, nav: [{txt: 'Chess', href: '/chess  '}]}) %>
 
-  </head>
-  <body>
-  </body>
-</html>
+  <section class="jumbotron restricted">
+    <%- messages('message', locals) %>
+    <h1 id="title">Waiting to recive data</h1>
+    <p>The player who sends the invite is going to be white</p>
+    <ul id="player_list">
+      <li>Waiting to get players names</li>
+    </ul>
+    <br>
+    <h1>Invites</h1>
+    <ul id="invite_list">
+      <li>Waiting to get Invites</li>
+    </ul>
+
+    <%- include('copyright') %>
+  </section>
+
+
+
+
+  <script type='module' src="./waiting_room.js"></script>
+
+<%- include('footer', {socket: true}) %>

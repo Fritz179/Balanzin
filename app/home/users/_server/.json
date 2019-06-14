@@ -1,0 +1,14 @@
+{
+  "redirect": "login",
+  "subDir": [
+    {
+      "custom": "register"
+    },
+    {
+      "custom": "login"
+    },
+    {
+      "custom": "logout"
+    }
+  ]
+}

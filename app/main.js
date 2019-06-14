@@ -52,10 +52,8 @@ const Server = app.listen(process.env.PORT || 1234, () => {
   CIGC = credo in gesù carota
 */
 
-/*
-,
-{
-  "title": "",
-  "p": "",
-  "load": ""
+/*{
+  "title": "Nostalgia!",
+  "p": "My first 'game'",
+  "path": "nostalgia"
 }*/

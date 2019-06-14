@@ -1,0 +1,32 @@
+{
+  "animations": [
+    {
+      "mirror": true,
+      "action": "idle",
+      "recursive": false,
+      "x": 0,
+      "y": 0,
+      "w": 15,
+      "h": 24
+    },
+    {
+      "mirror": true,
+      "action": "run",
+      "recursive": 10,
+      "x": 0,
+      "y": 24,
+      "w": 16,
+      "h": 25,
+      "yd": -1
+    },
+    {
+      "mirror": true,
+      "action": "jump",
+      "recursive": 3,
+      "x": 0,
+      "y": 50,
+      "w": 16,
+      "h": 24
+    }
+  ]
+}

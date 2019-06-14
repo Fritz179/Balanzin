@@ -1,18 +1,11 @@
 const localStrategy = require('passport-local').Strategy
 const User = require('../models/User')
-const bcrypt = require('bcryptjs');
-const offlineUsers = require('./offlineUsers');
+const bcrypt = require('bcryptjs')
 
 module.exports = passport => {
 
   //local Strategy
   passport.use(new localStrategy((username, password, done) => {
-    offlineUsers.findOne(username, password, user => {
-      if (user) {
-        console.log(user, 'sd on line 12 passport.js');
-        return done(null, user, {message: 'You are logged in'})
-      }
-    })
 
     User.findOne({username: username}, (err, user) => {
       if (err) {
@@ -42,12 +35,6 @@ module.exports = passport => {
   });
 
   passport.deserializeUser(function(id, done) {
-    offlineUsers.findById(id, user => {
-      if (user) {
-        done(null, user);
-      }
-    })
-
     User.findById(id, (err, user) => {
       done(err, user);
     });

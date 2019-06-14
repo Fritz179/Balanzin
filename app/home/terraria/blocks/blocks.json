@@ -1,0 +1,10 @@
+{
+  "default": {
+    "solid": false
+  },
+  "tiles": [
+    "emty",
+    "wall",
+    "outer"
+  ]
+}

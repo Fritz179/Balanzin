@@ -1,10 +1,9 @@
-[
-  {
-    "path": "join",
-    "socket": true
-  },
-  {
-    "path": "play",
-    "socket": true
-  }
-]
+{
+  "renderer": false,
+  "subDir": [
+    {
+      "path": "play",
+      "socket": true
+    }
+  ]
+}

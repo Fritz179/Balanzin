@@ -1,0 +1,14 @@
+{
+  "renderer": false,
+  "subDir": [
+    {
+      "custom": "add"
+    },
+    {
+      "custom": "edit"
+    },
+    {
+      "custom": "article"
+    }
+  ]
+}

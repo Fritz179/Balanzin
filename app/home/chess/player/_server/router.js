@@ -1,9 +1,13 @@
-module.exports = ({router}) => {
-  router.get('/', (req, res) => {
-    res.send('select')
-  })
+const ensureAuthenticated = require('../../../../setup/ensureAuthenticated');
+const {check, validationResult} = require('express-validator/check');
+const {join} = require('path');
 
-  router.get('/play', (req, res) => {
-    res.send('play')
+const Article = require('../../../../models/Article');
+
+module.exports = ({router, directory, createRouter}) => {
+  router.use('/', createRouter('/' + directory))
+
+  router.get('/', (req, res) => {
+    res.render(join(directory, 'index.ejs'))
   })
 }

@@ -1,0 +1,12 @@
+{
+  "animations": [
+    {
+      "action": "idle",
+      "recursive": 3,
+      "x": 0,
+      "y": 0,
+      "w": 16,
+      "h": 16
+    }
+  ]
+}

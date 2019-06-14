@@ -1,11 +1,13 @@
 {
   "title": "WWE",
   "p": "Made with Handrea Custach",
+  "authenticate": false,
   "cards": [
     {
       "title": "Guess the logo!",
       "p": "You will be presented with a logo, and three possible answersGuess the logo!",
-      "path": "logo"
+      "path": "logo",
+      "socket": true
     },
     {
       "title": "Guess the player!",

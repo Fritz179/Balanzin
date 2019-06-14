@@ -34,7 +34,7 @@ module.exports = (app, io, dirname) => {
   app.use(express.static(path.join(dirname, 'home')))
 
   app.get('/favicon.ico', (req, res) => {
-    res.sendFile(path.join(dirname, 'public/favicon.ico'))
+    res.sendFile(path.join(dirname, 'template/favicon.ico'))
   })
 
   require('./passport')(passport)

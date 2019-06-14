@@ -7,15 +7,15 @@
     <div class="container">
       <br>
       <%- messages('message', locals) %>
-      <h1 class="jumbotron-heading"><%- cards.title %></h1>
-      <p class="lead text-muted"><%- cards.p %></p>
+      <h1 class="jumbotron-heading"><%- json.title %></h1>
+      <p class="lead text-muted"><%- json.p %></p>
     </div>
   </section>
 
   <div class="album py-5 bg-light">
     <div class="container">
       <div class="row">
-        <% cards.cards.forEach(card => { %>
+        <% json.cards.forEach(card => { %>
           <%- include('card', {card: card}) %>
         <% }) %>
       </div>

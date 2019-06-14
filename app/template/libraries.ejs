@@ -2,8 +2,6 @@
   <script src="/libraries/p5.min.js"></script>
   <script src="/libraries/p5.dom.min.js"></script>
   <script src="/libraries/p5.sound.min.js"></script>
-  <script src="/libraries/createOptions.js"></script>
-  <link href="/libraries/style.css" rel="stylesheet"></link>
 <% } %>
 
 <% if (locals.socket) { %>
@@ -11,6 +9,30 @@
   <script src="/libraries/socketUtils.js"></script>
 <% } %>
 
+<% if (locals.side) { %>
+  <script src="/libraries/createOptions<%= side %>.js"></script>
+  <link href="/libraries/side.css" rel="stylesheet"></link>
+<% } %>
+
 <% if (locals.fritz) { %>
-  <script> console.error('NO FRITZ LIBRARIE'); </script>
+  <script src="/libraries/fritz_1/app.js"></script>
+  <script src="/libraries/fritz_1/conversion.js"></script>
+  <script src="/libraries/fritz_1/entity.js"></script>
+
+  <script src="/libraries/fritz_1/sprites.js"></script>
+  <script src="/libraries/fritz_1/Layer.js"></script>
+  <script src="/libraries/fritz_1/camera.js"></script>
+  <script src="/libraries/fritz_1/Status.js"></script>
+  <script src="/libraries/fritz_1/Menu.js"></script>
+  <script src="/libraries/fritz_1/Game.js"></script>
+  <script src="/libraries/fritz_1/collision.js"></script>
+  <script src="/libraries/fritz_1/spawn.js"></script>
+  <script src="/libraries/fritz_1/input.js"></script>
+
+  <script src="/libraries/fritz_1/MasterStatus.js"></script>
+  <script src="/libraries/fritz_1/mapParser.js"></script>
+  <script src="/libraries/fritz_1/Chunk.js"></script>
+  <script src="/libraries/fritz_1/map.js"></script>
+
+  <link href="/libraries/fritz_1/style.css" rel="stylesheet"></link>
 <% } %>

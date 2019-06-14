@@ -1,0 +1,24 @@
+{
+  "x": 0,
+  "y": 0,
+  "w": 16,
+  "h": 16,
+  "tiles": [
+    {
+      "name": "air",
+      "collision": 0
+    },
+    {
+      "name": "grass",
+      "collision": 15
+    },
+    {
+      "name": "dirt",
+      "collision": 15
+    },
+    {
+      "name": "stone",
+      "collision": 15
+    }
+  ]
+}

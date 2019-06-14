@@ -3,6 +3,16 @@
   "p": "BALANZA",
   "cards": [
     {
+      "title": "Block Racer! (WIP)",
+      "p": "An attemp to create a geme with levels, and a more complicated game logic!",
+      "path": "block_racer"
+    },
+    {
+      "title": "Terraria! (WIP)",
+      "p": "Terraria in js",
+      "path": "terraria"
+    },
+    {
       "title": "Chess",
       "p": "Play Chess against another human, yourself or my artificial intelligence!",
       "extend": "chess"
@@ -13,9 +23,14 @@
       "extend": "wwe"
     },
     {
+      "title": "Amazon",
+      "p": "The game of the amazons!",
+      "path": "amazon"
+    },
+    {
       "title": "Articles",
       "p": "Read and write articles",
-      "path": "articles"
+      "custom": "articles"
     },
     {
       "title": "Sinus",
@@ -31,6 +46,11 @@
       "title": "SSD",
       "p": "Seven Segment Display",
       "path": "ssd"
+    }
+  ],
+  "subDir": [
+    {
+      "extend": "users"
     }
   ]
 }

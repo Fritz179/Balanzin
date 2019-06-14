@@ -1,0 +1,22 @@
+{
+  "encoding": "animations",
+  "mirror": true,
+  "animations": [
+    {
+      "action": "idle",
+      "recursive": false,
+      "x": 0,
+      "y": 0,
+      "w": 15,
+      "h": 24
+    },
+    {
+      "action": "running",
+      "recursive": 10,
+      "x": 0,
+      "y": 24,
+      "w": 16,
+      "h": 25
+    }
+  ]
+}

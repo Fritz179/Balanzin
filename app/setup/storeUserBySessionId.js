@@ -1,34 +1,24 @@
 const User = require('../models/User');
-const offlineUsers = require('./offlineUsers');
 
 const credentials = {}
 
 module.exports.getUser = (socket, callback) => {
-  const userId = credentials[socket.request.session.id]
-  if (!userId) {
-    socket.emit('redirect', '/users/login?from=')
-    console.log('400: failed attempt to log in with socket');
-  } else {
-    offlineUsers.findById(userId, user => {
-      if (user) {
-        callback(user)
-        return
-      }
-    })
 
-    const user = User.findOne({_id: userId}, (err, doc) => {
-      if (err) {
-        socket.emit('redirect', '/errors')
-        console.log(err);
-      } else if (doc) {
-        callback(doc)
-        return
-      } else {
-        socket.emit('redirect', '/errors')
-        console.log('storeUserBySessionId:20 nodoc');
-      }
-    })
-  }
+  const userId = credentials[socket.request.session.id]
+  if (!userId) return callback(false)
+
+  const user = User.findOne({_id: userId}, (err, doc) => {
+    if (err) {
+      console.log(err);
+      return callback(false)
+    } else if (doc) {
+      return callback(doc)
+    } else {
+      console.log('storeUserBySessionId:20 nodoc', userId);
+      return callback(false)
+    }
+  })
+
 }
 
 module.exports.storeUser = (req, res, next) => {

@@ -1,6 +1,6 @@
-<%- include('../header') %>
+<%- include('header') %>
 
-<%- include('../navbar', {user: user, search: true, nav: [{txt: 'Articles', href: '/articles'}, {txt: 'Add article', href: '/articles/add'}]}) %>
+<%- include('navbar', {user: user, search: true, nav: [{txt: 'Articles', href: '/articles'}, {txt: 'Add article', href: '/articles/add'}]}) %>
 
 <main role="main">
   <section class="jumbotron text-center">
@@ -19,16 +19,16 @@
       <ul class='list-group'>
         <% articles.forEach(article => { %>
           <li class='list-group-item'>
-            <a href=<%= '/articles/' + article._id %>><%= article.title %></a>
+            <a href=<%= '/articles/article/' + article._id %>><%= article.title %></a>
           </li>
         <% }) %>
       </ul>
       <br>
       <a class='btn btn-primary' href='/articles/add'>Click here to write an Article!!</a>
       <br>
-      <%- include('../copyright') %>
+      <%- include('copyright') %>
     </div>
   </div>
 </main>
 
-<%- include('../footer') %>
+<%- include('footer') %>
