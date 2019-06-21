@@ -54,10 +54,11 @@ module.exports = (socket, user) => {
     }
   })
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', socket => {
     matches[gameId][myColor] = null
     setTimeout(() => {
-      if (socket.disconnected && matches[gameId][opColor].socket.disconnected) {
+      const opp = matches[gameId][opColor]
+      if (socket.disconnected && (!opp || !opp.socket || socket.disconnected)) {
         playerMatchesHandler.endGame(gameId)
       }
     }, 1000)

@@ -5,7 +5,7 @@ const fs = require('fs');
 
 module.exports = (io) => {
 
-  function createRouter(topDirectory = '\\') {
+  function createRouter(topDirectory = '/') {
     //require('express').Router() must be inside of module.exports else it will break
     const router = require('express').Router()
 
@@ -74,7 +74,8 @@ module.exports = (io) => {
     const setupRouter = require(join(__dirname, '../home', directory, '_server/router.js'));
     const router = require('express').Router()
 
-    directory = directory.replace(/^\\+/, '')
+    directory = directory.replace(/^(\\|\/)+/, '')
+
     setupRouter({router, io, loadSocket, directory, createRouter, customRouter})
 
     return router
