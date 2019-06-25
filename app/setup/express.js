@@ -31,6 +31,7 @@ module.exports = (app, io, dirname) => {
   app.set('views', [path.join(dirname, 'home'), path.join(dirname, 'template')])
 
   app.use('/libraries' , express.static(path.join(dirname, 'template/libraries')))
+  app.use('/fonts' , express.static(path.join(dirname, 'template/fonts')))
   app.use(express.static(path.join(dirname, 'home')))
 
   app.get('/favicon.ico', (req, res) => {

@@ -7,7 +7,8 @@ module.exports = (socket, user) => {
 
   socket.on('guess', name => {
     if (socket.rightName == name) {
-      user.wwe.score += 1
+      if (user) user.wwe.score += 1
+      
       socket.emit('new_guess', getGuess(socket, 'logo'))
     }
   })

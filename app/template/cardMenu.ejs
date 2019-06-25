@@ -1,27 +1,66 @@
-<%- include('header') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Balanzin</title>
 
-<%- include('navbar', {user: user, search: true}) %>
+  <link rel="stylesheet" href="/libraries/cards.css">
+</head>
+<body>
 
-<main role="main">
-  <section class="jumbotron text-center">
-    <div class="container">
-      <br>
-      <%- messages('message', locals) %>
-      <h1 class="jumbotron-heading"><%- json.title %></h1>
-      <p class="lead text-muted"><%- json.p %></p>
-    </div>
-  </section>
+  <div class="wrapper">
+    <!-- Navigation -->
+    <nav class="main-nav">
+      <ul id="main-ul">
+        <ul id="left">
+          <li><a href="/">Fritz_179</a></li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/">About</a></li>
+        </ul>
+        <form id="center">
+          <input type="text" placeholder="Search">
+          <a href="/search" class="btn">Search</a>
+        </form>
+        <ul id="right">
+          <li><a href="#">Version 3.1.4</a></li>
+          <li><a href="/users/report">Report Bug</a></li>
+          <li><a href="/users/login">Login</a></li>
+        </ul>
+      </ul>
+    </nav>
 
-  <div class="album py-5 bg-light">
-    <div class="container">
-      <div class="row">
+    <!-- Title -->
+    <section class="title">
+      <h1 id="welcome">Welcome to Balanzin</h1>
+      <p id="description">Balnaza!</p>
+    </section>
+
+    <!-- Cards -->
+    <div class="card-wrapper">
+      <section class="cards">
         <% json.cards.forEach(card => { %>
-          <%- include('card', {card: card}) %>
+          <div class="card clickable" redirect="<%= card.subDirectory %>">
+            <img src="<%= `${card.serverDirectory}/${card.subDirectory}.png` %>" alt="<%= card.subDirectory %>">
+            <div class="card-body">
+              <h4><%= card.title %></h4>
+              <p><%= card.p %></p>
+            </div>
+          </div>
         <% }) %>
-      </div>
-      <%- include('copyright') %>
+      </section>
     </div>
-  </div>
-</main>
 
-<%- include('footer') %>
+    <!-- Footer -->
+
+  </div>
+  <!-- Wrapper Ends -->
+
+</body>
+<footer>
+  <div class="copy">
+    <hr>
+    <p>Copyright &copy; 2019 &reg by Fritz_179</p>
+  </div>
+</footer>
+<script src="/libraries/cards.js"> </script>
+</html>
