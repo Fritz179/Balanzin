@@ -30,9 +30,25 @@ module.exports = (app, io, dirname) => {
   app.set('view engine', 'ejs')
   app.set('views', [path.join(dirname, 'home'), path.join(dirname, 'template')])
 
-  app.use('/libraries' , express.static(path.join(dirname, 'template/libraries')))
-  app.use('/fonts' , express.static(path.join(dirname, 'template/fonts')))
-  app.use(express.static(path.join(dirname, 'home')))
+  app.use('/libraries', express.static(path.join(dirname, 'template/libraries')))
+  app.use('/fonts', express.static(path.join(dirname, 'template/fonts')))
+
+  app.use(/\/template\/.*\.css/, (req, res, next) => {
+    res.sendFile(path.join(dirname, req.originalUrl))
+  })
+
+  app.use((req, res, next) => {
+    if (req.originalUrl.match(/\.png$/)){
+      res.sendFile(path.join(dirname, 'home', req.originalUrl))
+    } else {
+      next()
+    }
+  })
+
+  const staticHandler = express.static(path.join(dirname, 'home'))
+  app.use((req, res, next) => {
+    req.originalUrl.match(/_server/) ? next() : staticHandler(req, res, next)
+  })
 
   app.get('/favicon.ico', (req, res) => {
     res.sendFile(path.join(dirname, 'template/favicon.ico'))

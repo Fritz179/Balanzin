@@ -1,17 +1,11 @@
-$(document).ready(() => {
-  $('.delete-article').on('click', e => {
-    e.preventDefault()
-    let target = $(e.target)
-    const id = target.attr('data-id')
-    $.ajax({
-      type: 'DELETE',
-      url: '/articles/article/' + id,
-      success: response => {
-        window.location.href = response
-      },
-      error: err => {
-        console.log(err);
-      }
-    })
-  })
-})
+const el = document.getElementsByClassName("delete")[0]
+
+if (el) {  
+  const data_id = el.getAttribute('data_id')
+
+  el.onclick = async () => {
+    await fetch(`/articles/article/${data_id}`, {method: 'DELETE'})
+
+    window.location = '/articles'
+  }
+}

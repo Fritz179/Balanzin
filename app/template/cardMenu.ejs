@@ -1,44 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Balanzin</title>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
 
-  <link rel="stylesheet" href="/libraries/cards.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/template/cardMenu.css">
+  </head>
+  <body>
 
-  <div class="wrapper">
-    <!-- Navigation -->
-    <nav class="main-nav">
-      <ul id="main-ul">
-        <ul id="left">
-          <li><a href="/">Fritz_179</a></li>
-          <li><a href="/">Home</a></li>
-          <li><a href="/">About</a></li>
-        </ul>
-        <form id="center">
-          <input type="text" placeholder="Search">
-          <a href="/search" class="btn">Search</a>
-        </form>
-        <ul id="right">
-          <li><a href="#">Version 3.1.4</a></li>
-          <li><a href="/users/report">Report Bug</a></li>
-          <li><a href="/users/login">Login</a></li>
-        </ul>
-      </ul>
-    </nav>
+    <%- include('navbar') %>
 
-    <!-- Title -->
-    <section class="title">
-      <h1 id="welcome">Welcome to Balanzin</h1>
-      <p id="description">Balnaza!</p>
-    </section>
+    <%- include('title') %>
 
     <!-- Cards -->
     <div class="card-wrapper">
       <section class="cards">
-        <% json.cards.forEach(card => { %>
+        <% cards.forEach(card => { %>
           <div class="card clickable" redirect="<%= card.subDirectory %>">
             <img src="<%= `${card.serverDirectory}/${card.subDirectory}.png` %>" alt="<%= card.subDirectory %>">
             <div class="card-body">
@@ -50,17 +28,8 @@
       </section>
     </div>
 
-    <!-- Footer -->
+  </body>
+  <%- include('footer') %>
 
-  </div>
-  <!-- Wrapper Ends -->
-
-</body>
-<footer>
-  <div class="copy">
-    <hr>
-    <p>Copyright &copy; 2019 &reg by Fritz_179</p>
-  </div>
-</footer>
-<script src="/libraries/cards.js"> </script>
+  <script src="/libraries/cards.js"> </script>
 </html>

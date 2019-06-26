@@ -10,7 +10,7 @@ module.exports = ({router, directory, createRouter}) => {
     Article.findById(req.params.id, checkErrors(req, res, article => {
       if (article.author != req.user._id) {
         req.flash('danger', 'Invalid credentials')
-        res.redirect('/articles')
+        res.redirect('/users/login')
         return
       } else if (article) {
         Article.deleteOne({_id: req.params.id}, err => {
@@ -19,9 +19,9 @@ module.exports = ({router, directory, createRouter}) => {
           } else {
             console.log('410: deleted: ' + req.params.id);
             req.flash('danger', 'Message Deleted')
-            res.send('/articles')
           }
         })
+        res.send('/articles')
       }
     }))
   })

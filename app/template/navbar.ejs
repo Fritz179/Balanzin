@@ -1,55 +1,19 @@
-<nav class="navbar navbar-expand-md navbar-dark <%= locals.notFixed ? 'notFixed' : 'fixed-top' %> bg-dark" id='nav'>
-  <a class="navbar-brand" href="/">Fritz_179</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarCollapse">
-    <ul class="navbar-nav mr-auto">
-      <% if (locals.nav) { %>
-        <% nav.forEach((nav, i) => { %>
-          <li class="nav-item <%= i == 0 ? 'active' : '' %>">
-            <a class="nav-link" href="<%= nav.href %>"><%= nav.txt %></a>
-          </li>
-        <% }) %>
-      <% } else { %>
-        <li class="nav-item active">
-          <a class="nav-link" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/genral/about">About</a>
-        </li>
-      <% } %>
-    </ul>
-    <div class='centered navbar-nav mr-auto'>
-      <% if (locals.search) { %>
-        <form class="form-inline mt-2 mt-md-0 centered">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-          <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
-      <% } else { %>
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="/users/login"><%= locals.user ? 'You are logged in as ' + user.username : 'You are not logged in ;-( click here to log in' %></a>
-          </li>
-        </ul>
-      <% } %>
-    </div>
-    <ul class='navbar-nav right'>
-      <li class='nav item'>
-        <a class='nav-link' href='/'>Version 1.3.1</a>
-      </li>
-      <li class='nav item'>
-        <a class='nav-link' href='/users/report'>Report Bug</a>
-      </li>
-      <% if (user) { %>
-        <li class='nav item'>
-          <a class='nav-link' href='/users/logout'>Logout</a>
-        </li>
-      <% } else { %>
-        <li class='nav item'>
-          <a class='nav-link' href='/users/login'>Login</a>
-        </li>
-      <% } %>
-    </ul>
-  </div>
+<link rel="stylesheet" href="/template/navbar.css">
+<link rel="stylesheet" href="/template/style.css">
+
+<nav class="main-nav">
+  <ul id="left">
+    <li><a class="link" href="/">Fritz_179</a></li>
+    <li><a class="link" href="/">Home</a></li>
+    <li><a class="link" href="/">About</a></li>
+  </ul>
+  <form id="center">
+    <input type="text" placeholder="Search">
+    <a href="/search" class="btn">Search</a>
+  </form>
+  <ul id="right">
+    <li><a class="link" href="#">Version 3.1.4</a></li>
+    <li><a class="link" href="/users/report">Report Bug</a></li>
+    <li><a class="link" href="/users/login">Login</a></li>
+  </ul>
 </nav>

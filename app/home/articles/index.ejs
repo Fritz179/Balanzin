@@ -1,34 +1,35 @@
-<%- include('header') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
 
-<%- include('navbar', {user: user, search: true, nav: [{txt: 'Articles', href: '/articles'}, {txt: 'Add article', href: '/articles/add'}]}) %>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
 
-<main role="main">
-  <section class="jumbotron text-center">
-    <div class="container">
-      <%- messages('message', locals) %>
-      <br>
-      <h1 class="jumbotron-heading">Articles! By Fritz_179!</h1>
-      <p class="lead text-muted">In this projet you can read some amazing articles. <br> and you can even write one of your own by
-        <a href='/articles/add'>clicking here</a> or in the navbar
-      </p>
+    <%- include('navbar') %>
+
+    <%- include('title', {
+      title: 'Articles! By Fritz_179!',
+      p: `In this projet you can read some amazing articles. <br> You can even write one of your own by <a class="link" href='/articles/add'>clicking here</a> or in the navbar!`
+    }) %>
+
+    <!-- Articles -->
+    <div class="articles-wrapper">
+      <section class="articles">
+        <ul>
+          <% articles.forEach(article => { %>
+            <li><a class="link" href=<%= '/articles/article/' + article._id %>><%= article.title %></a></li>
+          <% }) %>
+        </ul>
+        <a class='btn add-article' href='/articles/add'>Click here to write an Article!!</a>
+      </section>
     </div>
-  </section>
 
-  <div class="album py-5 bg-light">
-    <div class="container">
-      <ul class='list-group'>
-        <% articles.forEach(article => { %>
-          <li class='list-group-item'>
-            <a href=<%= '/articles/article/' + article._id %>><%= article.title %></a>
-          </li>
-        <% }) %>
-      </ul>
-      <br>
-      <a class='btn btn-primary' href='/articles/add'>Click here to write an Article!!</a>
-      <br>
-      <%- include('copyright') %>
-    </div>
-  </div>
-</main>
+  </body>
+  <%- include('footer') %>
 
-<%- include('footer') %>
+  <script src="/libraries/cards.js"> </script>
+</html>

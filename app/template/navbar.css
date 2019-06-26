@@ -1,0 +1,97 @@
+.main-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  background: #343a40;
+  padding: 0;
+}
+
+.main-nav > * {
+  flex: 1;
+
+  font-family: roboto-light;
+  letter-spacing: 0.05rem;
+  white-space: nowrap;
+
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  list-style: none;
+
+  padding: 0;
+  margin: 0 1rem;
+}
+
+.main-nav ul li {
+  margin: 0.75rem;
+}
+
+.main-nav ul li a {
+  color: var(--gray);
+}
+
+.main-nav ul li a:hover {
+  color: #fff;
+}
+
+/* Title, Fritz_179 */
+.main-nav #left > li:first-child a {
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.main-nav #center {
+  justify-content: center;
+  align-items: center;
+}
+
+.main-nav #center > * {
+  border-radius: 0.25rem;
+  margin: 0.625rem 0.3125rem;
+}
+
+.main-nav #center input {
+  padding: 0.625rem 0.75rem;
+  border: 2px solid #ced4da;
+  height: 18px;
+}
+
+.main-nav #center a {
+  padding: 0.625rem;
+  background: #28a745;
+}
+
+.main-nav #right {
+  justify-content: flex-end;
+}
+
+/* Login */
+.main-nav #right > li:last-child a {
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+@media (max-width: 950px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 37rem;
+  }
+
+  .main-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .main-nav ul li {
+    font-size: 1.4rem;
+  }
+
+  .main-nav #left > li:first-child a {
+    font-size: 1.8rem;
+  }
+
+  .main-nav #right > li:last-child a {
+    font-size: 1.8rem;
+  }
+}

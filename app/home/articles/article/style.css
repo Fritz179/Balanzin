@@ -1,0 +1,80 @@
+html {
+  background: var(--secondary);
+  min-width: 40rem;
+}
+
+.article-wrapper {
+  padding: 6rem;
+  margin: auto;
+  max-width: 65rem;
+}
+
+.article {
+  padding: 4rem;
+
+  background: var(--primary);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  border-radius: 2rem;
+  border: var(--border);
+  box-shadow: var(--shadow);
+}
+
+.article h1 {
+  font-family: roboto;
+  font-size: 3rem;
+  margin-bottom: 0;
+}
+
+.article h2 {
+  margin-top: 0.75rem;
+  font-family: roboto-light;
+  font-size: 1.5rem;
+}
+
+.article .body {
+  font-family: roboto-light;
+  font-size: 1.375rem;
+}
+
+.article .others {
+  background: #28aa44;
+  border-color: #28aa44;
+}
+
+.article .others:hover {
+  background: #118822;
+  border-color: #118822;
+}
+
+.article .edit {
+  background: #007bff;
+  border-color: #007bff;
+}
+
+.article .edit:hover {
+  background: #0055aa;
+  border-color: #0055aa;
+}
+
+.article .delete {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+
+.article .delete:hover {
+  background: #aa1525;
+  border-color: #aa1525;
+}
+
+footer {
+  background: var(--primary);
+  width: 100%;
+  margin-top: 2.5rem;
+}
+
+footer .copy {
+  padding: 0;
+}

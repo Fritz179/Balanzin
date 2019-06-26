@@ -1,0 +1,10 @@
+footer {
+  width: 100%;
+  background: #f8f9fa;
+}
+
+footer .copy {
+  max-width: 65rem;
+  padding: 6rem;
+  margin: auto;
+}

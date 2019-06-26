@@ -19,7 +19,7 @@ module.exports = (io) => {
     if (renderer !== false) {
       router.get('/', (req, res) => {
         if (redirect) res.redirect(redirect)
-        else if (renderer) res.render(renderer, {json})
+        else if (renderer) res.render(renderer, {...json})
         else res.render(join('.' + topDirectory, 'index.ejs'))
       })
     }
