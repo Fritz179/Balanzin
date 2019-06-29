@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Raspy</title>
+
+  </head>
+  <body>
+
+    <%- include('navbar') %>
+
+    <!-- Cards -->
+    <section class="control">
+      <div class='camera horizontal'><input class="slider" type="range"></div>
+      <div class='roll horizontal'><input class="slider" type="range"></div>
+      <div class='speed vertical'><div><input class="slider" type="range"></div></div>
+      <div class='height vertical'><div><input class="slider" type="range"></div></div>
+      <div class='pitch vertical'><div><input class="slider" type="range"></div></div>
+      <div class='absolute'>
+        <a class='a1 arrow'><%- include('svg/undo.svg') %></a>
+        <a class='a2 arrow'><%- include('svg/arrow-up.svg') %></a>
+        <a class='a3 arrow'><%- include('svg/redo.svg') %></a>
+        <a class='a4 arrow'><%- include('svg/arrow-left.svg') %></a>
+        <a class='a6 arrow'><%- include('svg/arrow-right.svg') %></a>
+        <a class='a8 arrow'><%- include('svg/arrow-down.svg') %></a>
+      </div>
+      <div class="relative">
+        <a class='r1 arrow'><%- include('svg/undo.svg') %></a>
+        <a class='r2 arrow'><%- include('svg/arrow-up.svg') %></a>
+        <a class='r3 arrow'><%- include('svg/redo.svg') %></a>
+        <a class='r4 arrow'><%- include('svg/arrow-left.svg') %></a>
+        <a class='r6 arrow'><%- include('svg/arrow-right.svg') %></a>
+        <a class='r8 arrow'><%- include('svg/arrow-down.svg') %></a>
+      </div>
+      <%- include('footer') %>
+    </section>
+
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>

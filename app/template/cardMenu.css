@@ -3,16 +3,16 @@ img {
 }
 
 .card-wrapper {
-  background: #f8f9fa;
+  background: var(--secondary);
   margin-top: 2rem;
   padding-top: 4rem;
 }
 
 .cards {
   max-width: 65rem;
-  grid-gap: 2rem;
   margin: 0 auto;
   display: grid;
+  grid-gap: 2rem;
   grid-template-columns: repeat(3, 1fr);
   align-items: start;
   padding: 0 6rem;

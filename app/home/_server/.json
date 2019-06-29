@@ -33,6 +33,11 @@
       "custom": "articles"
     },
     {
+      "title": "Spider PI!",
+      "p": "A spider robot made with a Raspberry Pi 3 (and SILVIO LARDI)",
+      "path": "raspy"
+    },
+    {
       "title": "Sinus",
       "p": "Sinus Wave",
       "path": "sinus_wave"

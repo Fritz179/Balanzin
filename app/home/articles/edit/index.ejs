@@ -1,20 +1,29 @@
-<%- include('header') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
 
-<%- include('navbar', {user: user, nav: [{txt: 'Articles', href: '/articles'}]}) %>
+  </head>
+  <body>
 
-<main role="main">
-  <section class="jumbotron top-margin">
-    <div class="container">
-      <%- messages('message', locals) %>
-      <h1>Edit article</h1>
-       <form method="post" action=<%= '/articles/edit/' + article._id %>>
-          <div class="form-group"><label>Title:</label><input class="form-control" name="title" type="text" value='<%= article.title %>'></div>
-          <div class="form-group"><label>Body:</label><textarea class="form-control" name="body"><%= article.body %></textarea></div>
-          <br><input class="btn btn-primary" type="submit" value="Save changes">
-       </form>
-       <%- include('copyright') %>
+    <%- include('navbar') %>
+
+    <!-- Articles -->
+    <div class="article-wrapper">
+      <section class="article">
+        <h1>Edit your article!</h1>
+        <form method="post" action=<%= '/articles/edit/' + article._id %>>
+          <div><label>Title:</label><input class="field" name="title" type="text" value='<%= article.title %>' autofocus/></div>
+          <div><label>Body:</label><textarea class="field" name="body"><%= article.body %></textarea></div>
+          <input class="btn" type="submit" value="Save Changes">
+        </form>
+        <%- include('footer') %>
+      </section>
     </div>
-  </section>
-</main>
 
-<%- include('footer') %>
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>

@@ -1,0 +1,201 @@
+.control-wrapper {
+  background: var(--secondary);
+  padding-top: 4rem;
+}
+
+.control {
+  background: var(--primary);
+  padding: 2rem 5rem;
+  width: 100%;
+  max-width: 61rem;
+  margin: 5rem auto;
+
+  box-shadow: var(--shadow);
+  border: var(--border);
+  border-radius: 1rem;
+
+  display: grid;
+  grid-gap: 2rem;
+  grid-template-columns: repeat(9, 5rem);
+  grid-template-areas:
+    ". camera camera camera . roll roll roll ."
+    "speed absolute absolute absolute height relative relative relative pitch"
+    "speed absolute absolute absolute height relative relative relative pitch"
+    "speed absolute absolute absolute height relative relative relative pitch"
+    "footer footer footer footer footer footer footer footer footer";
+}
+
+.absolute {
+  background: #ccc;
+  border-radius: 2rem;
+  padding: 1rem;
+
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(3, 5rem);
+  grid-template-areas:
+    "a1 a2 a3"
+    "a4 a5 a6"
+    "a7 a8 a9";
+}
+
+.relative {
+  background: #ccc;
+  border-radius: 2rem;
+  padding: 1rem;
+
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(3, 5rem);
+  grid-template-areas:
+    "r1 r2 r3"
+    "r4 r5 r6"
+    "r7 r8 r9";
+}
+
+.relative > * {
+  width: 5rem;
+  height: 5rem;
+}
+
+.absolute > * {
+  width: 5rem;
+  height: 5rem;
+}
+
+.arrow {
+  box-sizing: border-box;
+  background: var(--primary);
+  border: 1px solid #0008;
+  border-radius: 2rem;
+  transition: 0.5s;
+}
+
+.arrow:hover {
+  background: green;
+  transition: 1s;
+}
+
+.arrow:hover svg {
+  transform: scale(0.8);
+  transition: 0.5s;
+}
+
+svg {
+  transform: scale(0.6);
+  transition: 0.5s;
+}
+
+.camera { grid-area: camera;}
+.roll { grid-area: roll; }
+.speed { grid-area: speed; }
+.height { grid-area: height; }
+.pitch { grid-area: pitch; }
+.absolute { grid-area: absolute; }
+.relative { grid-area: relative; }
+.a1 { grid-area: a1; }
+.a2 { grid-area: a2; }
+.a3 { grid-area: a3; }
+.a4 { grid-area: a4; }
+.a5 { grid-area: a5; }
+.a6 { grid-area: a6; }
+.a7 { grid-area: a7; }
+.a8 { grid-area: a8; }
+.a9 { grid-area: a9; }
+.r1 { grid-area: r1; }
+.r2 { grid-area: r2; }
+.r3 { grid-area: r3; }
+.r4 { grid-area: r4; }
+.r5 { grid-area: r5; }
+.r6 { grid-area: r6; }
+.r7 { grid-area: r7; }
+.r8 { grid-area: r8; }
+.r9 { grid-area: r9; }
+
+.slider {
+  -webkit-appearance: none;
+  width: 19rem;
+  height: 15px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.vertical {
+  height: 19rem;
+  width: 5rem;
+}
+
+.vertical div {
+  transform: rotate(-90deg) translate(-16rem, 0);
+}
+
+footer {
+  grid-area: footer;
+  background: var(--primary);
+  width: 100%;
+  margin-top: 2.5rem;
+}
+
+footer .copy {
+  padding: 0;
+}
+
+@media (max-width: 1200px) {
+  .control {
+    max-width: 42rem;
+    grid-template-columns: repeat(6, 5rem);
+    grid-template-areas:
+      "camera camera camera roll roll roll"
+      "absolute absolute absolute relative relative relative"
+      "speed speed height height pitch pitch"
+      "footer footer footer footer footer footer";
+  }
+
+  .vertical {
+    width: 12rem;
+  }
+}
+
+@media (max-width: 950px) {
+  .control {
+    max-width: 19rem;
+    grid-template-columns: repeat(3, 5rem);
+    grid-template-areas:
+      "camera camera camera"
+      "roll roll roll"
+      "speed height pitch"
+      "relative relative relative"
+      "absolute absolute absolute"
+      "footer footer footer";
+  }
+
+  .vertical {
+    width: 5rem;
+  }
+}
