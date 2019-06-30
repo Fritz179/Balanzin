@@ -20,7 +20,7 @@ class Circle {
 
   update() {
     if (this.validateCircle()) { //can grow
-      this.r ++
+      this.r++
     } else {
       validPos = validPos.filter(pos => dist(this.x, this.y, pos.x, pos.y) > this.r + this.min)
       updatePixelsCount(validPos.length)

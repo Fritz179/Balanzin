@@ -64,7 +64,7 @@ module.exports = (io) => {
 
     io.of(`${socketName}`).on('connection', socket => {
       getUser(socket, user => {
-        if (!user && withUser) return socket.emit('redirect', '/users/login?from=')
+        if (!user && withUser) return socket.emit('redirect', '/users/login?from=' + socketName)
         else return setupSocket(socket, user)
       })
     })

@@ -9,7 +9,7 @@ module.exports = ({router, directory}) => {
 
   router.post('/', (req, res, next) => {
     passport.authenticate('local', {
-      failureRedirect: req.originalUrl || '/users/login',
+      failureRedirect: '/users/login',
       failureFlash: true,
     })(req, res, next)
   }, storeUser, (req, res, next) => {

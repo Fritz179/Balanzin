@@ -59,8 +59,9 @@ module.exports = (app, io, dirname) => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.get('*', (req, res, next) => {
+  app.use((req, res, next) => {
     res.locals.user = req.user || null
+    res.locals.messages = req.messages || []
     next()
   })
 }

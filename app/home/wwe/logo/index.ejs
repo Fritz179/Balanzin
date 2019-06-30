@@ -1,34 +1,29 @@
-<%- include('header') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
 
-<%- include('navbar', {user: user, nav: [{txt: 'WWE', href: '/wwe'}]}) %>
+    <%- include('libraries', {socket: true, p5: false}) %>
+  </head>
+  <body>
 
-<%- messages('message', locals) %>
+    <%- include('navbar') %>
 
-<div class="album py-5 bg-black">
-  <div class="container text-center">
-    <img id='img' class="logo hidden" alt="Logo alt">
-    <div class="card-body">
-      <h4 class="card-text white">who's logo is this?</h4>
-      <br>
-      <br>
-      <div class="d-flex justify-content-between centered">
-        <div class="btn-group centered hidden" id='ul'>
-          <button type="button" class="btn btn-sm btn-outline-secondary white">La mama da umberto!</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary white">La mama da umberto!</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary white">La mama da umberto!</button>
-        </div>
-      </div>
+    <!-- Articles -->
+    <div class="logo">
+      <img id='img' alt="Logo of a Wrestler">
+      <h4 class="card-text white">WHO'S LOGO IS THIS?</h4>
+      <ul id="selection">
+        <li><a class="btn"></a></li>
+        <li><a class="btn"></a></li>
+        <li><a class="btn"></a></li>
+      </ul>
     </div>
-  </div>
-</div>
 
-<div class="py-5 bg-light">
-  <div class="container">
-    <%- include('copyright') %>
-  </div>
-</div>
+  </body>
 
-<link rel="stylesheet" href="./style.css">
-<script type='module' src="./guess.js"></script>
-
-<%- include('footer', {socket: true}) %>
+  <link rel="stylesheet" href="./style.css">
+  <script type='module' src="./guess.js"></script>
+</html>

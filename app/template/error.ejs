@@ -1,16 +1,23 @@
-<%- include('header') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
 
+  </head>
+  <body>
 
-<%- include('navbar', {user: user}) %>
+    <%- include('navbar') %>
 
-<main role="main">
-  <section class="jumbotron">
-    <br>
-    <%- messages('message', locals) %>
-    <h1>Error <%= error %></h1>
-    <p>An error accured :-(</p>
-    <a class="btn btn-success" href="/">Click here to go back to the Homepage</a>
-  </section>
-</main>
+    <!-- Error -->
+    <section class="error">
+      <h1>An error accured :-(</h1>
+      <a class="btn" href="/">Click here to go back to the Homepage</a>
+      <%- include('footer') %>
+    </section>
 
-<%- include('footer') %>
+  </body>
+
+  <link rel="stylesheet" href="template/error.css">
+</html>

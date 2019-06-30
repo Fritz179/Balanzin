@@ -1,26 +1,34 @@
-<%- include('header') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
 
-<%- include('navbar', {user: user, nav: [{txt: 'Chess', href: '/chess  '}]}) %>
+    <%- include('libraries', {socket: true, p5: false}) %>
+  </head>
+  <body>
 
-  <section class="jumbotron restricted">
-    <%- messages('message', locals) %>
-    <h1 id="title">Waiting to recive data</h1>
-    <p>The player who sends the invite is going to be white</p>
-    <ul id="player_list">
-      <li>Waiting to get players names</li>
-    </ul>
-    <br>
-    <h1>Invites</h1>
-    <ul id="invite_list">
-      <li>Waiting to get Invites</li>
-    </ul>
+    <%- include('navbar') %>
 
-    <%- include('copyright') %>
-  </section>
+    <!-- Articles -->
+    <div class="waiting-wrapper">
+      <section class="waiting">
+        <h1 id="title">Waiting to recive data</h1>
+        <p id="info">*The player who sends the invite is going to be white</p>
+        <ul id="player_list">
+          <li>Waiting to get players names</li>
+        </ul>
+        <h1>Invites</h1>
+        <ul id="invite_list">
+          <li>Waiting to get Invites</li>
+        </ul>
+        <%- include('footer') %>
+      </section>
+    </div>
 
+  </body>
 
-
-
+  <link rel="stylesheet" href="./style.css">
   <script type='module' src="./waiting_room.js"></script>
-
-<%- include('footer', {socket: true}) %>
+</html>

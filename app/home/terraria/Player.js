@@ -82,7 +82,7 @@ class End extends Entity {
   }
 
   update() {
-    this.lifetime ++
+    this.lifetime++
     if (this.lifetime >= this.maxLifetime) this.lifetime = 0
   }
 

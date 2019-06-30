@@ -52,8 +52,6 @@ function createItem(user, isInvite = false, userId) {
         alreadyInvited.push(user.username)
         link.innerHTML = user.username + ' (already invited!)'
         socket.emit('invite_user', user.id)
-      } else {
-        link.innerHTML = user.username + ' (already invited!)'
       }
     }
   }

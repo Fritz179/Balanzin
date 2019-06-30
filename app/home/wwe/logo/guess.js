@@ -1,7 +1,7 @@
 const socket = connect('/wwe/logo')
 
-const img = document.getElementById('img')
-const ul = document.getElementById('ul')
+const img = document.querySelector('img')
+const ul = document.querySelector('#selection')
 
 socket.on('ready', () => {
 
@@ -11,7 +11,7 @@ socket.on('ready', () => {
     ul.classList.remove("hidden");
     img.src = guess.url
     guess.options.forEach((option, i) => {
-      ul.children[i].innerHTML = option
+      ul.children[i].children[0].innerHTML = option
     })
   })
 
@@ -19,7 +19,7 @@ socket.on('ready', () => {
 })
 
 for (let i = 0; i < 3; i++) {
-  ul.children[i].onclick = () => {
-    socket.emit('guess', ul.children[i].innerHTML)
+  ul.children[i].children[0].onclick = () => {
+    socket.emit('guess', ul.children[i].children[0].innerHTML)
   }
 }

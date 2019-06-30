@@ -9,7 +9,7 @@ class Shooter extends Entity {
   }
 
   update() {
-    this.lifetime ++
+    this.lifetime++
     if (this.lifetime >= this.maxLifetime) {
       this.lifetime = 0
       this._ecs.spawners.bullet(this.x, this.y + 8)

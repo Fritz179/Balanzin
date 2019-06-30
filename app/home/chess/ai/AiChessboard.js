@@ -77,7 +77,7 @@ function negaMax(board, depth, alpha, beta, color) {
 let ev = 0
 
 function evaluation(board) {
-  ev ++
+  ev++
   let val = 0
 
   // board.pieces.forEach((piece, i) => { //i = 21, piece = 4
