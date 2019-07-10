@@ -1,31 +1,32 @@
-const matches = {}
-const whites = []
+const whites = {}
+const blacks = {}
 
 module.exports.addMatch = (white, black) => {
-  whites.push(white)
-  matches[white] = black
-  matches[black] = white
+  whites[white] = black
+  blacks[black] = white
 }
 
 module.exports.getGameById = sessionId => {
-  if (!matches[sessionId]) {
+  let match, white, black, isWhite
+
+  if (black = whites[sessionId]) {
+    white = sessionId
+  } else if (white = blacks[sessionId]){
+    black = sessionId
+  } else {
     console.log('failed lookup for a game: ' + sessionId);
-    return {isWhite: false, id: false}
+    return {}
   }
 
-  const white = whites.includes(sessionId) ? sessionId : matches[sessionId]
-  const black = matches[white]
-
-  const output = {
-    isWhite: sessionId == white,
-    gameId: white + black
+  return {
+    gameId: white + black,
+    isWhite: white == sessionId
   }
-
-  whites.filter(id => id != white)
-
-  return output
 }
 
 module.exports.endGame = gameId => {
-  console.log('almost deliting game: ' + gameId);
+  const black = gameId.slice(gameId.length / 2)
+
+  delete whites[blacks[black]]
+  delete blacks[black]
 }

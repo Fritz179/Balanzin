@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" unselectable="on" onselectstart="return false;">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5 user-scalable=no"> 
     <title>Raspy</title>
 
   </head>
@@ -22,6 +22,7 @@
         <a class='a2 arrow'><%- include('svg/arrow-up.svg') %></a>
         <a class='a3 arrow'><%- include('svg/redo.svg') %></a>
         <a class='a4 arrow'><%- include('svg/arrow-left.svg') %></a>
+        <canvas class="a5 nipple" id="absolute"></canvas>
         <a class='a6 arrow'><%- include('svg/arrow-right.svg') %></a>
         <a class='a8 arrow'><%- include('svg/arrow-down.svg') %></a>
       </div>
@@ -30,6 +31,7 @@
         <a class='r2 arrow'><%- include('svg/arrow-up.svg') %></a>
         <a class='r3 arrow'><%- include('svg/redo.svg') %></a>
         <a class='r4 arrow'><%- include('svg/arrow-left.svg') %></a>
+        <canvas class="r5 nipple" id="absolute"></canvas>
         <a class='r6 arrow'><%- include('svg/arrow-right.svg') %></a>
         <a class='r8 arrow'><%- include('svg/arrow-down.svg') %></a>
       </div>
@@ -39,4 +41,7 @@
   </body>
 
   <link rel="stylesheet" href="./style.css">
+  <script src="./nipple.js"></script>
+
+  </script>
 </html>

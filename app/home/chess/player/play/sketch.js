@@ -2,10 +2,8 @@ if (typeof io == 'undefined') {
   throw new Error('No Server connection!')
 }
 
-const socket = connect('/chess/player/play')
-
-let chessboard, pieces
-let xOff = 100, yOff = 100
+let socket, chessboard
+let xOff = 100, yOff = 100, pieces
 
 function onload() {
   pieces = {}
@@ -19,9 +17,38 @@ function onload() {
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight)
+
   chessboard = new PlayerChessboard()
+  socket = connect('/chess/player/play')
+
+  socket.on('setColor', isWhite => {
+    chessboard.setColor(isWhite)
+  })
+
+  socket.on('update', update => {
+    clearMessage()
+    const {key, data} = update
+    console.log(update);
+    if (typeof chessboard[key] == 'function') {
+      chessboard[key](data)
+    } else {
+      console.warn('update not found: ' + key);
+    }
+  })
+
+  socket.on('loadBoard', ({isWhite, moves}) => {
+    // chessboard = new PlayerChessboard()
+    // chessboard.setColor(isWhite)
+    // moves.forEach(move => {
+    //   chessboard.move(move)
+    // })
+  })
+
+  socket.on('move', move => {
+    chessboard.move(move)
+  })
+
   addMouseListener(chessboard)
-  socket.emit('loaded')
   messagesPos(width / 3, height * 0.8)
 }
 
@@ -31,25 +58,6 @@ function draw() {
   chessboard.draw()
   showMessages()
 }
-
-socket.on('update', update => {
-  clearMessage()
-  const {key, data} = update
-  console.log(update);
-  if (typeof chessboard[key] == 'function') {
-    chessboard[key](data)
-  } else {
-    console.warn('update not found: ' + key);
-  }
-})
-
-socket.on('reloadBoard', board => {
-  chessboard.reloadBoard(board)
-})
-
-socket.on('move', move => {
-  chessboard.move(move)
-})
 
 function touchStarted() {
   background(255, 0, 0)

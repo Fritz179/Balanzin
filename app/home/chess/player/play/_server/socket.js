@@ -1,66 +1,50 @@
 const playerMatchesHandler = require('../../playerMatchesHandler');
-const global = {}
 const matches = {}
 
 module.exports = (socket, user) => {
   const sessionId = socket.request.session.id
   const {gameId, isWhite} = playerMatchesHandler.getGameById(sessionId)
 
+  if (!gameId) {
+    return socket.emit('redirect', '/chess/player')
+  }
+
+  socket.emit('setColor', isWhite)
+
   const myColor = isWhite ? 'white' : 'black'
   const opColor = isWhite ? 'black' : 'white'
 
-  if (!gameId) {
-    socket.emit('redirect', '/chess/player')
-    return
+  //save matches reference or get the alredy created
+  let first = !matches[gameId]
+  if (first) {
+    matches[gameId] = {moves: []}
   }
 
-  socket.on('loaded', () => {
-    //save matches reference or get the alredy created
-    let first = true
-    if (matches[gameId]) {
-      first = false
-    } else {
-      matches[gameId] = {moves: []}
-    }
-    const game = matches[gameId]
+  const game = matches[gameId]
 
-    game[myColor] = {
-      socket: socket,
-      user: user
-    }
+  game[myColor] = {
+    socket: socket,
+    user: user
+  }
 
-    socket.move = move => {
-      socket.emit('update', {key: 'move', data: move})
-    }
+  socket.emit('loadBoard', {isWhite, moves: game.moves})
 
-    socket.start = () => {
-      socket.started = true
-      socket.emit('update', {key: 'setColor', data: isWhite})
-      game.moves.forEach(move => {
-        socket.move(move)
-      })
+  socket.on('move', move => {
+    game.moves.push(move)
 
-      socket.on('move', move => {
-        game.moves.push(move)
-        game[opColor].socket.move(move)
-      })
-    }
-
-    if (!first) {
-      socket.start()
-      if (!game[opColor].socket.started) {
-        game[opColor].socket.start()
-      }
+    if (game[opColor]) {
+      game[opColor].socket.emit('move', move)
     }
   })
 
-  socket.on('disconnect', socket => {
-    matches[gameId][myColor] = null
-    setTimeout(() => {
-      const opp = matches[gameId][opColor]
-      if (socket.disconnected && (!opp || !opp.socket || socket.disconnected)) {
-        playerMatchesHandler.endGame(gameId)
-      }
-    }, 1000)
+  socket.on('disconnect', () => {
+    delete game[myColor]
+
+    if (game[opColor]) {
+      game[opColor].socket.emit('opp_disconnected')
+    } else {
+      playerMatchesHandler.endGame(gameId)
+      delete matches[gameId]
+    }
   })
 }

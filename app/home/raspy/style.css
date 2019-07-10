@@ -63,6 +63,30 @@
   height: 5rem;
 }
 
+canvas {
+  box-sizing: border-box;
+  background: var(--primary);
+  border: 1px solid #0008;
+  border-radius: 2rem;
+  cursor: grab;
+}
+
+.grabbing {
+  cursor: grabbing !important;
+}
+
+.stop-scrolling {
+  overflow: hidden;
+}
+
+body {
+  position: relative;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
 .arrow {
   box-sizing: border-box;
   background: var(--primary);

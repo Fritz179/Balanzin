@@ -50,9 +50,8 @@ module.exports = (app, io, dirname) => {
     req.originalUrl.match(/_server/) ? next() : staticHandler(req, res, next)
   })
 
-  app.get('/favicon.ico', (req, res) => {
-    res.sendFile(path.join(dirname, 'template/favicon.ico'))
-  })
+  app.get('/favicon.ico', (req, res) => res.sendFile(path.join(dirname, 'template/favicon.ico')))
+  app.get('/robots.txt', (req, res) => res.sendFile(path.join(dirname, 'template/robots.txt')))
 
   require('./passport')(passport)
 

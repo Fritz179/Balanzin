@@ -3,7 +3,7 @@ const {getUser} = require('../setup/storeUserBySessionId');
 const {join} = require('path');
 const fs = require('fs');
 
-module.exports = (io) => {
+module.exports = (io, dirname = join(__dirname, '../home')) => {
 
   function createRouter(topDirectory = '/') {
     //require('express').Router() must be inside of module.exports else it will break
@@ -11,15 +11,16 @@ module.exports = (io) => {
 
     //get the json file containig all informations,
     //if no renderer is specified, its defaulted to cardMenu
-    const json = JSON.parse(fs.readFileSync(join(__dirname, '../home', topDirectory, '_server/.json')))
-    const {renderer = 'cardMenu', redirect, cards = [], subDir = []} = json
+    const json = JSON.parse(fs.readFileSync(join(dirname, topDirectory, '_server/.json')))
+    const {renderer, redirect, cards = [], subDir = []} = json
     const toLoad = cards.concat(subDir)
 
     //get the topDirectory, display the appropiate cardMenu
     if (renderer !== false) {
       router.get('/', (req, res) => {
         if (redirect) res.redirect(redirect)
-        else if (renderer) res.render(renderer, {...json})
+        else if (renderer) res.render(join('.' + topDirectory, renderer), json)
+        else if (cards.length) res.render('cardMenu', json)
         else res.render(join('.' + topDirectory, 'index.ejs'))
       })
     }
@@ -59,7 +60,7 @@ module.exports = (io) => {
 
   function loadSocket(socketName, withUser = false) {
     //require the module to call when a socket is connected
-    const setupSocket = require(join(__dirname, '../home', socketName, '_server/socket.js'))
+    const setupSocket = require(join(dirname, socketName, '_server/socket.js'))
     socketName = socketName.replace(/\\+/g, '/')
 
     io.of(`${socketName}`).on('connection', socket => {
@@ -71,7 +72,7 @@ module.exports = (io) => {
   }
 
   function customRouter(directory) {
-    const setupRouter = require(join(__dirname, '../home', directory, '_server/router.js'));
+    const setupRouter = require(join(dirname, directory, '_server/router.js'));
     const router = require('express').Router()
 
     directory = directory.replace(/^(\\|\/)+/, '')

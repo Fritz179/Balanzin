@@ -16,7 +16,7 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
 })
 
 //create router from ../home
-const router = require('./setup/createRouter.js')(io);
+const router = require('./setup/createRouter.js')(io, path.join(__dirname, 'home'));
 app.use('/', router)
 
 //connect the error page to all remaining requests (404)
@@ -38,9 +38,10 @@ const Server = app.listen(process.env.PORT || 1234, () => {
 })
 
 /*
-  //todo: fix bug, iframe rewuest ending in 404 with a second header (loopable), check all have /puclic, change footer.ejs
+  //todo: adjust chess socket
 
-  //projects ideas: tothpick, calculator, wordfinder, boids, chess(kübel), tris, nostalgia, terraria, car driver
+  //projects ideas: tothpick, calculator, wordfinder, boids, chess(kübel)
+  //nostalgia, terraria, car driver, transpiler
   v1 articles
   v1.1.1 7segment
   v1.1.2 WWE

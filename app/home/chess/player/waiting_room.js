@@ -12,7 +12,12 @@ socket.on('updateUsers', users => {
   if (users.length) {
     usersTitle.innerHTML = 'Choose a player to play against'
     users.forEach(user => {
-      userList.appendChild(createItem(user))
+      userList.appendChild(createItem(user, user => {
+        if (!alreadyInvited.includes(user.username)) {
+          alreadyInvited.push(user.username)
+          socket.emit('invite_user', user.id)
+        }
+      }))
     })
   } else {
     usersTitle.innerHTML = 'It looks like you are the only player waiting...'
@@ -32,29 +37,20 @@ socket.on('remove_invite', userId => {
 function displayInvites() {
   invitesList.innerHTML = ''
   invites.forEach(invite => {
-    invitesList.appendChild(createItem(invite, true))
+    invitesList.appendChild(createItem(invite, user => {
+      socket.emit('invite_accepted', user.id)
+    }))
   })
 }
 
-function createItem(user, isInvite = false, userId) {
+function createItem(user, callback) {
   const item = document.createElement('li')
   const link = document.createElement('a')
 
   item.classList.add("li");
   link.innerHTML = user.username
   link.href = '#'
-  link.onclick = () => {
-    if (isInvite) {
-      socket.emit('invite_accepted', user.id)
-      link.innerHTML = user.username + ' (already accepted!)'
-    } else {
-      if (!alreadyInvited.includes(user.username)) {
-        alreadyInvited.push(user.username)
-        link.innerHTML = user.username + ' (already invited!)'
-        socket.emit('invite_user', user.id)
-      }
-    }
-  }
+  link.onclick = () => callback(user)
   item.appendChild(link)
 
   return item
