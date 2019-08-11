@@ -26,11 +26,6 @@ app.get('*', (req, res) => {
   }
 })
 
-//Add variables for ejs
-app.locals.site = {
-  title: 'Balanzin'
-}
-
 //connect Server to localhost
 const Server = app.listen(process.env.PORT || 1234, () => {
   console.log(`200: Server online on: http://localhost:${Server.address().port} !!`);

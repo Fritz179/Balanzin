@@ -38,6 +38,11 @@
       "path": "raspy"
     },
     {
+      "title": "Wuchabericht",
+      "p": "E bessery version vo Wuchaberich",
+      "path": "wuchabericht"
+    },
+    {
       "title": "Sinus",
       "p": "Sinus Wave",
       "path": "sinus_wave"

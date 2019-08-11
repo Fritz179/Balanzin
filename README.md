@@ -103,7 +103,7 @@ If the socket flag is set to true, the module called router.js in the \_server i
 `directory` -- the current directory (without first slash)<br>
 `createrRouter` -- a function that loads a .json<br>
 `customRouter` -- a function that calls a router.js<br>
-`loadSocket` -- a function that loads the socket.json<br>
+`loadSocket` -- a function that loads the socket.js<br>
 <br>
 
 In home/custom_project/\_server/router.js

@@ -1,0 +1,22 @@
+<% if (locals.from) { %>
+  <script type="text/babel">
+    class <%= locals.as || from.charAt(0).toUpperCase() + from.slice(1) %> extends React.Component {
+      render() {
+        return (
+          <div>
+            <%- include(from).replace(/class/g, 'className') %>
+          </div>
+        );
+      }
+    }
+  </script>
+<% } else { %>
+  <div id="react-wrapper">
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+    <%- include('react', {from: 'navbar', to: 'Navbar'}) %>
+    <%- include('react', {from: 'footer', to: 'Footer'}) %>
+  </div>
+<% } %>
