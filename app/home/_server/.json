@@ -56,6 +56,21 @@
       "title": "SSD",
       "p": "Seven Segment Display",
       "path": "ssd"
+    },
+    {
+      "title": "Museum",
+      "p": "All of the old projects before version 5 of the Fritz library",
+      "extend": "museum"
+    },
+    {
+      "title": "Isaac",
+      "p": "All of the old projects before version 5 of the Fritz library",
+      "path": "isaac"
+    },
+    {
+      "title": "Flipperino",
+      "p": "Copy of another phone game, where you have to dodge cubes",
+      "path": "flip"
     }
   ],
   "subDir": [

@@ -21,8 +21,8 @@
           <div class="card clickable" redirect="<%= card.subDirectory %>">
             <img src="<%= `${card.serverDirectory}/${card.subDirectory}.png` %>" alt="<%= card.subDirectory %>">
             <div class="card-body">
-              <h4><%= card.title %></h4>
-              <p><%= card.p %></p>
+              <h4><%- card.title %></h4>
+              <p><%- card.p %></p>
             </div>
           </div>
         <% }) %>

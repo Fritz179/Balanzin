@@ -17,7 +17,7 @@ It also must have a third key, which is one of the following: `path`, `extend` o
 ### flags
 Some flags can be set too, they are booleans and can be set on either the json file or on each card separately, if it's specified only in the json, all cards have the same flags, but if in both places id specified a flag with a different value the card flag is chosen, the flags are:<br>
 
-`sokcet` used if you want to connect with a socket, a socket.js file is required in the \_server<br>
+`socket` used if you want to connect with a socket, a socket.js file is required in the \_server<br>
 `authenticate` use if login is required to access the page, no further file required<br>
 `pw` coming soon, specifies a password to access the page<br>
 `renderer` string, only in json, defaults to cardMenu, set to index.js to send different html, set to false for not rendering anything (useful for custom, or placeholder, like /users is empty, but /users/login, /users/register has to load)<br>

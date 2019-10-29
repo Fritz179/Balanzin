@@ -1,0 +1,73 @@
+{
+  "sprites": [
+    {
+      "name":"tiles",
+      "width":16,
+      "height":16,
+      "normal":true,
+      "tiles": [
+        {
+          "name":"air",
+          "isSolid": false
+        },
+        {
+          "name":"wall",
+          "isSolid": true
+        },
+        {
+          "name":"fill",
+          "isSolid": true
+        },
+        {
+          "name":"clay",
+          "isSolid": true
+        }
+      ]
+    }
+  ],
+
+  "entities": [
+    {
+      "name":"jack",
+      "animations": [
+        {
+          "name":"idle",
+          "length":2,
+          "x":0,
+          "y":0,
+          "w":15,
+          "h":24
+        },
+        {
+          "name":"jumping",
+          "length":2,
+          "x":0,
+          "y":48,
+          "w":15,
+          "h":24
+        },
+        {
+          "name":"walking",
+          "length":20,
+          "x":0,
+          "y":72,
+          "w":16,
+          "h":25
+        }
+      ]
+    },
+    {
+      "name":"defaultTexture",
+      "animations": [
+        {
+          "name":"idle",
+          "length":1,
+          "x":0,
+          "y":0,
+          "w":16,
+          "h":16
+        }
+      ]
+    }
+  ]
+}

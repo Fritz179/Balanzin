@@ -1,0 +1,31 @@
+{
+  "title": "Museum of all the my Projects",
+  "p": "This section contains all of my old projects that thought me how to program.<br>They work \"properly\" only on pc :-)",
+  "cards": [
+    {
+      "title": "Super Mario Bros 1",
+      "p": "This is a recreation inspired by Meth Meth Method",
+      "path": "mario"
+    },
+    {
+      "title": "Anti Ovomaltine",
+      "p": "The project that startet with the intent of not allowing the Ovomaltine chocolate bar to ber recorded on screen... <br>But works especially well with rubik's cubes",
+      "path": "ovo"
+    },
+    {
+      "title": "Colorbox",
+      "p": "Copy of a phone game that my old classmates were addicted to...",
+      "path": "colorbox"
+    },
+    {
+      "title": "Drawing",
+      "p": "An application for drawing geometrical shapes, it even kinda almost supports 3D<br>Instructions are currently missing...",
+      "path": "drawing"
+    },
+    {
+      "title": "Jack lo smilzo",
+      "p": "The first failed attemp of recreating Terraria",
+      "path": "jack"
+    }
+  ]
+}
