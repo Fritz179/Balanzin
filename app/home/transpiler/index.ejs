@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Fritz_179 >>> Transpiler</title>
+
+    <%- include('navbar') %>
+
+  </head>
+  <body>
+    <textarea rows="54" cols="70" spellcheck="false" autofocus placeholder="Insert code here" id='input'/>
+    </textarea>
+    <textarea rows="54" cols="80" disabled placeholder="Output will display here" id='output'/>
+    </textarea>
+
+    <style>
+      textarea {
+        white-space: pre;
+        margin: 3rem;
+        margin-right: 0;
+        background-color: var(--secondary)
+      }
+
+      body {
+        background-color: var(--primary)
+      }
+    </style>
+
+    <script src="./senser.js"></script>
+    <script src="./compile.js"></script>
+
+    <script src="./logic/definer.js"></script>
+    <script src="./logic/piston.js"></script>
+    <script src="./logic/if.js"></script>
+    <script src="./logic/function.js"></script>
+    <script src="./logic/process.js"></script>
+    <script src="./logic/await.js"></script>
+    <script src="./logic/operator.js"></script>
+
+    <script src="./tokenizer.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>

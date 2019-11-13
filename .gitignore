@@ -3,3 +3,4 @@
 node_modules
 app/template/libraries/bower_components
 app/template/fonts
+app/home/transpiler/lager.js

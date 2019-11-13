@@ -71,6 +71,11 @@
       "title": "Flipperino",
       "p": "Copy of another phone game, where you have to dodge cubes",
       "path": "flip"
+    },
+    {
+      "title": "Transpiler",
+      "p": "Transpile from FRL to SCL<br>(Fritz text to Structured text)",
+      "path": "transpiler"
     }
   ],
   "subDir": [
