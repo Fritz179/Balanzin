@@ -7,7 +7,7 @@ html {
   width: 70%;
   max-width: 50rem;
   height: 70%;
-  max-height: 45rem;
+  /* max-height: 45rem; */
   padding: 4rem;
   margin: 4rem auto;
 
@@ -45,7 +45,6 @@ html {
 
 img {
   width: 60%;
-  max-height: 60%;
 }
 
 footer {

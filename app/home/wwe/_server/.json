@@ -2,12 +2,12 @@
   "title": "WWE",
   "p": "Made with Handrea Custach",
   "authenticate": false,
+  "socket": true,
   "cards": [
     {
       "title": "Guess the logo!",
       "p": "You will be presented with a logo, and three possible answersGuess the logo!",
-      "path": "logo",
-      "socket": true
+      "path": "logo"
     },
     {
       "title": "Guess the player!",
@@ -16,7 +16,7 @@
     },
     {
       "title": "Guess the Final Move!",
-      "p": "You will be presented with a player, and thre final moves, chose charefully.",
+      "p": "You'll have to match the player with it's finisher move!",
       "path": "final"
     }
   ]

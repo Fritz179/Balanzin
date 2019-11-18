@@ -3,11 +3,11 @@ const getElements = require('../../getElements');
 function getGuess(socket) {
   const {options, right} = getElements(socket)
 
-  socket.rightName = right.name
+  socket.rightName = right.final
 
   const guess = {
-    url: `/wwe/img/logo/${right.id}.jpg`,
-    options: options.map(opt => opt.name)
+    url: `/wwe/img/foto/${right.id}.jpg`,
+    options: options.map(opt => opt.final)
   }
 
   return guess
@@ -35,6 +35,11 @@ module.exports = (socket, user) => {
         if (err) console.log(err)
       })
     }
+  })
+
+  socket.on('connection', () => {
+    console.log(socket.answered);
+    socket.answered = [1, 2]
   })
 
   socket.emit('ready')

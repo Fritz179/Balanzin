@@ -71,7 +71,7 @@
   },
   {
     "id": "5c06bb93e63f1f33ac6c3611",
-    "name": "TheRock",
+    "name": "The Rock",
     "final": "Rock bottom"
   },
   {
@@ -93,5 +93,20 @@
     "id": "5c06bd12afad6562641184a9",
     "name": "Sheamus",
     "final": "Brouge Kick"
+  },
+  {
+    "id": "5c06bd12afad6562641184b0",
+    "name": "Johnny Gargano",
+    "final": "Garga-No-Escape"
+  },
+  {
+    "id": "5c06bd12afad6562641184b1",
+    "name": "Ricochet",
+    "final": "630"
+  },
+  {
+    "id": "5c06bd12afad6562641184b2",
+    "name": "Adam Cole",
+    "final": "Last shot"
   }
 ]

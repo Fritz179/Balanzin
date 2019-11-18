@@ -6,7 +6,7 @@ function getGuess(socket) {
   socket.rightName = right.name
 
   const guess = {
-    url: `/wwe/img/logo/${right.id}.jpg`,
+    url: `/wwe/img/foto/${right.id}.jpg`,
     options: options.map(opt => opt.name)
   }
 

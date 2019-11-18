@@ -1,6 +1,11 @@
 .env
-
 node_modules
-app/template/libraries/bower_components
+
+#roboto
 app/template/fonts
+
+#plc
 app/home/transpiler/lager.js
+
+#original size images, in any folder
+original
