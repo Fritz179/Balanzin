@@ -1,4 +1,5 @@
-const socket = connect('/wwe/player')
+const {pathname} = window.location
+const socket = connect(pathname.replace(/\/$/g, ''))
 
 const img = document.querySelector('img')
 const ul = document.querySelector('#selection')

@@ -1,0 +1,17 @@
+{
+  "logo": {
+    "question": "Who's logo is this?",
+    "folder": "logo",
+    "prop": "name"
+  },
+  "final": {
+    "question": "Which finisher does this big boy use?",
+    "folder": "foto",
+    "prop": "final"
+  },
+  "player": {
+    "question": "How's this wrestler called?",
+    "folder": "foto",
+    "prop": "name"
+  }
+}

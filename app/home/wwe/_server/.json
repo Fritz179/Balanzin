@@ -1,8 +1,7 @@
 {
   "title": "WWE",
   "p": "Made with Handrea Custach",
-  "authenticate": false,
-  "socket": true,
+  "preventRecursion": true,
   "cards": [
     {
       "title": "Guess the logo!",

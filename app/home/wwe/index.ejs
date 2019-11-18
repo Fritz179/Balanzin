@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" unselectable="on" onselectstart="return false;" onmousedown="return false;">
   <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=0.5">
     <title>Balanzin</title>
 
@@ -14,7 +15,7 @@
     <!-- Articles -->
     <div class="logo">
       <img id='img' alt="Foto of a Wrestler">
-      <h4 class="card-text white">How's this wrestler called?</h4>
+      <h4 class="card-text white"><%= question %></h4>
       <ul id="selection">
         <li><a class="btn"></a></li>
         <li><a class="btn"></a></li>
@@ -24,6 +25,6 @@
 
   </body>
 
-  <link rel="stylesheet" href="./style.css">
-  <script type='module' src="./guess.js"></script>
+  <link rel="stylesheet" href="/wwe/style.css">
+  <script type='module' src="/wwe/guess.js"></script>
 </html>

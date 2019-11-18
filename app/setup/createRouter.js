@@ -5,14 +5,14 @@ const fs = require('fs');
 
 module.exports = (io, dirname = join(__dirname, '../home')) => {
 
-  function createRouter(topDirectory = '/') {
+  function createRouter(topDirectory = '\\') {
     //require('express').Router() must be inside of module.exports else it will break
     const router = require('express').Router()
 
     //get the json file containig all informations,
     //if no renderer is specified, its defaulted to cardMenu
     const json = JSON.parse(fs.readFileSync(join(dirname, topDirectory, '_server/.json')))
-    const {renderer, redirect, cards = [], subDir = []} = json
+    const {renderer, redirect, cards = [], subDir = [], preventRecursion = false} = json
     const toLoad = cards.concat(subDir)
 
     //get the topDirectory, display the appropiate cardMenu
@@ -25,34 +25,38 @@ module.exports = (io, dirname = join(__dirname, '../home')) => {
       })
     }
 
-    //iloop through all card to check for subdirectories
+    // loop through all card to check for subdirectories
     toLoad.forEach(card => {
       card.topDirectory = topDirectory
 
-      //get parameters, default to .json parameters
+      // get parameters, default to .json parameters
       const {extend, path, custom, authenticate = json.authenticate} = card
       const {socket = json.socket, subSockets = json.subSockets = []} = card
+      const {preventRecursion = json.preventRecursion} = card
 
-      //get the subDirectory
+      // get the subDirectory
       const subDirectory = card.subDirectory = extend || custom || path
       if (!subDirectory) throw new Error(`Please specify a extend, custom, or path at: ${topDirectory}`)
 
-      //concatenate direcotories
+      // concatenate direcotories
       card.serverDirectory = join(topDirectory, '_server')
       const directory = card.directory = join(topDirectory, subDirectory)
 
-      //check for authentication and choose if a subrouter is needed
-      const toAuthenticate = authenticate ? ensureAuthenticated : []
+      if (!preventRecursion) {
 
-      let handler
-      if (extend) handler = createRouter(directory)
-      else if (custom) handler = customRouter(directory)
-      else handler = (req, res) => res.render(join('.' + directory, 'index.ejs'), {card})
+        // check for authentication and choose if a subrouter is needed
+        const toAuthenticate = authenticate ? ensureAuthenticated : []
 
-      router.use(`/${subDirectory}`, toAuthenticate, handler)
+        let handler
+        if (extend) handler = createRouter(directory)
+        else if (custom) handler = customRouter(directory)
+        else handler = (req, res) => res.render(join('.' + directory, 'index.ejs'), {card})
 
-      //if socket is needed, create a listener
-      if (socket) loadSocket(typeof socket == 'string' ? socket : directory, authenticate)
+        router.use(`/${subDirectory}`, toAuthenticate, handler)
+
+        // if socket is needed, create a listener
+        if (socket) loadSocket(typeof socket == 'string' ? socket : directory, authenticate)
+      }
     })
 
     return router
@@ -63,7 +67,7 @@ module.exports = (io, dirname = join(__dirname, '../home')) => {
     const setupSocket = require(join(dirname, socketName, '_server/socket.js'))
     socketName = socketName.replace(/\\+/g, '/')
 
-    io.of(`${socketName}`).on('connection', socket => {
+    io.of(socketName).on('connection', socket => {
       getUser(socket, user => {
         if (!user && withUser) return socket.emit('redirect', '/users/login?from=' + socketName)
         else return setupSocket(socket, user)

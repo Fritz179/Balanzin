@@ -20,6 +20,7 @@ Some flags can be set too, they are booleans and can be set on either the json f
 `socket` used if you want to connect with a socket, a socket.js file is required in the \_server<br>
 `authenticate` use if login is required to access the page, no further file required<br>
 `pw` coming soon, specifies a password to access the page<br>
+`preventRecursion` bool, used to display cards in cardMenu but not load the subdirectory [use with custom and router.js]<br>
 `renderer` string, only in json, defaults to cardMenu, set to index.js to send different html, set to false for not rendering anything (useful for custom, or placeholder, like /users is empty, but /users/login, /users/register has to load)<br>
 Multiple flags can be set at the same time<br>
 <br>

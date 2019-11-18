@@ -20,7 +20,7 @@
     {
       "title": "WWE Game",
       "p": "Play a game made in collaboration with Custasch!",
-      "extend": "wwe"
+      "custom": "wwe"
     },
     {
       "title": "Amazon",

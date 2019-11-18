@@ -5,7 +5,7 @@ const {join} = require('path');
 const Article = require('../../../models/Article');
 
 module.exports = ({router, directory, createRouter}) => {
-  router.use('/', createRouter(directory))
+  router.use('/', createRouter(`\\${directory}`))
 
   router.get('/', (req, res) => {
     Article.find({}, checkErrors(req, res, doc => {
