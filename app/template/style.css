@@ -2,16 +2,19 @@
 @font-face {
   src: url(/fonts/Roboto-Thin.ttf);
   font-family: roboto-thin;
+  font-display: fallback;
 }
 
 @font-face {
   src: url(/fonts/Roboto-Light.ttf);
   font-family: roboto-light;
+  font-display: fallback;
 }
 
 @font-face {
   src: url(/fonts/Roboto-Regular.ttf);
   font-family: roboto;
+  font-display: fallback;
 }
 
 /* CSS Variables */

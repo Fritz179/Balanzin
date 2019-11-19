@@ -5,7 +5,7 @@ const fs = require('fs');
 
 module.exports = (io, dirname = join(__dirname, '../home')) => {
 
-  function createRouter(topDirectory = '\\') {
+  function createRouter(topDirectory = '/') {
     //require('express').Router() must be inside of module.exports else it will break
     const router = require('express').Router()
 

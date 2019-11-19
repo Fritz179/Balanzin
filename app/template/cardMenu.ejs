@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=0.5">
     <title>Balanzin</title>
 
-    <link rel="stylesheet" href="/template/cardMenu.css">
+    <!-- cardMenu -->
+    <style><%- include('cardMenu.css') %></style>
+
     <meta name="Description" content="A website made for player by Fritz_179">
   </head>
   <body>
@@ -19,7 +21,7 @@
       <section class="cards">
         <% cards.forEach(card => { %>
           <div class="card clickable" redirect="<%= card.subDirectory %>">
-            <img src="<%= `${card.serverDirectory}/${card.subDirectory}.png` %>" alt="<%= card.subDirectory %>">
+            <img src="<%= `${card.serverDirectory}/${card.subDirectory}.jpg` %>" alt="<%= card.subDirectory %>">
             <div class="card-body">
               <h4><%- card.title %></h4>
               <p><%- card.p %></p>

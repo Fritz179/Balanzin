@@ -38,7 +38,7 @@ module.exports = (app, io, dirname) => {
   })
 
   app.use((req, res, next) => {
-    if (req.originalUrl.match(/\.png$/)){
+    if (req.originalUrl.match(/\.(png|jpg)$/)){
       res.sendFile(path.join(dirname, 'home', req.originalUrl))
     } else {
       next()
@@ -49,7 +49,7 @@ module.exports = (app, io, dirname) => {
   app.use((req, res, next) => {
     req.originalUrl.match(/_server/) ? next() : staticHandler(req, res, next)
   })
-  
+
   app.get('/favicon.ico', (req, res) => res.sendFile(path.join(dirname, 'template/favicon.png')))
   app.get('/robots.txt', (req, res) => res.sendFile(path.join(dirname, 'template/robots.txt')))
 
