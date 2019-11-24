@@ -1,6 +1,7 @@
 {
   "title": "CHESS!",
   "p": "If you already know how to play chess and you would like to challenge yorself<br> by playing against my artificial intelligence, you are welcome!<br><a class='link' href='/chess/ai'>clicking here to lose againt my AI</a><br>or if you want to have a chance to win,<br><a class='link' href='/chess/player'>clicking here to challenge another player</a>",
+  "description": "Enjoy your time challenging my artificial intelligence, or if you want to have a chance at winning, play against a friend!",
   "authenticate": true,
   "cards": [
     {
