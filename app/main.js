@@ -8,7 +8,7 @@ require('./setup/express.js')(app, io, __dirname)
 
 //connect to mongoDB Atlas with mongoose
 const mongoose = require('mongoose')
-mongoose.connect(process.env.URI, {useNewUrlParser: true}).then(() => {
+mongoose.connect(process.env.URI, {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
   console.log('200: Connection with mongoDB Atlas established.');
 }, err => {
   console.error('503: Connection with mongoDB Atlas failed!.');
