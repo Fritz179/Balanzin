@@ -1,0 +1,44 @@
+{
+  "animations": [
+    {
+      "action": "slot",
+      "recursive": 2,
+      "x": 0,
+      "y": 0,
+      "w": 32,
+      "h": 32
+    },
+    {
+      "action": "start",
+      "mirror": true,
+      "x": 0,
+      "y": 32,
+      "w": 10,
+      "h": 40
+    },
+    {
+      "action": "middle",
+      "mirror": true,
+      "x": 10,
+      "y": 32,
+      "w": 20,
+      "h": 40
+    },
+    {
+      "action": "junction",
+      "mirror": true,
+      "x": 30,
+      "y": 32,
+      "w": 10,
+      "h": 40
+    },
+    {
+      "action": "arrow",
+      "mirror": true,
+      "x": 40,
+      "y": 32,
+      "w": 40,
+      "h": 40
+    }
+  ]
+}

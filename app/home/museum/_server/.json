@@ -9,6 +9,11 @@
       "path": "mario"
     },
     {
+      "title": "Terraria V2",
+      "p": "Terraria in js (with p5)",
+      "path": "terraria"
+    },
+    {
       "title": "Anti Ovomaltine",
       "p": "The project that startet with the intent of not allowing the Ovomaltine chocolate bar to ber recorded on screen... <br>But works especially well with rubik's cubes",
       "path": "ovo"

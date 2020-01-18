@@ -3,22 +3,93 @@
   "y": 0,
   "w": 16,
   "h": 16,
+  "index": 0,
+  "properties": {
+    "collision": 15,
+    "hardness": 1,
+    "weakness": "none",
+    "drop": "_name",
+    "toolType": null,
+    "toolLevel": 0,
+    "miningLevel": 0,
+    "maxStack": 64
+  },
   "tiles": [
     {
       "name": "air",
-      "collision": 0
+      "collision": 0,
+      "hardness": null
     },
     {
       "name": "grass",
-      "collision": 15
+      "hardness": 20,
+      "weakness": "shovel",
+      "drop": "dirt"
     },
     {
       "name": "dirt",
-      "collision": 15
+      "hardness": 20,
+      "weakness": "shovel"
     },
     {
       "name": "stone",
-      "collision": 15
+      "hardness": 50,
+      "miningLevel": 1,
+      "weakness": "pickaxe"
+    },
+    {
+      "name": "wood_log",
+      "collision": 0,
+      "hardness": 35,
+      "weakness": "axe"
+    },
+    {
+      "name": "leaf",
+      "collision": 0,
+      "hardness": 10,
+      "weakness": "sword"
+    },
+    {
+      "name": "coal_ore",
+      "hardness": 55,
+      "miningLevel": 1,
+      "weakness": "pickaxe",
+      "drop": "coal"
+    },
+    {
+      "name": "iron_ore",
+      "hardness": 70,
+      "miningLevel": 2,
+      "weakness": "pickaxe"
+    },
+    {
+      "name": "diamond_ore",
+      "hardness": 100,
+      "miningLevel": 3,
+      "weakness": "pickaxe"
+    },
+    {
+      "name": "furnace",
+      "hardness": 50,
+      "miningLevel": 1,
+      "weakness": "pickaxe"
+    },
+    {
+      "name": "furnace_lit",
+      "hardness": 50,
+      "weakness": "pickaxe",
+      "miningLevel": 1,
+      "drop": "furnace"
+    },
+    {
+      "name": "wood",
+      "hardness": 35,
+      "weakness": "axe"
+    },
+    {
+      "name": "crafting_table",
+      "hardness": 45,
+      "weakness": "axe"
     }
   ]
 }

@@ -1,0 +1,31 @@
+{
+  "x": 0,
+  "y": 0,
+  "w": 16,
+  "h": 16,
+  "index": 100,
+  "properties": {
+    "collision": null,
+    "toolType": null,
+    "toolLevel": 0,
+    "maxStack": 1
+  },
+  "tiles": [
+    {
+      "name": "coal",
+      "maxStack": 64
+    },
+    {
+      "name": "iron",
+      "maxStack": 64
+    },
+    {
+      "name": "diamond",
+      "maxStack": 64
+    },
+    {
+      "name": "stick",
+      "maxStack": 64
+    }
+  ]
+}

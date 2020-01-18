@@ -1,0 +1,127 @@
+[
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "wood", "quantity": 2 }],
+    "result": [     { "name": "wooden_sword", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "wood", "quantity": 3 }],
+    "result": [     { "name": "wooden_pickaxe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "wood", "quantity": 3 }],
+    "result": [     { "name": "wooden_axe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "wood", "quantity": 1 }],
+    "result": [     { "name": "wooden_shovel", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "stone", "quantity": 2 }],
+    "result": [     { "name": "stone_sword", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "stone", "quantity": 3 }],
+    "result": [     { "name": "stone_pickaxe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "stone", "quantity": 3 }],
+    "result": [     { "name": "stone_axe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "stone", "quantity": 1 }],
+    "result": [     { "name": "stone_shovel", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "iron", "quantity": 2 }],
+    "result": [     { "name": "iron_sword", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "iron", "quantity": 3 }],
+    "result": [     { "name": "iron_pickaxe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "iron", "quantity": 3 }],
+    "result": [     { "name": "iron_axe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "iron", "quantity": 1 }],
+    "result": [     { "name": "iron_shovel", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "diamond", "quantity": 2 }],
+    "result": [     { "name": "diamond_sword", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "diamond", "quantity": 3 }],
+    "result": [     { "name": "diamond_pickaxe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "diamond", "quantity": 3 }],
+    "result": [     { "name": "diamond_axe", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "stick", "quantity": 2 },
+                    { "name": "diamond", "quantity": 1 }],
+    "result": [     { "name": "diamond_shovel", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "wood_log", "quantity": 1 }],
+    "result": [     { "name": "wood", "quantity": 4 }]
+  },
+  {
+    "ingredients": [{ "name": "wood", "quantity": 2 }],
+    "result": [     { "name": "stick", "quantity": 4 }]
+  },
+  {
+    "ingredients": [{ "name": "wood", "quantity": 4 }],
+    "result": [     { "name": "crafting_table", "quantity": 1 }]
+  },
+  {
+    "ingredients": [{ "name": "stone", "quantity": 8 }],
+    "result": [     { "name": "furnace", "quantity": 1 }],
+    "from": "crafting"
+  },
+  {
+    "ingredients": [{ "name": "coal", "quantity": 1 },
+                    { "name": "iron_ore", "quantity": 3 }],
+    "result": [     { "name": "iron", "quantity": 1 }],
+    "from": "furnace"
+  },
+  {
+    "ingredients": [{ "name": "coal", "quantity": 2 },
+                    { "name": "diamond_ore", "quantity": 2 }],
+    "result": [     { "name": "diamond", "quantity": 1 }],
+    "from": "furnace"
+  }
+]

@@ -1,0 +1,122 @@
+{
+  "x": 0,
+  "y": 0,
+  "w": 16,
+  "h": 16,
+  "index": 100,
+  "properties": {
+    "collision": null,
+    "maxStack": 1,
+    "toolLevel": 1
+  },
+  "tiles": [
+    {
+      "properties": {
+        "toolType": "sword"
+      },
+      "tiles": [
+        {
+          "name": "wooden_sword",
+          "toolLevel": 1
+        },
+        {
+          "name": "stone_sword",
+          "toolLevel": 2
+        },
+        {
+          "name": "iron_sword",
+          "toolLevel": 3
+        },
+        {
+          "name": "diamond_sword",
+          "toolLevel": 4
+        },
+        {
+          "name": "golden_sword",
+          "toolLevel": 3
+        }
+      ]
+    },
+    {
+      "properties": {
+        "toolType": "shovel"
+      },
+      "tiles": [
+        {
+          "name": "wooden_shovel",
+          "toolLevel": 1
+        },
+        {
+          "name": "stone_shovel",
+          "toolLevel": 2
+        },
+        {
+          "name": "iron_shovel",
+          "toolLevel": 3
+        },
+        {
+          "name": "diamond_shovel",
+          "toolLevel": 4
+        },
+        {
+          "name": "golden_shovel",
+          "toolLevel": 3
+        }
+      ]
+    },
+    {
+      "properties": {
+        "toolType": "pickaxe"
+      },
+      "tiles": [
+        {
+          "name": "wooden_pickaxe",
+          "toolLevel": 1
+        },
+        {
+          "name": "stone_pickaxe",
+          "toolLevel": 2
+        },
+        {
+          "name": "iron_pickaxe",
+          "toolLevel": 3
+        },
+        {
+          "name": "diamond_pickaxe",
+          "toolLevel": 4
+        },
+        {
+          "name": "golden_pickaxe",
+          "toolLevel": 3
+        }
+      ]
+    },
+    {
+      "properties": {
+        "toolType": "axe"
+      },
+      "tiles": [
+        {
+          "name": "wooden_axe",
+          "toolLevel": 1
+        },
+        {
+          "name": "stone_axe",
+          "toolLevel": 2
+        },
+        {
+          "name": "iron_axe",
+          "toolLevel": 3
+        },
+        {
+          "name": "diamond_axe",
+          "toolLevel": 4
+        },
+        {
+          "name": "golden_axe",
+          "toolLevel": 3
+        }
+      ]
+    }
+  ]
+}

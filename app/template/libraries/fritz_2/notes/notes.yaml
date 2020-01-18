@@ -1,0 +1,70 @@
+# app\testing\app3, app\testing\v5, !libraries
+
+classes:
+  Block:
+    - x, y, w, h
+    - top, bottom, left, right, frame, pos
+    - setPos(x, y), setSize(w, y)
+
+  Frame: [Block]
+    - px, py, xm, ym
+    - update, fixedUpdate, getSprite
+    - sptite, layer
+    - changed (_posChanged, _spriteChanged)
+    - onKeyUp, onClick...
+    - despawn?
+
+  Body: [Frame, Block]
+    - xv, yv, xa, ya, xd, yd (physics)
+    - collideWithMap, collideWithEntities
+    - onBlockCollision, onUnloadedChunk, onEntityCollision
+    - lifeTime, movingFor
+
+  Entity: [Body, Frame, Block]
+    - sprite [Canvas]
+    - getSprite, setSprite
+    - changed (_spriteFrame, _spriteDir, _spriteAction)
+    - autoWalk, autoDir
+
+  Context: [Block]
+    - p5?
+    - getContext('2d')
+    - noSmooth, fill, stroke, scale, clear, text, image, drawHitbox, rect
+
+  Canvas: [(Context, Block), Frame, Block]
+    - setSize, setScale
+    - p5?
+
+  Layer: [Canvas(Context, Block), Frame, Block]
+    - children
+    - cameraMode
+
+  SpriteLayer: [Layer, Canvas(Context, Block), Frame, Block]
+    - updates all children
+    - getSprite all children
+
+  FrontLayer: [Layer, Canvas(Context, Block), Frame, Block]
+    - setText
+
+  TileGame: [(Chunk, Canvas(Context, Block), Frame, Block), SpriteLayer, Layer, Canvas(Context, Block), Frame, Block]
+    - chunks...
+
+  # MapLoader: [TileGame(Chunk, Canvas(Context, Block), Frame, Block), SpriteLayer, Layer, Canvas(Context, Block), Frame, Block]
+  #   - linearMapModifiers
+
+  ChunkLoader:
+    - chunkLoader
+    - MapModifiers
+    - offLoadChunks
+
+  Chunk: [Canvas(Context, Block), Frame, Block]
+    - load, unload, draw...
+    - forEachChunk()
+
+Middlewers:
+  - update
+
+Notes:
+  - body is collision box
+  - body.sprite is drawing position
+  - body.trigger is triggering box => defaults to body collision box

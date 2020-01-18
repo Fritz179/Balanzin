@@ -1,4 +1,4 @@
-<% if (typeof p5 != 'boolean' || p5) { %>
+<% if (locals.p5 || locals.side || locals.fritz == 1) { %>
   <script src="/libraries/p5.min.js"></script>
   <script src="/libraries/p5.dom.min.js"></script>
   <script src="/libraries/p5.sound.min.js"></script>
@@ -14,7 +14,7 @@
   <link href="/libraries/side.css" rel="stylesheet"></link>
 <% } %>
 
-<% if (locals.fritz) { %>
+<% if (locals.fritz == 1) { %>
   <script src="/libraries/fritz_1/app.js"></script>
   <script src="/libraries/fritz_1/conversion.js"></script>
   <script src="/libraries/fritz_1/Entity.js"></script>
@@ -35,4 +35,32 @@
   <script src="/libraries/fritz_1/map.js"></script>
 
   <link href="/libraries/fritz_1/style.css" rel="stylesheet"></link>
+<% } %>
+
+<% if (locals.fritz == 2) { %>
+  <script src="/libraries/fritz_2/helper.js"></script>
+  <script src="/libraries/fritz_2/math.js"></script>
+  <script src="/libraries/fritz_2/createMiddleware.js"></script>
+  <script src="/libraries/fritz_2/intersections.js"></script>
+  <script src="/libraries/fritz_2/noise.js"></script>
+
+  <script src="/libraries/fritz_2/basic/Block.js"></script>
+  <script src="/libraries/fritz_2/basic/Frame.js"></script>
+  <script src="/libraries/fritz_2/basic/Context.js"></script>
+  <script src="/libraries/fritz_2/basic/Canvas.js"></script>
+  <script src="/libraries/fritz_2/Entity/Body.js"></script>
+  <script src="/libraries/fritz_2/Entity/TriggerBox.js"></script>
+  <script src="/libraries/fritz_2/Entity/Entity.js"></script>
+  <script src="/libraries/fritz_2/Layer/Layer.js"></script>
+  <script src="/libraries/fritz_2/Layer/FrontLayer.js"></script>
+  <script src="/libraries/fritz_2/Layer/SpriteLayer.js"></script>
+  <script src="/libraries/fritz_2/Game/Game.js"></script>
+  <script src="/libraries/fritz_2/Game/Chunk.js"></script>
+  <script src="/libraries/fritz_2/Game/TileGame.js"></script>
+  <script src="/libraries/fritz_2/Game/ChunkLoader.js"></script>
+
+  <script src="/libraries/fritz_2/Timer.js"></script>
+  <script src="/libraries/fritz_2/input.js"></script>
+  <script src="/libraries/fritz_2/app.js"></script>
+  <script src="/libraries/fritz_2/sprites.js"></script>
 <% } %>

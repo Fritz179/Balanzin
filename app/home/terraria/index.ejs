@@ -3,16 +3,25 @@
   <head>
     <title>Fritz_179 >>> Terraria</title>
 
-    <%- include('libraries', {fritz: true}) %>
+    <%- include('libraries', {fritz: 2}) %>
 
+    <link href="./style.css" rel="stylesheet"></link>
+
+    <script src="./Drop.js"></script>
+    <script src="./Furnace.js"></script>
     <script src="./Player.js"></script>
-    <script src="./MainMenu.js"></script>
-    <script src="./Shooter.js"></script>
-
+    <script src="./Overlay.js"></script>
+    <script src="./inventory/Inventory.js"></script>
+    <script src="./inventory/ItemHolder.js"></script>
+    <script src="./inventory/CraftingSlot.js"></script>
+    <script src="./inventory/Slot.js"></script>
+    <script src="./inventory/Pointer.js"></script>
+    <script src="./inventory/Hand.js"></script>
+    <script src="./MainChunkLoader.js"></script>
     <script src="./main.js"></script>
 
   </head>
-  <body>
-    <div id='screen'></div>
+  <body oncontextmenu="return false;">
+    <canvas id='screen'></canvas>
   </body>
 </html>

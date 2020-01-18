@@ -1,0 +1,20 @@
+{
+  "animations": [
+    {
+      "action": "breaking",
+      "recursive": 6,
+      "x": 0,
+      "y": 0,
+      "w": 16,
+      "h": 16
+    },
+    {
+      "action": "tools",
+      "recursive": 3, 
+      "x": 0,
+      "y": 16,
+      "w": 16,
+      "h": 16
+    }
+  ]
+}

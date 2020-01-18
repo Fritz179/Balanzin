@@ -1,94 +1,154 @@
 class Player extends Entity {
-  constructor(x, y, status) {
-    console.log(x, y, status);
-    super()
-    // this.setSize(15, 24)
-    this.setSize(24, 40)
-    this.setSize(15, 24)
-    this.setPos(x, y)
-
-    status.camera.follow(this)
-    this.listen('key')
-    this.collideWithMap()
-    this.setAcc(0, 0.1)
-    // this.collideWith(['bullet', 'end', 'shooter'])
-
-    this.speed = 3
-    this.jumpingForce = 4
-    this.movingDir = 0
-    this.dir = 0
-    this.movingDist = 0
-  }
-
-  onKey(input) {
-    switch (input) {
-      case 'x': this.collideWithMap(false); break;
-      case 'c': console.log(`isInGround: ${this.isOnGround}`); break;
-      case ' ': if (this.isOnGround || debugEnabled) this.setVel(this.xv, -this.jumpingForce); break;
-      case 'left': this.movingDir--; break;
-      case 'right': this.movingDir++; break;
-      case 'p': console.log(this.x, this.y, this.xv, this.yv, this.realX, this.realY); break;
-      case 'Escape': setCurrentStatus('mainMenu'); break;
-    }
-  }
-
-  update() {
-    if (this.xv > 0) this.dir = 0
-    else if (this.xv < 0) this.dir = 1
-
-    if (this.xv) {
-      if (this.movingDist > 0 != this.xv > 0) this.movingDist = 0
-      this.movingDist += this.xv / 10
-    } else {
-      this.movingDist = 0
-    }
-
-    this.xv = this.movingDir * this.speed
-  }
-
-  onKeyReleased(input) {
-    switch (input) {
-      case 'x': this.collideWithMap(true); break;
-      case 'left': this.movingDir++; break;
-      case 'right': this.movingDir--; break;
-    }
-  }
-
-  onCollision({collider, stopCollision, stopOtherCollision}) {
-    switch (collider.name) {
-      case 'bullet': console.log('damaged'); break;
-      case 'end': setCurrentStatus('levelSelection'); break;
-      default: console.log('colliding with', collider.name, collider);
-    }
-  }
-
-  getSprite() {
-    if (!this.isOnGround) {
-      if (abs(this.yv) < this.jumpingForce) return this.sprite.jump[1][this.dir]
-      else return this.sprite.jump[this.yv > 0 ? 0 : 2][this.dir]
-    }
-    else if (this.movingDist) return this.sprite.run[floor(abs(this.movingDist % 10))][this.dir]
-    else return this.sprite.idle[this.dir]
-  }
-}
-
-class End extends Entity {
   constructor(x, y) {
-    super()
-    this.setPos(x * 16, y * 16)
-    this.setSize(16, 16)
-    this.lifetime = 0
-    this.maxLifetime = 20
+    super(x, y)
+    this.setSize(15, 24)
+    this.setSprite('player')
+
+    this.spriteAction = 'idle'
+    this.speed = 0.7
+    this.autoDir = true
+    this.autoWalk = 12
+    this.collideWithMap = true
+
+    this.setDrag(0.85, 0.99).setAcc(0, 0.25)
+
+    this.breakBlock = false
+    this.createNew = false
+    this.jumpRequest = 0
+    this.creative = false
+    this.inventory = null
+    this.nearFurnace = false
+    this.wasNearFurnace = false
+    this.nearCrafting = false
+    this.wasNearCrafting = false
+
+    this.setGamemode(true)
   }
 
-  update() {
-    this.lifetime++
-    if (this.lifetime >= this.maxLifetime) this.lifetime = 0
+  fixedUpdate({updatePhisics}) {
+    updatePhisics()
+
+    if (this.createNew) {
+      this.createNew = false
+      this.layer.addChild(new Player(this.x + random(-100, 100), this.y + random(-100, 100)))
+    }
+
+    if (this.creative) {
+      if (this.jumpRequest) {
+        this.yv = -5
+      }
+    } else {
+      if (this.jumpRequest > 0) {
+        this.jumpRequest--
+
+        if (this.isOnGround()) {
+          this.jumpRemanining = 10
+          this.yv = -3.5
+        }
+      }
+
+      if (this.jumpRemanining) {
+        this.jumpRemanining--
+
+        if (this.jumpRemanining < 6) {
+          this.yv = -4 * (1 + this.jumpRemanining / 180)
+        }
+      }
+    }
+
+    if (this.nearFurnace != this.wasNearFurnace) {
+      this.wasNearFurnace = this.nearFurnace
+      main.player.inventory.setNearFurnace(this.nearFurnace)
+    }
+    this.nearFurnace = false
+
+    if (this.nearCrafting != this.wasNearCrafting) {
+      this.wasNearCrafting = this.nearCrafting
+      main.player.inventory.setNearCrafting(this.nearCrafting)
+    }
+    this.nearCrafting = false
   }
 
-  onCollision({stopCollision}) { stopCollision() }
+  onEntityCollision({name, entity}) {
+    if (name == 'Drop') {
+      if (entity.pickupTime < 0 && this.inventory) {
+        this.inventory.add(entity.id, entity.quantity)
+        entity.despawn()
+      }
+    }
+  }
+
+  setGamemode(survival) {
+    this.creative = !survival
+    this.speed = survival ? 0.7 : 1.4
+
+    if (this.xa) this.xa = this.speed * sign(this.xa)
+  }
 
   getSprite() {
-    return this.sprite.idle[floor(this.lifetime / this.maxLifetime * this.sprite.idle.length)]
+    if (this.yv || !this.isOnGround()) {
+      this.spriteAction = 'jump'
+      if (abs(this.yv) <= 7) {
+        this.spriteFrame = 1
+      } else {
+        this.spriteFrame = this.yv > 0 ? 0 : 2
+      }
+    } else {
+      this.spriteAction = abs(this.movingFor) > 1 ? 'run' : 'idle'
+    }
+  }
+
+  cancelJump() {
+    this.jumpRequest = this.creative ? 0 : 2
+    this.jumpRemanining = 0
+    this.ya = 0.25
+  }
+
+  onBlockCollision({x, y, solveCollision}) {
+    if (this.breakBlock) {
+      this.layer.setTileAt(x, y, 0)
+    } else {
+      solveCollision()
+    }
+  }
+
+  onKey({name}) {
+    switch (name) {
+      case 'left': this.xa -= this.speed; break;
+      case 'right': this.xa += this.speed; break;
+      case 'p': console.log(`x: ${round(this.x)}, y: ${round(this.y)}`); break;
+      case 'x': this.collideWithMap = !this.collideWithMap; break;
+      case 'c': this.breakBlock = !this.breakBlock; break;
+      case 'n': this.createNew = true; break;
+      case 'b': this.explode(5, 5); break;
+      case 'y': this.explode(50, 10); break;
+      case ' ': this.jumpRequest = Infinity; break;
+      case 'g': this.setGamemode(this.creative); break;
+      case 'j': this.yv = -15; break;
+    }
+  }
+
+  onKeyUp({name}) {
+    switch (name) {
+      case 'left': this.xa += this.speed; break;
+      case 'right': this.xa -= this.speed; break;
+      case ' ': this.cancelJump(); break;
+    }
+  }
+
+  explode(w, h) {
+    for (let x = -w + 1; x < w + 1; x++) {
+      for (let y = -h + 1; y < h + 1; y++) {
+        this.layer.setTileAt.cord(this.x + x * 16, this.y + y * 16, 0)
+      }
+    }
+  }
+
+  onUnloadedChunk({forceChunkLoad}) {
+    if (this == main.player) {
+      forceChunkLoad()
+    } else {
+      this.despawn()
+    }
   }
 }
