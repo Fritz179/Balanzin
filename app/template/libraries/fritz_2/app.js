@@ -20,6 +20,7 @@ function fixedUpdate() {
   crawl('fixedUpdate')
 }
 
+let redrawAll = false
 function update() {
   updateMouseHover()
   redrawAll = redrawAll || debugEnabled
@@ -33,4 +34,11 @@ function update() {
 
 function addLayer(child) {
   masterLayer.addChild(child)
+}
+
+const entities = {}
+function addEntities(...args) {
+  args.forEach(entity => {
+    entities[entity.name.toLowerCase()] = entity
+  })
 }

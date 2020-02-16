@@ -1,9 +1,3 @@
-/*
-  Chunk:
-    - data: Array(16*16)
-    - entities: Array()
-*/
-
 class ChunkLoader {
   constructor() {
     this.bufferedChunks = {}

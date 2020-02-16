@@ -1,4 +1,5 @@
 # app\testing\app3, app\testing\v5, !libraries
+# Balanzin\app\home\block_racer, Balanzin\app\home\terraria, Balanzin\app\template\libraries\fritz_2
 
 classes:
   Block:
@@ -68,3 +69,23 @@ Notes:
   - body is collision box
   - body.sprite is drawing position
   - body.trigger is triggering box => defaults to body collision box
+
+
+Tiles:
+  collision: null => not placable, 1 = up, 2 = right, 4 = bottom, 8 = left
+  weakness[collision = null]: weak to toolType
+  drop[collision = null]: _name reflects name property[_]
+  toolType: null,
+  toolLevel: level of tool, 0 = hand, 1 = wood, 2 = stone...,
+  miningLevel: toolLevel required to get item (still breakable),
+  maxStack: 64 stacking ammount
+  id: tile id
+
+  collision: where to collide
+  id: tile id (no name needed)
+
+Chunk:
+  data: [0, 0, 1, 1...]
+  entities:
+    name: player
+    args: [420, 69, 16, 16]

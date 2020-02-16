@@ -3,9 +3,18 @@
     {
       "ultraMirror": true,
       "action": "idle",
-      "recursive": false,
+      "recursive": 2,
       "x": 0,
       "y": 0,
+      "w": 16,
+      "h": 16
+    },
+    {
+      "ultraMirror": true,
+      "action": "moving",
+      "recursive": 2,
+      "x": 0,
+      "y": 16,
       "w": 16,
       "h": 16
     }

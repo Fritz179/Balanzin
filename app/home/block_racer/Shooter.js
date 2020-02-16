@@ -1,90 +1,84 @@
 class Shooter extends Entity {
-  constructor(x, y, r) {
+  constructor([x, y, r]) {
     super()
     this.setPos(x * 16, y * 16)
     this.r = r
     this.setSize(16, 16)
-    this.lifetime = 0
+    this.livingFor = 0
     this.maxLifetime = 250
+
+    this.setSprite('shooter')
   }
 
   update() {
-    this.lifetime++
-    if (this.lifetime >= this.maxLifetime) {
-      this.lifetime = 0
-      this._ecs.spawners.bullet(this.x, this.y + 8)
+    this.livingFor ++
+    if (this.livingFor >= this.maxLifetime) {
+      this.livingFor = 0
+      const xs = [0, 1, 0, -1][this.r]
+      const ys = [-1, 0, 1, 0][this.r]
+
+      main.addChild(new Bullet(this.x + 8 + xs * 8, this.y + 8 + ys * 8, xs, ys, this.r))
     }
+
+    this.spriteFrame = floor((this.livingFor / this.maxLifetime) * this.sprite.length)
   }
 
   getSprite() {
-    return this.sprite.idle[floor(this.lifetime / this.maxLifetime * this.sprite.idle.length)][this.r]
-  }
-
-
-  onCollision({stopCollision}) {
-    stopCollision()
-  }
-
-  onChuckUnload() {
-    return [this.x, this.y, this.r]
-  }
-
-  onOffscreen() {
-    return false
+    return this.sprite[this.spriteFrame][this.r]
   }
 }
 
 class Bullet extends Entity {
-  constructor(x, y) {
+  constructor(x, y, xs, ys, r) {
     super()
     this.setPos(x - 3, y - 3)
     this.setSize(6, 6)
-    this.setVel(-5, 0)
-    this.dying = false
+    this.setVel(xs * 5, ys * 5)
+
+    this.r = r
+
+    this.setSprite('bullet')
+    this.spriteAction = 'idle'
     this.deadTime = 0
     this.maxDeadTime = 30
-    this.collideWithMap()
+    this.collideWithMap = true
   }
 
   update() {
-    if (this.dying) {
+    if (this.spriteAction == 'dying') {
       this.deadTime++
+
+
       if (this.deadTime >= this.maxDeadTime) {
-        this.die()
+        this.despawn()
       }
+
+      this.spriteFrame = floor(this.deadTime / this.maxDeadTime * this.sprite.dying.length)
     }
   }
 
-  onMapCollision({solveCollision}) {
+  onEntityCollision() {
+    this.die()
+  }
+
+  onBlockCollision({solveCollision}) {
+    this.die()
     solveCollision()
-    this.secondPhase()
   }
 
-  getSprite() {
-    if (!this.dying) {
-      return this.sprite.idle
-    } else {
-      return this.sprite.dying[floor(this.deadTime / this.maxDeadTime * this.sprite.dying.length)]
+  onUnloadedChunk({teleportToNearestChunk}) {
+    teleportToNearestChunk()
+    console.log('sadf');
+    if (this.spriteAction != 'dying') {
+      this.vel.set(0, 0)
+      this.die()
     }
   }
 
-  onCollision({stopCollision, stopOtherCollision}) {
-    stopOtherCollision()
-    this.secondPhase()
-  }
-
-  secondPhase() {
-    this.changeType('bullet_dying')
-    this.dying = true
-    this.setSize(8, 16)
-    this.setPos(this.x, this.y - 5)
-  }
-
-  onOffscreen() {
-    return true
-  }
-
-  onChuckUnload() {
-    return true
+  die() {
+    this.spriteDir = (this.r + 1) % 4
+    this.setPos(this.x + [-5, 8, -5, -8][this.r], this.y + [-8, -5, 8, -5][this.r])
+    this.setSize([16, 8, 16, 8][this.r], [8, 16, 8, 16][this.r])
+    this.spriteAction = 'dying'
   }
 }

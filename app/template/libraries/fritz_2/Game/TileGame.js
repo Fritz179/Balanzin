@@ -19,6 +19,7 @@ class TileGame extends SpriteLayer {
     this.postW = this.postH = null
 
     this.chunkLoader = this
+    this.backgroundColor = null
   }
 
   get tileHeight() { return this.tileWidth }
@@ -79,6 +80,10 @@ class TileGame extends SpriteLayer {
   }
 
   getSpriteCapture() {
+    if (this.backgroundColor != null) {
+      this.background(this.backgroundColor)
+    }
+
     this.forEachChunk((chunk, x, y) => {
       const {chunkTotalWidth, chunkTotalHeight} = this
 
@@ -121,11 +126,11 @@ class TileGame extends SpriteLayer {
   }
 
   isOnMap(entity) {
-    const {chunkTotalWidth, chunks} = this
+    const {chunkTotalWidth, chunkTotalHeight, chunks} = this
     const x1 = floor(entity.left / chunkTotalWidth)
-    const y1 = floor(entity.top / chunkTotalWidth)
+    const y1 = floor(entity.top / chunkTotalHeight)
     const x2 = ceil(entity.right / chunkTotalWidth) - 1
-    const y2 = ceil(entity.bottom / chunkTotalWidth) - 1
+    const y2 = ceil(entity.bottom / chunkTotalHeight) - 1
 
     const it = this.chunkGen(x1, y1, x2, y2)
     let result = it.next()
@@ -189,23 +194,16 @@ class TileGame extends SpriteLayer {
     this.chunks[chunkX][chunkY] = chunk
 
     chunk.load(json.data)
-    json.entities.forEach(({name, args}) => {
-      switch (name) {
-        case 'Furnace': this.addChild(new Furnace(args, chunk)); break;
-        case 'CraftingTable': this.addChild(new CraftingTable(args, chunk)); break;
-        case 'Drop': this.addChild(new Drop(args, chunk)); break;
-        default: console.error(name);
+    Object.keys(json.entities).forEach(key => {
+      name = key.toLowerCase()
 
+      if (!entities[name]) {
+        throw new Error(`Invalid entity name: ${name}, available: ${Object.keys(entities)}`)
       }
 
-
-      // const key = name.toLowerCase()
-      // if (!this.spawners[key]) {
-      //   throw new Error(`failed to load map ${name}, ${key} spawner not found`)
-      // }
-      //
-      // const entity = new this.spawners[key](chunk, data)
-      // this.spawn(entity)
+      json.entities[key].forEach(arg => {
+        this.addChild(new entities[name](arg, chunk))
+      })
     })
   }
 
@@ -221,7 +219,11 @@ class TileGame extends SpriteLayer {
 
       if (serialized) {
         entity.despawn()
-        json.entities.push({name: entity.constructor.name, args: serialized})
+        const name = entity.constructor.name
+
+        if (!json.entities[name]) json.entities[name] = []
+
+        json.entities[name].push(serialized)
       }
     })
 

@@ -1,5 +1,13 @@
 [
   {
+    "ingredients": [{ "name": "wood_log", "quantity": 1 }],
+    "result": [     { "name": "wood", "quantity": 4 }]
+  },
+  {
+    "ingredients": [{ "name": "wood", "quantity": 2 }],
+    "result": [     { "name": "stick", "quantity": 4 }]
+  },
+  {
     "ingredients": [{ "name": "stick", "quantity": 2 },
                     { "name": "wood", "quantity": 2 }],
     "result": [     { "name": "wooden_sword", "quantity": 1 }],
@@ -94,14 +102,6 @@
                     { "name": "diamond", "quantity": 1 }],
     "result": [     { "name": "diamond_shovel", "quantity": 1 }],
     "from": "crafting"
-  },
-  {
-    "ingredients": [{ "name": "wood_log", "quantity": 1 }],
-    "result": [     { "name": "wood", "quantity": 4 }]
-  },
-  {
-    "ingredients": [{ "name": "wood", "quantity": 2 }],
-    "result": [     { "name": "stick", "quantity": 4 }]
   },
   {
     "ingredients": [{ "name": "wood", "quantity": 4 }],

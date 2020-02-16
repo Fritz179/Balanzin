@@ -4,7 +4,7 @@ class Body extends Frame {
 
     this.vel = new velVec(0, 0)
     this.acc = new accVec(0, 0)
-    this.drag = new dragVec(0, 0)
+    this.drag = new dragVec(1, 1)
 
     this.speed = 5
     this.autoMove = true

@@ -7,7 +7,7 @@ loadSprite('tools', './img/sprites')
 const recipes = loadJSON('./inventory/recipes.json', true)
 // loadSprite('slot', {path: './img/sprites', recursive: 2})
 
-let main, redrawAll = false
+let main
 
 noiseSeed(420)
 function setup() {
@@ -23,6 +23,7 @@ addCollision(Player, Drop)
 addCollision(Furnace, Player)
 addCollision(CraftingTable, Player)
 addCollision(Drop, Drop)
+addEntities(Player, Drop, Furnace, CraftingTable)
 
 function tp(x, y = false) {
   if (y === false) y = (ceil(noise(x / 320) * 50)) * 16 - 24

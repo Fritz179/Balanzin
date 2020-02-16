@@ -1,59 +1,84 @@
 class Player extends Entity {
-  constructor(x, y, status) {
-    super()
+  constructor(x, y) {
+    super(x, y)
     this.setSize(16, 16)
-    this.setPos(x, y)
+    this.setSprite('player')
+
+    this.spriteAction = 'idle'
     this.speed = 15
-    // this.setVel(this.speed, this.speed)
-    this.setVel(0, 0)
-    this.collideWithMap()
-    this.spriteDir = 0
-    status.camera.follow(this)
-    this.listen('onKey')
-    this.collideWith(['bullet', 'end', 'shooter'])
+    this.collideWithMap = true
+    this.livingFor = 0
+    this.wiggleTime = 15
+
   }
 
-  onKey(input) {
-    switch (input) {
-      case 'up': if (!this.isMoving) { this.setVel(0, -this.speed); this.spriteDir = 2; } break;
-      case 'right': if (!this.isMoving) { this.setVel(this.speed, 0); this.spriteDir = 3; } break;
-      case 'down': if (!this.isMoving) { this.setVel(0, this.speed); this.spriteDir = 0; } break;
-      case 'left': if (!this.isMoving) { this.setVel(-this.speed, 0); this.spriteDir = 1; } break;
-      case 'p': console.log(this.x, this.y, this.xv, this.yv, this.realX, this.realY); break;
-      case 'Escape': setCurrentStatus('mainMenu'); break;
+  fixedUpdate({updatePhisics}) {
+    updatePhisics()
+
+    this.livingFor++
+  }
+
+  update() {
+    this.spriteFrame = this.livingFor % this.wiggleTime > this.wiggleTime / 2 ? 1 : 0
+  }
+
+  onEntityCollision({name, entity}) {
+    if (name == 'Bullet') {
+
     }
   }
 
-  onCollision({collider, stopCollision, stopOtherCollision}) {
-    switch (collider.name) {
-      case 'bullet': console.log('damaged'); break;
-      case 'end': setCurrentStatus('levelSelection'); break;
-      default: console.log('colliding with', collider.name, collider);
+  onBlockCollision({x, y, solveCollision}) {
+    if (this.breakBlock) {
+      this.layer.setTileAt(x, y, 0)
+    } else {
+      solveCollision()
+    }
+  }
+
+  onKey({name}) {
+    if (!this.xv && !this.yv) {
+      switch (name) {
+        case 'up': this.setVel(0, -this.speed); this.dir = 2; break;
+        case 'down': this.setVel(0, this.speed); this.dir = 0; break;
+        case 'left': this.setVel(-this.speed, 0); this.dir = 1; break;
+        case 'right': this.setVel(this.speed, 0); this.dir = 3; break;
+      }
+    }
+  }
+
+  move(xs, ys) {
+    if (!this.xv && !this.yv) {
+      this.setVel(xs * this.speed, ys * this.speed)
     }
   }
 
   getSprite() {
-    return this.sprite.idle[this.spriteDir]
+    if (this.xv || this.yv) {
+      return sprites.player.moving[this.spriteFrame][this.dir]
+    } else {
+      return sprites.player.idle[this.spriteFrame][this.dir]
+    }
   }
 }
 
 class End extends Entity {
-  constructor(x, y) {
+  constructor([x, y]) {
     super()
     this.setPos(x * 16, y * 16)
     this.setSize(16, 16)
-    this.lifetime = 0
-    this.maxLifetime = 20
+    this.livingFor = 0
+    this.wiggleTime = 6
+
+    this.setSprite('end')
   }
 
   update() {
-    this.lifetime++
-    if (this.lifetime >= this.maxLifetime) this.lifetime = 0
+    this.livingFor++
+    this.spriteFrame = floor(this.livingFor / this.wiggleTime) % this.sprite.length
   }
 
-  onCollision({stopCollision}) { stopCollision() }
-
   getSprite() {
-    return this.sprite.idle[floor(this.lifetime / this.maxLifetime * this.sprite.idle.length)]
+    return this.sprite[this.spriteFrame]
   }
 }

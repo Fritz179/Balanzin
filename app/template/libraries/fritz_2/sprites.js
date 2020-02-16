@@ -38,7 +38,7 @@ function loadSprite(name, options = {}, callback) {
   function parse(img, json = false) {
     let parser
 
-    if (options.parser) parser = options.parser
+    if (options.parser) parser = typeof options.parser == 'function' ? options.parser : parsers[options.parser]
     else if (options.recursive) parser = parsers.recursive
     else if (json.tiles) parser = parsers.tiles
     else if (json.animations) parser = parsers.animation
@@ -48,7 +48,7 @@ function loadSprite(name, options = {}, callback) {
       console.error(`Invalid sprite type: ${options.type}, available: ${available}`);
     }
 
-    const output = parser(img, json, options)
+    const output = parser(img, json || options, options)
 
     if (output instanceof Canvas) {
       sprites[name] = output
@@ -130,7 +130,7 @@ addParser('tiles', (img, json) => {
         }
 
         tile.sprite = cut(img, x, y, w, h)
-        addTile(tile)
+        parseTile(tile)
 
         //go to next tile, move x and y
         metadata.x += w
@@ -138,14 +138,8 @@ addParser('tiles', (img, json) => {
     })
   }
 
-  function addTile(newTile) {
-    const id = lastTileId++
-
-    if (tiles[id]) {
-      throw new Error(`Id: ${id}, already in use by: ${tiles[id].name}, duplicate: ${name}`)
-    }
-
-    const tile = { }
+  function parseTile(newTile) {
+    const tile = {name: newTile.name}
 
     properties.forEach(prop => {
       if (typeof tile[prop] == 'undefined') tile[prop] = newTile[prop]
@@ -154,16 +148,29 @@ addParser('tiles', (img, json) => {
     _properties.forEach(prop => {
       if (typeof tile[prop] == 'undefined') tile[prop] = newTile[prop]
     })
+
     if (typeof tile.sprite == 'undefined') tile.sprite = newTile.sprite
 
-    tile.id = id
-    tiles[id] = tile
-    tiles[newTile.name] = tile
-    tile.name = newTile.name
+    addTile(tile)
   }
 
   return false
 })
+
+function addTile(tile) {
+  const id = lastTileId++
+
+  if (tiles[id]) {
+    throw new Error(`Id: ${id}, already in use by: ${tiles[id].name}`)
+  }
+
+  tile.id = id
+  tiles[id] = tile
+
+  if (tile.name) {
+    tiles[tile.name] = tile
+  }
+}
 
 addParser('recursive', (img, json, data) => {
   const sprite = []
@@ -179,50 +186,25 @@ addParser('recursive', (img, json, data) => {
     const x1 = (i * w) % img.width
     const y1 = (i * w - x1) / img.width
 
-    sprite.push(cut(img, x1, y1, w, h))
+    if (json.mirror) {
+      sprite.push([
+        cut(img, x1, y1, w, h),
+        flipH(cut(img, x1, y1, w, h))
+      ])
+    } else if (json.ultraMirror) {
+      sprite.push([
+        cut(img, x1, y1, w, h),
+        rotate90(cut(img, x1, y1, w, h)),
+        rotate90(rotate90(cut(img, x1, y1, w, h))),
+        unRotate(cut(img, x1, y1, w, h))
+      ])
+    } else {
+      sprite.push(cut(img, x1, y1, w, h))
+    }
   }
 
   return sprite
 })
-
-function parsePacmanTiles(img) {
-  const l = 0
-
-  const w = h = img.height
-
-  const sprite = []
-  sprite.tilePieces = {
-    corner: cut(img, 0, 0, w, h),
-    junction: flipH(cut(img, w, 0, w, h)),
-    junctionRotated: unRotate(cut(img, w, 0, w, h)),
-    straightLeft: cut(img, w * 2, 0, w, h),
-    straightRight: unRotate(cut(img, w * 3, 0, w, h)),
-    outer: cut(img, w * 4, 0, w, h),
-    empty: cut(img, w * 5, 0, w, h),
-    converter: {},
-    collision: {},
-    add: (tile, collision) => {
-      if (typeof sprite.tilePieces.converter[tile] == 'undefined') {
-        sprite.tilePieces.converter[tile] = sprite.length
-        sprite.tilePieces.collision[sprite.length] = collision
-        sprite[sprite.length] = compose(tile.split('_'), w, h)
-      }
-    }
-  }
-
-  sprite.tilePieces.add('empty_empty_empty_empty', 0)
-
-  function compose(pieces, w, h) {7
-    let g =  createGraphics(w * 2, h * 2)
-    g.image(sprite.tilePieces[pieces[0]], 0, 0, w, h)
-    g.image(rotate90(sprite.tilePieces[pieces[1]]), w, 0, w, h)
-    g.image(rotate90(rotate90(sprite.tilePieces[pieces[2]])), w, h, w, h)
-    g.image(unRotate(sprite.tilePieces[pieces[3]]), 0, h, w, h)
-    return g
-  }
-
-  return sprite
-}
 
 addParser('animation', (img, json) => {
   if (!json) {
@@ -247,11 +229,13 @@ addParser('animation', (img, json) => {
         if (!Number.isInteger(x1) || !Number.isInteger(y1) || !action) throw new Error(`invalid arguments for ${name} sprite`)
 
         if (ultraMirror) {
+          sprite[action].mirrored = true
           sprite[action][i][0] = cut(img, x1, y1, w, h, ...off(0))
           sprite[action][i][1] = rotate90(cut(img, x1, y1, w, h, ...off(1)))
           sprite[action][i][2] = rotate90(rotate90(cut(img, x1, y1, w, h, ...off(2))))
           sprite[action][i][3] = unRotate(cut(img, x1, y1, w, h, ...off(3)))
         } else if (mirror) {
+          sprite[action].mirrored = true
           sprite[action][i][0] = cut(img, x1, y1, w, h, ...off(0))
           sprite[action][i][1] = flipH(cut(img, x1, y1, w, h, ...off(1)))
         } else {
@@ -288,7 +272,7 @@ function rotate90(img) {
   const w = img.width, h = img.height
   let c = new Canvas(h, w)
   c.noSmooth()
-  c.rotate(HALF_PI)
+  c.rotate(PI / 2)
   c.image(img, 0, -h, w, h, 0, 0, w, h, {trusted: true})
   if (img.offset) c.offset = img.offset
   return c.setPos(img.x || 0, img.y || 0)
@@ -298,7 +282,7 @@ function unRotate(img) {
   const w = img.width, h = img.height
   let c = new Canvas(h, w)
   c.noSmooth()
-  c.rotate(-HALF_PI)
+  c.rotate(-PI / 2)
   c.image(img, -w, 0, w, h, 0, 0, w, h, {trusted: true})
   if (img.offset) c.offset = img.offset
   return c.setPos(img.x || 0, img.y || 0)
