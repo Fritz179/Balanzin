@@ -36,7 +36,7 @@ class Player extends Entity {
     }
   }
 
-  onKey({name}) {
+  onKeyBubble({name}) {
     if (!this.xv && !this.yv) {
       switch (name) {
         case 'up': this.setVel(0, -this.speed); this.dir = 2; break;

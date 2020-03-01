@@ -68,7 +68,6 @@ class Bullet extends Entity {
 
   onUnloadedChunk({teleportToNearestChunk}) {
     teleportToNearestChunk()
-    console.log('sadf');
     if (this.spriteAction != 'dying') {
       this.vel.set(0, 0)
       this.die()
