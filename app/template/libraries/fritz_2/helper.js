@@ -1,4 +1,4 @@
-let preloadCounter = 0
+let preloadCounter = 1
 const preloadFunctions = []
 const eventListeners = []
 
@@ -46,6 +46,10 @@ function decrementPreloadCounter(index, callback) {
     })
   }
 }
+
+window.addEventListener('load', (event) => {
+  decrementPreloadCounter(0, () => { })
+});
 
 function addDefaultOptions(target, source) {
   for (let key in source) {

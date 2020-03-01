@@ -1,5 +1,5 @@
 class Block {
-  constructor(x = 0, y = 0, w = 100, h = 100) {
+  constructor(x = 0, y = 0, w = 0, h = 0) {
     this.pos = new posVec(x, y)
     this.w = w
     this.h = h

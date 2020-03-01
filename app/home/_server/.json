@@ -24,6 +24,11 @@
       "custom": "wwe"
     },
     {
+      "title": "Conway's game of life",
+      "p": "Play cellular automata",
+      "path": "conway"
+    },
+    {
       "title": "Amazon",
       "p": "The game of the amazons!",
       "path": "amazon"

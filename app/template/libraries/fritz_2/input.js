@@ -88,16 +88,31 @@ function mapMouse(allow, drag) {
   return (target, args, parent) => {
     if (target instanceof Layer) {
       const {xAlign, yAlign, overflow} = target.cameraMode
+      const middleX = target.sprite.x + target.sprite.w * target.cameraMode.xAlign
+      const middleY = target.sprite.y + target.sprite.h * target.cameraMode.yAlign
 
-      // args[0] = (args[0] + (this.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
-      // args[1] = (args[1] + (this.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
       if (target.buffer) {
-        args.x = round((args.x - parent.w * xAlign) / target.xm - (target.x + target.sprite.x + target.w * xAlign))
-        args.y = round((args.y - parent.h * yAlign) / target.ym - (target.y + target.sprite.y + target.h * yAlign))
+        args.x = middleX + (args.x - target.w * target.cameraMode.xAlign) / target.xm
+        args.y = middleY + (args.y - target.h * target.cameraMode.yAlign) / target.ym
+        // args[0] = (args[0] + (this.sprite.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
+        // args[1] = (args[1] + (this.sprite.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
       } else {
-        args.x = round((args.x - parent.w * xAlign) / target.xm - (target.x + target.w * xAlign))
-        args.y = round((args.y - parent.h * yAlign) / target.ym - (target.y + target.h * yAlign))
+        args.x = middleX + (args.x - parent.w * target.cameraMode.xAlign) / target.xm - target.x
+        args.y = middleY + (args.y - parent.h * target.cameraMode.yAlign) / target.ym - target.y
+        // args[0] = this.parentSprite.w * xAlign + (args[0] - middleX + this.x) * this.xm
+        // args[1] = this.parentSprite.h * yAlign + (args[1] - middleY + this.y) * this.ym
       }
+      // const {xAlign, yAlign, overflow} = target.cameraMode
+      //
+      // // args[0] = (args[0] + (this.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
+      // // args[1] = (args[1] + (this.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
+      // if (target.buffer) {
+      //   args.x = round((args.x - parent.w * xAlign) / target.xm - (target.x + target.sprite.x + target.w * xAlign))
+      //   args.y = round((args.y - parent.h * yAlign) / target.ym - (target.y + target.sprite.y + target.h * yAlign))
+      // } else {
+      //   args.x = round((args.x - parent.w * xAlign) / target.xm - (target.x + target.w * xAlign))
+      //   args.y = round((args.y - parent.h * yAlign) / target.ym - (target.y + target.h * yAlign))
+      // }
     } else {
       args.x = round(args.x / target.xm - target.x)
       args.y = round(args.y / target.ym - target.y)

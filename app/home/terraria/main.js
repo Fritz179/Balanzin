@@ -34,11 +34,10 @@ class Main extends TileGame {
   constructor() {
     super('auto')
 
-    this.zoom = 3
-    this.setScale(3)
+    this.setScale(this.zoom = 3)
     this.setCameraMode({align: 'center', overflow: 'display'})
+    this.setSize(window.innerWidth, window.innerHeight, true)
 
-    this.setSize(window.innerWidth, window.innerHeight)
     // this.w = window.innerWidth
     // this.h = window.innerHeight
 
@@ -56,7 +55,7 @@ class Main extends TileGame {
   }
 
   onDrag({x, y}) {
-    this.pointer.offset.set(x + this.sprite.x, y + this.sprite.y)
+    this.pointer.offset.set(x - this.sprite.x, y - this.sprite.y)
   }
 
   onKey({name}) {
@@ -86,13 +85,9 @@ class Main extends TileGame {
     }
   }
 
-  onResize({w, h}) {
-    this.setSize(w, h)
-  }
-
   update() {
     let {x, y} = this.player.center
-    this.sprite.center = {x: -x, y: -y}
+    this.sprite.center = {x: x, y: y}
   }
 
   onBlockPlaced({id, x, y, chunk, xc, yc}) {

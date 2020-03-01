@@ -10,12 +10,14 @@ class Canvas extends Frame {
 
         if (args[0] == 'auto') {
           canvas = document.createElement('canvas');
+          canvas.width = 0;
+          canvas.height = 0;
         } else {
           canvas = document.getElementById(args[0])
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
         }
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
 
         if (!canvas) {
           throw new Error(`Invalid canvas: ${args[0]}`)
@@ -35,8 +37,9 @@ class Canvas extends Frame {
         this.w = canvas.width = sprite.width
         this.h = canvas.height = sprite.height
         this.sprite = new Context(canvas)
+        this.parentSprite = this.sprite
         this.image(sprite, 0, 0)
-        flag = true
+        // flag = true
       }
     } else if (args.length == 2) {
       const canvas = document.createElement('canvas');
@@ -59,14 +62,18 @@ class Canvas extends Frame {
       })
 
       this.buffer = true
+    } else {
+      this.sprite = new Context()
     }
+
+    this.parentSprite = this.sprite
   }
 
   set size({w, h}) { this.setSize(w, h); }
 
   get size() { return {w: this.w, h: this.h} }
-  get topCtx() { return this.sprite.topCtx }
-  get isTopCtx() { return this.topCtx == this.sprite }
+  get topCtx() { return this.parentSprite.topCtx }
+  get isTopCtx() { return this.topCtx == this.parentSprite }
 
   get textSize() { return this.sprite.textSize }
   get textStyle() { return this.sprite.textStyle }
@@ -75,16 +82,19 @@ class Canvas extends Frame {
   setScale(x = 1, y) { this.xm = x; this.ym = y || x; this.changed = true; return this; }
   setCtx(ctx) { this.cxt = ctx; this.xm = 1; this.ym = 1; return this; }
 
-  setSize(w, h) {
-    if (this.sprite) {
+  setSize(w, h, even = false) {
+    if (even) {
+      w = ceil(w / 2) * 2
+      h = ceil(h / 2) * 2
+    }
+
+    if (this.buffer) {
       if (this.sprite != this.topCtx) debugger
       const state = getState(this.topCtx.ctx)
       this.sprite.canvas.width = w
       this.sprite.canvas.height = h
       setState(this.topCtx.ctx, state)
-    }
-
-    if (!this.buffer) {
+    } else {
       this.w = w
       this.h = h
     }
@@ -106,6 +116,9 @@ class Canvas extends Frame {
   }
 
   background(...args) {
+    if (!this.buffer) {
+      console.log('background in a not buffer layer?');
+    }
     this.topCtx._background(getColor(args))
   }
 
@@ -118,7 +131,11 @@ class Canvas extends Frame {
   }
 
   strokeWeight(w) {
-    this.topCtx._strokeWeight(w)
+    this._strokeWeight(w)
+  }
+
+  _strokeWeight(w) {
+    this.parentSprite._strokeWeight(w * this.xm)
   }
 
   textFont(f) {
@@ -138,7 +155,7 @@ class Canvas extends Frame {
   }
 
   _text(txt, x, y) {
-    this.sprite._text(txt, ...this.multiply([x, y]))
+    this.parentSprite._text(txt, ...this.multiply([x, y]))
   }
 
   multiply(args, q = false) {
@@ -146,18 +163,28 @@ class Canvas extends Frame {
       const {xAlign, yAlign, overflow} = this.cameraMode
 
       if (this.buffer) {
-        args[0] = (args[0] + (this.sprite.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
-        args[1] = (args[1] + (this.sprite.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
+        // console.log(this);
+        const middleX = this.sprite.x + this.sprite.w * this.cameraMode.xAlign
+        const middleY = this.sprite.y + this.sprite.h * this.cameraMode.yAlign
+        // console.log(this.parentSprite.w, middleX, args[0]);
+        args[0] = this.parentSprite.w * xAlign + (args[0] - middleX) * this.xm
+        args[1] = this.parentSprite.h * yAlign + (args[1] - middleY) * this.ym
+        // args[0] = (args[0] + (this.sprite.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
+        // args[1] = (args[1] + (this.sprite.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
       } else {
-        args[0] = (args[0] + (this.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
-        args[1] = (args[1] + (this.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
+        const middleX = this.sprite.w * xAlign
+        const middleY = this.sprite.h * yAlign
+
+        args[0] = this.parentSprite.w * xAlign + (args[0] - middleX + this.x) * this.xm
+        args[1] = this.parentSprite.h * yAlign + (args[1] - middleY + this.y) * this.ym
+        // args[0] = (args[0] + (this.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
+        // args[1] = (args[1] + (this.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
       }
       if (q) {
         args[2] *= this.xm
         args[3] *= this.ym
       }
     } else {
-
       args[0] = (args[0] - this.x) * this.xm
       args[1] = (args[1] - this.y) * this.ym
 
@@ -170,7 +197,28 @@ class Canvas extends Frame {
     return args
   }
 
+  scalePoints(args) {
+    const {x, y, xm, ym} = this
+
+    if (this.buffer) {
+      if (args.length == 2) {
+        return [args[0] * xm, args[1] * ym]
+      } else {
+        return [args[0] * xm, args[1] * ym, args[2] * xm, args[3] * ym]
+      }
+
+    } else {
+      if (args.length == 2) {
+        return [args[0] * xm + x, args[1] * ym + y]
+      } else {
+        return [args[0] * xm + x, args[1] * ym + y, args[2] * xm, args[3] * ym]
+      }
+    }
+  }
+
   rect(...args) {
+    // console.log(this.parentSprite);
+
     if (args.length == 4) {
       this._rect(args)
     } else { // quadru
@@ -179,7 +227,15 @@ class Canvas extends Frame {
   }
 
   _rect(args) {
-    this.sprite._rect(this.multiply(args, true))
+    this.parentSprite._rect(this.scalePoints(args))
+  }
+
+  line(...args) {
+    this._line(args)
+  }
+
+  _line(args) {
+    this.parentSprite._line(this.scalePoints(args))
   }
 
   image(canvas, ...val) {
@@ -199,14 +255,14 @@ class Canvas extends Frame {
   }
 
   _image(canvas, ...args) {
-    this.sprite._image(canvas, ...this.multiply(args.slice(0, 9), true))
+    this.parentSprite._image(canvas, ...this.multiply(args.slice(0, 9), true))
     if (args[9]) {
       this._drawHitbox(args.slice(0, 4).concat(['red']))
     }
   }
 
   drawHitbox(...args) { this._drawHitbox(args) }
-  _drawHitbox(args) { this.sprite._drawHitbox(this.multiply(args, true)) }
+  _drawHitbox(args) { this.parentSprite._drawHitbox(this.multiply(args, true)) }
 }
 
 const valuesToSave = ['strokeStyle', 'fillStyle', 'globalAlpha', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDashOffset', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'shadowColor', 'globalCompositeOperation', 'font', 'textAlign', 'textBaseline', 'direction', 'imageSmoothingEnabled']

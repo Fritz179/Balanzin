@@ -79,7 +79,6 @@ class SpriteLayer extends Layer {
         }
 
         const sprite = child.getSprite(this)
-
         if (sprite) {
           if (child.buffer) {
             this.image(sprite, child.x, child.y)

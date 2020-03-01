@@ -72,7 +72,7 @@ class Inventory extends SpriteLayer {
 
     this.changed = true
   }
-
+  
   onWheelBubble({dir}) {
     let newSel = this.selected + dir
 

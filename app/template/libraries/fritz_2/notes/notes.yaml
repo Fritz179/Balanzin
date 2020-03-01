@@ -1,5 +1,6 @@
 # app\testing\app3, app\testing\v5, !libraries
 # Balanzin\app\home\block_racer, Balanzin\app\home\terraria, Balanzin\app\template\libraries\fritz_2
+# tileGame => bindToTile => Furnace, CraftingTable, Shooter... Chest, clickables...
 
 classes:
   Block:
@@ -69,6 +70,15 @@ Notes:
   - body is collision box
   - body.sprite is drawing position
   - body.trigger is triggering box => defaults to body collision box
+  - if it's a buffer => .pos is position on screen
+  - if it isn't a buffer => .sprite.pos is camera view position
+  - cameraMode refers to .pos, so is position on screen
+  - it's like a entity sprite (like player or bullet), the sprite is a big 'all word sprite'
+    and the sprite.x is just the offset of where to start drawing it
+  - to change if flipped (sprite.x indicates nullpunkt of sprite
+    => sprite.x of 2 draws the sprite 2 pixels to the left)
+  - !!sprite.x indicates nullpunkt of the sprite!! (sprite in buffer is the word sprite)
+  - sprite.size => overflow of camera
 
 
 Tiles:

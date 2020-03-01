@@ -2,21 +2,29 @@ class Context extends Block {
   constructor(canvas) {
     super()
 
-    this.canvas = canvas
-    this.ctx = canvas.getContext('2d')
-    this.ctx.imageSmoothingEnabled = false
+    if (canvas) {
+      this.canvas = canvas
+      this.ctx = canvas.getContext('2d')
+      this.ctx.imageSmoothingEnabled = false
+
+      Object.defineProperty(this, 'w', {
+        get() { return this.canvas.width },
+        set(w) { debugger }
+      })
+      Object.defineProperty(this, 'h', {
+        get() { return this.canvas.height },
+        set(w) { debugger }
+      })
+    } else {
+      this.canvas = null
+      this.ctx = null
+    }
+
     this.textSize = 10
     this.textFont = 'sans-serif'
     this.textStyle = 'normal'
-
-    Object.defineProperty(this, 'w', {
-      get() { return this.canvas.width },
-      set(w) { debugger }
-    })
-    Object.defineProperty(this, 'h', {
-      get() { return this.canvas.height },
-      set(w) { debugger }
-    })
+    this._doStroke = true
+    this._doFill = true
   }
 
   get topCtx() { return this }
@@ -35,6 +43,7 @@ class Context extends Block {
 
   _strokeWeight(weight = 1) {
     this.ctx.lineWidth = weight
+    this._doStroke = weight
   }
 
   _rotate(a) {
@@ -93,6 +102,9 @@ class Context extends Block {
     // pars args
     const sprite = args[0]
     const destination = this.canvas
+    if (!destination) {
+      debugger
+    }
     let dx = len > 2 ? args[1] : (sprite.x || 0)
     let dy = len > 2 ? args[2] : (sprite.y || 0)
     let dw = len > 4 ? args[3] : (sprite.w || sprite.width)
@@ -217,15 +229,40 @@ class Context extends Block {
   _rect([x, y, w, h, color, stroke]) {
     const {ctx} = this
 
-    if (ctx.lineWidth % 2 == 1) {
+    if (ctx._doStroke && ctx.lineWidth % 2 == 1) {
       ctx.translate(0.5, 0.5)
     }
 
     ctx.beginPath()
     ctx.rect(x, y, w, h);
     ctx.closePath()
-    ctx.stroke();
+
+    if (ctx._doStroke) {
+      ctx.stroke();
+    }
+
     ctx.fill();
+
+    if (ctx._doStroke && ctx.lineWidth % 2 == 1) {
+      ctx.translate(-0.5, -0.5)
+    }
+  }
+
+  _line([x, y, w, h]) {
+    const {ctx} = this
+
+    if (!ctx._doStroke) {
+      return new Error('Cannot draw line with no stroke')
+    }
+
+    if (ctx.lineWidth % 2 == 1) {
+      ctx.translate(0.5, 0.5)
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w, y + w);
+    ctx.stroke();
 
     if (ctx.lineWidth % 2 == 1) {
       ctx.translate(-0.5, -0.5)

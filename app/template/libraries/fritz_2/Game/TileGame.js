@@ -38,8 +38,8 @@ class TileGame extends SpriteLayer {
 
       // const xCenter = floor(-this.x / chunkTotalWidth)
       // const yCenter = floor(-this.y / chunkTotalHeight)
-      const xCenter = floor(-this.sprite.center.x / chunkTotalWidth)
-      const yCenter = floor(-this.sprite.center.y / chunkTotalHeight)
+      const xCenter = floor(this.sprite.center.x / chunkTotalWidth)
+      const yCenter = floor(this.sprite.center.y / chunkTotalHeight)
 
       // delete all outside chunk
       let deletedChunks = 0
@@ -375,7 +375,8 @@ class TileGame extends SpriteLayer {
       throw new Error('Cannot load map, invalid measures...')
     }
 
-    this.setChunkSize(map.width, map.data.length / map.width)
+    this.chunkWidth = map.width
+    this.chunkHeight = map.data.length / map.width
 
     this.clearChunks()
     this.loadChunkAt(map, 0, 0)

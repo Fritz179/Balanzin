@@ -18,8 +18,8 @@ class Pointer extends Canvas {
   get tileCord() { return this.tilePos.map(pos => pos * 16) }
   get overEntity() { return !this.layer.noEntityAt.cord(this.x, this.y) }
 
-  get x() { return this.offset.x - main.sprite.x }
-  get y() { return this.offset.y - main.sprite.y }
+  get x() { return main.sprite.x + this.offset.x }
+  get y() { return main.sprite.y + this.offset.y }
 
   set tile(id) { this.layer.setTileAt.cord(this.x, this.y, id) }
 

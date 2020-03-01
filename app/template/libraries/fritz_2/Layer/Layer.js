@@ -9,7 +9,7 @@ class Layer extends Canvas {
 
   getSpriteCapture(parentSprite) {
     if (!this.buffer) {
-      this.sprite = parentSprite
+      this.parentSprite = parentSprite
     }
   }
 
@@ -88,7 +88,7 @@ class Layer extends Canvas {
 
   onResize({w, h}) {
     if (this.isTopCtx) {
-      this.setSize(w, h)
+      this.setSize(w, h, true)
     }
   }
 

@@ -14,6 +14,12 @@ class ItemHolder extends Canvas {
 
   set changed(bool) { }
 
+  getSpriteCapture(parentSprite) {
+    if (!this.buffer) {
+      this.parentSprite = parentSprite
+    }
+  }
+
   getFrom(other) {
     if (!this.isEmpty) throw new Error('What?')
 

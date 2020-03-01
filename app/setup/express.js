@@ -63,6 +63,6 @@ module.exports = (app, io, dirname) => {
     res.locals.messages = req.messages || []
     next()
   })
-}
 
-console.log('200: Express setup run succesfully!');
+  console.log('200: Express setup run succesfully!');
+}
