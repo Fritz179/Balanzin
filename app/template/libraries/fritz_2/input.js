@@ -88,15 +88,18 @@ function mapMouse(allow, drag) {
   return (target, args, parent) => {
     if (target instanceof Layer) {
       const {xAlign, yAlign, overflow} = target.cameraMode
-      const middleX = target.sprite.x + target.sprite.w * target.cameraMode.xAlign
-      const middleY = target.sprite.y + target.sprite.h * target.cameraMode.yAlign
 
       if (target.buffer) {
+        const middleX = target.sprite.x - target.x + target.sprite.w * target.cameraMode.xAlign
+        const middleY = target.sprite.y - target.y + target.sprite.h * target.cameraMode.yAlign
         args.x = middleX + (args.x - target.w * target.cameraMode.xAlign) / target.xm
         args.y = middleY + (args.y - target.h * target.cameraMode.yAlign) / target.ym
         // args[0] = (args[0] + (this.sprite.x + this.w * xAlign)) * this.xm + this.sprite.w * xAlign
         // args[1] = (args[1] + (this.sprite.y + this.h * yAlign)) * this.ym + this.sprite.h * yAlign
       } else {
+        const middleX = target.sprite.x + target.w * target.cameraMode.xAlign
+        const middleY = target.sprite.y + target.h * target.cameraMode.yAlign
+
         args.x = middleX + (args.x - parent.w * target.cameraMode.xAlign) / target.xm - target.x
         args.y = middleY + (args.y - parent.h * target.cameraMode.yAlign) / target.ym - target.y
         // args[0] = this.parentSprite.w * xAlign + (args[0] - middleX + this.x) * this.xm

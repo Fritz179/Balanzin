@@ -229,7 +229,7 @@ class Context extends Block {
   _rect([x, y, w, h, color, stroke]) {
     const {ctx} = this
 
-    if (ctx._doStroke && ctx.lineWidth % 2 == 1) {
+    if (this._doStroke && this.lineWidth % 2 == 1) {
       ctx.translate(0.5, 0.5)
     }
 
@@ -237,13 +237,13 @@ class Context extends Block {
     ctx.rect(x, y, w, h);
     ctx.closePath()
 
-    if (ctx._doStroke) {
+    if (this._doStroke) {
       ctx.stroke();
     }
 
     ctx.fill();
 
-    if (ctx._doStroke && ctx.lineWidth % 2 == 1) {
+    if (this._doStroke && this.lineWidth % 2 == 1) {
       ctx.translate(-0.5, -0.5)
     }
   }
