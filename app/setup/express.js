@@ -31,7 +31,7 @@ module.exports = (app, io, dirname) => {
   app.set('views', [path.join(dirname, 'home'), path.join(dirname, 'template')])
 
   app.use('/libraries', express.static(path.join(dirname, 'template/libraries')))
-  app.use('/fonts', express.static(path.join(dirname, 'template/fonts')))
+  app.use(express.static(path.join(dirname, 'misc')))
 
   app.use(/\/template\/.*\.css/, (req, res, next) => {
     res.sendFile(path.join(dirname, req.originalUrl))
@@ -47,11 +47,9 @@ module.exports = (app, io, dirname) => {
 
   const staticHandler = express.static(path.join(dirname, 'home'))
   app.use((req, res, next) => {
+    // deny public access to _server files
     req.originalUrl.match(/_server/) ? next() : staticHandler(req, res, next)
   })
-
-  app.get('/favicon.ico', (req, res) => res.sendFile(path.join(dirname, 'template/favicon.png')))
-  app.get('/robots.txt', (req, res) => res.sendFile(path.join(dirname, 'template/robots.txt')))
 
   require('./passport')(passport)
 

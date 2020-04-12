@@ -2,7 +2,7 @@
 node_modules
 
 #roboto
-app/template/fonts
+app/misc/fonts
 
 #plc
 app/home/transpiler/lager.js

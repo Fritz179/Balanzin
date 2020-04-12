@@ -22,7 +22,7 @@ app.use('/', router)
 //connect the error page to all remaining requests (404)
 app.get('*', (req, res) => {
   if (!res._header) {
-    res.render('error', {error: 404})
+    res.render('error', {code: 404, message: 'Not found!'})
   }
 })
 

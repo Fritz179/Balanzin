@@ -19,6 +19,15 @@ html {
   box-shadow: var(--shadow);
 }
 
+h1 {
+  font-size: 55px;
+  margin-bottom: 0;
+}
+
+.btn {
+  margin-left: 0;
+}
+
 footer {
   background: var(--primary);
   width: 100%;
