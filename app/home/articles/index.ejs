@@ -32,5 +32,9 @@
   </body>
   <%- include('footer') %>
 
-  <script><%- include('libraries/cards.js') %></script>
+  <script>
+    [...document.getElementsByClassName("clickable")].forEach(el => {
+      el.onclick = () => window.location.href = el.getAttribute("redirect")
+    })
+  </script>
 </html>

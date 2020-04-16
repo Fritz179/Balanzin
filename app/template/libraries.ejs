@@ -1,7 +1,7 @@
 <% if (locals.p5 || locals.side || locals.fritz == 1) { %>
-  <script src="/libraries/p5.min.js"></script>
-  <script src="/libraries/p5.dom.min.js"></script>
-  <script src="/libraries/p5.sound.min.js"></script>
+  <script src="/libraries/p5/p5.min.js"></script>
+  <script src="/libraries/p5/p5.dom.min.js"></script>
+  <script src="/libraries/p5/p5.sound.min.js"></script>
 <% } %>
 
 <% if (locals.socket) { %>
@@ -63,4 +63,35 @@
   <script src="/libraries/fritz_2/input.js"></script>
   <script src="/libraries/fritz_2/app.js"></script>
   <script src="/libraries/fritz_2/sprites.js"></script>
+<% } %>
+
+<% if (locals.fritz == 3) { %>
+  <script src="/libraries/fritz_3/helper.js"></script>
+  <script src="/libraries/fritz_3/math.js"></script>
+  <script src="/libraries/fritz_3/createMiddleware.js"></script>
+  <script src="/libraries/fritz_3/intersections.js"></script>
+  <script src="/libraries/fritz_3/noise.js"></script>
+
+  <script src="/libraries/fritz_3/basic/Block.js"></script>
+  <script src="/libraries/fritz_3/basic/Frame.js"></script>
+  <script src="/libraries/fritz_3/basic/Context.js"></script>
+  <script src="/libraries/fritz_3/basic/RenderContext.js"></script>
+  <script src="/libraries/fritz_3/Entity/Body.js"></script>
+  <script src="/libraries/fritz_3/Entity/TriggerBox.js"></script>
+  <script src="/libraries/fritz_3/Entity/Entity.js"></script>
+  <script src="/libraries/fritz_3/Layer/Layer.js"></script>
+  <script src="/libraries/fritz_3/Layer/FrontLayer.js"></script>
+  <script src="/libraries/fritz_3/Layer/ChildLayer.js"></script>
+  <script src="/libraries/fritz_3/Layer/HTMLLayer.js"></script>
+  <!-- <script src="/libraries/fritz_3/Game/Game.js"></script> -->
+  <!-- <script src="/libraries/fritz_3/Game/Chunk.js"></script> -->
+  <!-- <script src="/libraries/fritz_3/Game/TileGame.js"></script> -->
+  <!-- <script src="/libraries/fritz_3/Game/ChunkLoader.js"></script> -->
+
+  <script src="/libraries/fritz_3/Timer.js"></script>
+  <script src="/libraries/fritz_3/input.js"></script>
+  <script src="/libraries/fritz_3/app.js"></script>
+  <script src="/libraries/fritz_3/sprites.js"></script>
+
+  <link href="/libraries/fritz_3/style.css" rel="stylesheet"></link>
 <% } %>

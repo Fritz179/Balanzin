@@ -14,6 +14,11 @@
       "path": "terraria"
     },
     {
+      "title": "Test!",
+      "p": "Test of fritz 3",
+      "path": "tester"
+    },
+    {
       "title": "Chess",
       "p": "Play Chess against another human, yourself or my artificial intelligence!",
       "extend": "chess"
@@ -70,7 +75,7 @@
     },
     {
       "title": "Isaac",
-      "p": "All of the old projects before version 5 of the Fritz library",
+      "p": "The first playable game.",
       "path": "isaac"
     },
     {

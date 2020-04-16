@@ -1,0 +1,24 @@
+Frame:
+  - noSmooth
+  - fill
+  - stroke
+  - strokeWeight
+  - textSize
+  - textFont
+  - textStyle
+  - textAlign
+  - text
+  - image
+  - rect
+  - drawHitbox
+  - line
+  - background?
+  -
+  -
+  -
+  -
+  -
+  -
+  -
+  -
+  - 
