@@ -1,53 +1,51 @@
+/*
+  Base class for every layer type
+  Has cameraSettings
+  Has children
+  Has getsprite
+*/
+
 class Layer extends Frame {
-  constructor(cameraMode) {
+  constructor(cameraMode = {}) {
     super(0, 0, 100, 100)
 
     this.mult = [1, 1]
+    this.children = new ElementsHandler()
 
-    this.children = new Set()
-    this.children.types = []
+    const {from} = cameraMode
 
-    this.cameraMode = {}
-    if (cameraMode) {
-      this.setCameraMode(cameraMode)
-    }
-  }
-
-  // renderCapture(parentSprite) {
-  //   if (!this.buffer) {
-  //     this.parentSprite = parentSprite
-  //   }
-  // }
-
-  setCameraMode({mode, align = 'top-left', from, ratio = 16 / 9, size = 'fit', baseWidth}) {
-    this.cameraMode.size = size
-    this.cameraMode.from = from
-    this.cameraMode.ratio = ratio
-    this.cameraMode.baseWidth = baseWidth
-
-    if (from) {
+    if (!this.constructor.useHTML) {
       if (typeof from == 'string') {
         const canvas = document.getElementById(from)
         this.sprite = new RenderContext(this, new Context(canvas))
-      } else if (mode == 'overlay'){
-        this.sprite = new RenderContext(this, from.sprite)
       } else {
         const canvas = document.createElement('canvas')
         this.sprite = new RenderContext(this, new Context(canvas))
       }
-    } else if (mode != 'custom') {
-      if (!Array.isArray(size))
-        throw new Error(`For {mode: 'fixed'} the {size: [100, 100]} is required!`)
 
-
-      if (mode == 'overlay'){
-        this.sprite = new RenderContext(this)
+      this.size.bind(this.sprite.canvas, 'width', 'height')
+    } else {
+      if (typeof from == 'string') {
+        this.container = document.getElementById(from)
       } else {
-        const canvas = document.createElement('canvas')
-        this.sprite = new RenderContext(this, new Context(canvas))
+        this.container = document.createElement('div')
       }
     }
 
+    if (!cameraMode.align) cameraMode.align = 'top-left'
+    this.setCameraMode(cameraMode)
+  }
+
+  setCameraMode({from, align, ratio = 16 / 9, size = 'fill'}) {
+    console.log('??');
+    this.cameraMode = {size, ratio, from}
+
+    if (align) {
+      this.setAlignMode(align)
+    }
+  }
+
+  setAlignMode(align) {
     const xTable = {left: 0, right: 1, center: 0.5}
     const yTable = {top: 0, bottom: 1, center: 0.5}
 
@@ -59,125 +57,96 @@ class Layer extends Frame {
 
     this.cameraMode.xAlign = xTable[align.split('-')[1]] || 0
     this.cameraMode.yAlign = yTable[align.split('-')[0]] || 0
-
-    this.updateCameraMode()
   }
 
-  updateCameraMode() {
-    const {from, size, ratio, baseWidth} = this.cameraMode
-    console.log(this, from);
+  updateCameraMode(parent, width, height) {
+    const {size, ratio} = this.cameraMode
 
-    if (from) {
-      let width, height
-
-      if (typeof from == 'string') {
-        [width, height] = [window.innerWidth, window.innerHeight]
-        this.sprite.to.canvas.width = width
-        this.sprite.to.canvas.height = height
+    // console.log(parent, this, width, height, size);
+    if (size == 'fit') {
+      if (height * ratio <= width) {
+        const newWidth = Math.ceil(height * ratio)
+        this.setSize(newWidth, height)
+        this.setPos((width - newWidth) / 2 | 0, 0)
       } else {
-        [width, height] = [from.w, from.h]
+        const newHeight = Math.ceil(width / ratio)
+        this.setSize(width, newHeight)
+        this.setPos(0, (height - newHeight) / 2 | 0)
       }
-
-      console.log(width, height, size);
-      if (size == 'fit') {
-        if (height * ratio <= width) {
-          this.setSize(height * ratio, height)
-        } else {
-          this.setSize(width, width / ratio)
-        }
-      } else if (size == 'fill') {
-        this.setSize(width, height)
-      } else if (Array.isArray(size)){
-        this.setSize(width * size[0], height * size[1])
-      }
-
-      if (baseWidth) {
-        this.setMult(this.width / baseWidth)
-      }
+    } else if (size == 'fill') {
+      this.setSize(width, height)
+    } else if (Array.isArray(size)){
+      this.setSize(width * size[0], height * size[1])
     }
+
+    // console.log(this.children);
+    this.children.forEach(child => {
+      if (child instanceof Layer) {
+        child.updateCameraMode(this, this.width, this.height)
+      }
+    })
+
+    this.changed = true
   }
 
   addChild(child, layer) {
-    if (this.children.has(child)) {
-      console.warn('Layer already has child: ', child)
-    } else {
-      child.parentLayer = this
-      this.children.add(child)
-      this.changed = true
+    this.children.add(child, child.constructor.name)
 
-      const {name} = child.constructor
+    child.parentLayer = this
+    this.changed = true
 
-      if (!this.children[name]) {
-        this.children[name] = new Set([child])
-      } else {
-        this.children[name].add(child)
-      }
-
-      if (!this.children.types.includes(name)) {
-        this.children.types.push(name)
-      }
-
-      this.onChildrenAdded(child)
-
-      return this
-    }
+    this.runOnChildAdded(child)
   }
 
-  onChildrenAdded() {
+  onChildAddedCapture(child) {
+    if (child instanceof Layer) {
+      child.updateCameraMode(this, this.width, this.height)
+    }
 
+    if (this.constructor.useHTML) {
+      if (child.constructor.useHTML) {
+        this.container.appendChild(child.container)
+      } else {
+        this.container.appendChild(child.sprite.canvas)
+      }
+    }
   }
 
   removeChild(child) {
-    if (!this.children.delete(child)) {
-      console.warn('Cannot remove unexisting child: ', child);
-    } else {
-      this.changed = true
-
-      this.children[child.constructor.name].delete(child)
-    }
-  }
-
-  onChildrenRemoved() {
-
+    this.children.remove(child, child.constructor.name)
+    this.changed = true
   }
 
   clearChildren() {
+    this.children.clear()
+    this.changed = true
+  }
+
+  updateCapture() {
     this.children.forEach(child => {
-      this.removeChild(child)
+      child.runUpdate()
     })
   }
 
-  setChildren(children) {
-    this.clearChildren()
-
-    if (Array.isArray(children)) {
-      children.forEach(child => {
-        this.addChild(child)
-      })
-    } else {
-      this.addChild(children)
-    }
-  }
-
-  forEachChild(fun) {
-    let i = 0
-    this.children.forEach((value, key, set) => {
-      fun(key, i++, set)
+  fixedUpdateCapture() {
+    this.children.forEach(child => {
+      child.runFixedUpdate()
     })
   }
 
-  onResize({w, h}) {
-    this.updateCameraMode()
-
-    this.forEachChild(child => {
-      child.resize(this.w, this.h)
+  render() {
+    this.children.forEach(child => {
+      if (child.changed) {
+        child.runRender(this)
+      }
     })
-
-    this.onResizeBubble()
   }
 }
 
 addVec2(Layer, 'mult', 'xm', 'ym')
+createMiddleware(Layer, 'render')
+createMiddleware(Layer, 'onChildAdded')
+createMiddleware(Layer, 'onChildRemoved')
 
 Object.defineProperty(Layer.prototype, 'parentLayer', {
   get: function() {

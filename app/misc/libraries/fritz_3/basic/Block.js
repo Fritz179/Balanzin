@@ -1,3 +1,8 @@
+/*
+  Base class for everything
+  Has utils functions
+*/
+
 class Block {
   constructor(x = 0, y = 0, w = 0, h = 0) {
     this.pos = [x, y]

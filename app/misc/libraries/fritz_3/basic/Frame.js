@@ -1,3 +1,11 @@
+/*
+  Base class for everything more than a Block
+  Has all action functions (onKey etc..)
+  Has all drawing functions (no sprite definition)
+  Has update and fixedUpdate
+*/
+
+
 class Frame extends Block {
   constructor(x, y, w, h) {
     super(x, y, w, h)
@@ -6,13 +14,6 @@ class Frame extends Block {
     this._hovered = false     // for hovered
 
     this.changed = true
-  }
-
-  fixedUpdateBubble() {
-    // if (this.x != this.px || this.y != this.py) {
-    //   this.changed = true
-    //   this.prevPos.set(this.pos)
-    // }
   }
 
   noSmooth() {
@@ -56,16 +57,12 @@ class Frame extends Block {
     this.sprite.rect(x, y, w, h)
   }
 
-  fixedUpdate() {
+  image(img, x, y) {
+    if (img instanceof RenderContext || img instanceof Context) {
+      img = img.canvas
+    }
 
-  }
-
-  update() {
-
-  }
-
-  render() {
-
+    this.sprite.image(img, x, y)
   }
 };
 
@@ -95,9 +92,7 @@ class Frame extends Block {
 
 addVec2(Frame, 'prev', 'px', 'py')
 
-// update & render => Middleware & no crawler, fixedUpdate => Middleware & crawler
 createMiddleware(Frame, 'update')
-createMiddleware(Frame, 'render')
 createMiddleware(Frame, 'fixedUpdate')
 
 Object.defineProperty(Frame.prototype, 'sprite', {
@@ -106,6 +101,11 @@ Object.defineProperty(Frame.prototype, 'sprite', {
     throw new Error('Cannot acces unexisting sprite')
   },
   set: function(value) {
-    Object.defineProperty(this, 'sprite', {value})
+    if (value) {
+      Object.defineProperty(this, 'sprite', {value})
+    } else {
+      console.error(this);
+      throw new Error('Cannot assign empty sprite!')
+    }
   }
 })

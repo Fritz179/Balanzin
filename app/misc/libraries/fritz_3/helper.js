@@ -33,16 +33,7 @@ function decrementPreloadCounter(index, callback) {
     // => 2
     // => 4
 
-    setTimeout(() => {
-      masterLayer = new Master()
-
-      eventListeners.forEach(listener => {
-        window.addEventListener(...listener)
-      });
-
-      if (timer.running) console.error('Erur?');
-      else timer.start()
-    })
+    setTimeout(onPreloaDone)
   }
 }
 

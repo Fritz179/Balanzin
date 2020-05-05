@@ -52,8 +52,8 @@ function createCrawler(eventName, allowed = () => true) {
       }
 
       if (!stopPropagation) {
-        if (typeof target.forEachChild == 'function') {
-          target.forEachChild(child => {
+        if (target.children) {
+          target.children.forEach(child => {
             crawl(child, args, target)
           })
         }
@@ -207,8 +207,8 @@ addEventListenerAfterPreload('mouseup', ({x, y, button}) => {
 
 function deClickAll(target) {
   target._wasOnClick = false
-  if (typeof target.forEachChild == 'function') {
-    target.forEachChild(deClickAll)
+  if (target.children) {
+    target.children.forEach(deClickAll)
   }
 }
 
@@ -270,12 +270,11 @@ addEventListenerAfterPreload('wheel', event => {
   crawl('onWheel', {dir: Math.sign(event.deltaY)})
 });
 
-createCrawler('onResize', t => t instanceof Layer)
 addEventListenerAfterPreload('resize', () => {
   const width = window.innerWidth
   const height = window.innerHeight
 
-  crawl('onResize', {width, height, w: width, h: height})
+  masterLayer.updateCameraMode(null, width, height)
 });
 
 

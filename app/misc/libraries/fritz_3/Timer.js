@@ -28,7 +28,8 @@ class Timer {
     this.accTime += dt
 
     // if the engine is too far back, update at max (8) times
-    if (this.accTime >= this.timeStep * this.throttle) {
+    if (this.accTime > this.timeStep * this.throttle) {
+      console.warn(`Heavy lag detected! lost ${this.accTime - this.timeStep * this.throttle}ms!`);
       this.accTime = this.timeStep * this.throttle
     }
 

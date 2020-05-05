@@ -1,3 +1,24 @@
+/*
+  Expose common Math function to global
+  Better random function
+  Vec 2
+*/
+
+const {round, floor, ceil, PI, abs, min, max, sign} = Math
+const random = (...args) => {
+  if (args.length == 0) {
+    return Math.random()
+  } else if (args.length == 1) {
+    if (Array.isArray(args[0])) {
+      return args[0][Math.floor(Math.random() * min.length)]
+    } else {
+      return Math.random() * args[0]
+    }
+  } else {
+    return Math.random() * (args[1] - args[0]) + args[0]
+  }
+}
+
 function getXY(x, y) {
   if (Array.isArray(x)) {
     return x
@@ -113,6 +134,23 @@ function addVec2(target, name, dim1, dim2) {
 
     set [dim1](x) { this[0] = x }
     set [dim2](y) { this[1] = y }
+
+    bind(binded, dim1, dim2, px, fun) {
+      let x = this[0], y = this[1]
+      const setX = px ? to => binded[dim1] = (x = to) + 'px' : to => binded[dim1] = x = to
+      const setY = px ? to => binded[dim2] = (y = to) + 'px' : to => binded[dim2] = y = to
+
+      Object.defineProperties(this, {
+        0: {
+          get: function() { return x },
+          set: fun ? to => { setX(to); fun(x, y) } : setX
+        },
+        1: {
+          get: function() { return y },
+          set: fun ? to => { setY(to); fun(x, y) } : setY
+        }
+      })
+    }
   }
 
   ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'equals', 'reset'].forEach(funName => {
@@ -136,14 +174,17 @@ function addVec2(target, name, dim1, dim2) {
       Object.defineProperty(this, name, {
         get: function() { return thisVec },
         set: function(to) {
+          console.log(to);
           if (Array.isArray(to) || typeof to != 'object') {
             thisVec.set(to)
+            console.log(typeof to);
           } else {
-            console.log(to);
             const x = typeof to[dim1] != 'undefined' ? to[dim1] : to.x
             const y = typeof to[dim2] != 'undefined' ? to[dim2] : to.y
             thisVec.set(x, y)
           }
+
+          return thisVec
         }
       });
     }
@@ -192,55 +233,3 @@ class ChangeVec extends Vec2 {
     return this
   }
 }
-
-class A {
-  constructor() {
-    this.pos = [1, 2]
-  }
-}
-
-class B extends A {
-  constructor() {
-    super()
-  }
-}
-
-Object.defineProperty(A.prototype, 'pos', {
-  set: function(vec2) {
-    const vec = new posVec(vec2)
-    Object.defineProperty(this, 'pos', {
-      get: function() { return vec },
-      set: function(to) {
-        console.log('settedA', to);
-        if (Array.isArray(to) || typeof to != 'object') {
-          this[name].set(to)
-        } else {
-          const x = typeof to[dim1] != 'undefined' ? to[dim1] : to.x
-          const y = typeof to[dim2] != 'undefined' ? to[dim2] : to.y
-          this[name].set(x, y)
-        }
-      }
-    });
-  }
-})
-
-Object.defineProperty(B.prototype, 'pos', {
-  set: function(vec2) {
-    console.log('setted1', vec2);
-    Object.defineProperty(this, 'pos', {
-      get: function() { return this[name] },
-      set: function(to) {
-        console.log('settedB', to);
-        if (Array.isArray(to) || typeof to != 'object') {
-          this[name].set(to)
-        } else {
-          const x = typeof to[dim1] != 'undefined' ? to[dim1] : to.x
-          const y = typeof to[dim2] != 'undefined' ? to[dim2] : to.y
-          this[name].set(x, y)
-        }
-      }
-    });
-  }
-})
-
-b = new B()

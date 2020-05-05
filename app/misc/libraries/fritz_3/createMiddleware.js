@@ -1,17 +1,22 @@
 function createMiddleware(to, name) {
   const {prototype} = to
-  const capName = 'run' + capitalize(name)
+  const runName = 'run' + capitalize(name)
 
-  Object.defineProperty(prototype, capName, {
+  Object.defineProperty(prototype, runName, {
     get: function() {
-      const funs = this.hasOwnProperty(name) ? [prototype[name]] : []
-      console.log(funs, name);
+
+      // add only top? function in the middle
+      // const funs = this.__proto__.hasOwnProperty(name) ? [this.__proto__[name]] : []
+      const funs = this.__proto__[name] ? [this.__proto__[name]] : []
 
       function crawl(proto) {
+
+        // call all the capture first, from top to bottom
         if (proto.hasOwnProperty(`${name}Capture`)) {
           funs.unshift(proto[`${name}Capture`])
         }
 
+        // call al the bubble last, from bottom to top
         if (proto.hasOwnProperty(`${name}Bubble`)) {
           funs.push(proto[`${name}Bubble`])
         }
@@ -22,8 +27,9 @@ function createMiddleware(to, name) {
         }
       }
 
-      crawl(prototype)
-      Object.defineProperty(this.constructor.prototype, capName, {
+      crawl(this.__proto__)
+
+      Object.defineProperty(this.constructor.prototype, runName, {
         value: function(args = {}) {
           let ret
           funs.forEach(fun => {
@@ -35,7 +41,8 @@ function createMiddleware(to, name) {
         }
       });
 
-      return this[name]
+      console.log(this.constructor.name, funs, runName);
+      return this[runName]
     },
     set: function(to) {
       console.log(to);

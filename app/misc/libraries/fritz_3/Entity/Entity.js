@@ -99,3 +99,13 @@ class Entity extends Body {
     }
   }
 }
+
+Object.defineProperty(Entity.prototype, 'sprite', {
+  get: function() {
+    console.error(this);
+    throw new Error('Cannot acces unexisting sprite')
+  },
+  set: function(value) {
+    Object.defineProperty(this, 'sprite', {value})
+  }
+})
