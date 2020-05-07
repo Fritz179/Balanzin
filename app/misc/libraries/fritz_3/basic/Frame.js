@@ -57,13 +57,17 @@ class Frame extends Block {
     this.sprite.rect(x, y, w, h)
   }
 
-  image(img, x, y) {
+  image(img, x = 0, y = 0) {
     if (img instanceof RenderContext || img instanceof Context) {
       img = img.canvas
     }
 
     this.sprite.image(img, x, y)
   }
+
+  // updateBubble() {
+  //   return this.hasChangedPos
+  // }
 };
 
 // pure drawing functions

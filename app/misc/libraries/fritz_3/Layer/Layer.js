@@ -8,13 +8,14 @@
 class Layer extends Frame {
   constructor(cameraMode = {}) {
     super(0, 0, 100, 100)
+    this.useHTML = this.constructor.useHTML
 
     this.mult = [1, 1]
     this.children = new ElementsHandler()
 
     const {from} = cameraMode
 
-    if (!this.constructor.useHTML) {
+    if (!this.useHTML) {
       if (typeof from == 'string') {
         const canvas = document.getElementById(from)
         this.sprite = new RenderContext(this, new Context(canvas))
@@ -103,8 +104,8 @@ class Layer extends Frame {
       child.updateCameraMode(this, this.width, this.height)
     }
 
-    if (this.constructor.useHTML) {
-      if (child.constructor.useHTML) {
+    if (this.useHTML) {
+      if (child.useHTML) {
         this.container.appendChild(child.container)
       } else {
         this.container.appendChild(child.sprite.canvas)
@@ -124,8 +125,12 @@ class Layer extends Frame {
 
   updateCapture() {
     this.children.forEach(child => {
-      child.runUpdate()
+      if (child.runUpdate() || child.changed) {
+        this.changed = true
+      }
     })
+
+    return this.changed || this.changedPos || this.chagedMult
   }
 
   fixedUpdateCapture() {
@@ -134,12 +139,39 @@ class Layer extends Frame {
     })
   }
 
-  render() {
-    this.children.forEach(child => {
-      if (child.changed) {
-        child.runRender(this)
-      }
-    })
+  renderCapture(parent) {
+    if (parent.useHTML && (this.hasChangedPos || this.hasChangedMult)) {
+      // if both pos and mult have changed, the above statement cuts short
+      // at the || and mult is't staganted
+      this.stagnateMult()
+
+      const {style} = this.useHTML ? this.container : this.sprite.canvas
+      const {mult, pos} = this
+      style.transform = `matrix(${1}, 0, 0, ${1}, ${pos.x}, ${pos.y})`
+    }
+
+    if (this.useHTML) {
+      this.children.forEach(child => {
+        if (child.changed) {
+          child.runRender(this)
+          child.changed = false
+        }
+      })
+    } else {
+      this.children.forEach(child => {
+        if (child.changed) {
+          const sprite = child.runRender(this)
+
+          if (sprite) {
+            this.image(sprite)
+          }
+
+          child.changed = false
+        }
+      })
+
+      return this.sprite.canvas
+    }
   }
 }
 

@@ -41,7 +41,7 @@ function createMiddleware(to, name) {
         }
       });
 
-      console.log(this.constructor.name, funs, runName);
+      // console.log(this.constructor.name, funs, runName);
       return this[runName]
     },
     set: function(to) {

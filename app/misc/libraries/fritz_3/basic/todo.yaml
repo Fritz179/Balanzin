@@ -13,12 +13,19 @@ Frame:
   - drawHitbox
   - line
   - background?
-  -
-  -
-  -
-  -
-  -
-  -
-  -
-  -
-  - 
+
+On canvas resize:
+  const valuesToSave = ['strokeStyle', 'fillStyle', 'globalAlpha', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDashOffset', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur', 'shadowColor', 'globalCompositeOperation', 'font', 'textAlign', 'textBaseline', 'direction', 'imageSmoothingEnabled']
+  function getState(ctx) {
+    const ret = {}
+    valuesToSave.forEach(val => {
+      ret[val] = ctx[val]
+    })
+    return ret
+  }
+
+  function setState(ctx, state) {
+    valuesToSave.forEach(val => {
+      ctx[val] = state[val]
+    })
+  }

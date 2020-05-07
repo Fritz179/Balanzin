@@ -42,6 +42,15 @@ class Vec2 extends Array {
   set x(x) { this[0] = x }
   set y(y) { this[1] = y }
 
+  get hasChanged() { return this.changed ? this.stagnate() : false}
+  get changed() { return this[0] != this[2] || this[1] != this[3] }
+
+  stagnate() {
+    this[2] = this[0]
+    this[3] = this[1]
+    return this
+  }
+
   set(x, y) {
     [x, y] = getXY(x, y)
 
@@ -153,8 +162,14 @@ function addVec2(target, name, dim1, dim2) {
     }
   }
 
-  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'equals', 'reset'].forEach(funName => {
+  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'equals', 'reset', 'stagnate'].forEach(funName => {
     prototype[funName + capName] = function(...to) { this[name][funName](...to); return this; }
+  });
+
+  ['hasChanged', 'changed'].forEach(getName => {
+    Object.defineProperty(prototype, getName + capName, {
+      get: function() { return this[name][getName] }
+    });
   })
 
   Object.defineProperty(prototype, dim1, {
@@ -189,47 +204,4 @@ function addVec2(target, name, dim1, dim2) {
       });
     }
   })
-}
-
-class ChangeVec extends Vec2 {
-  constructor(x, y) {
-    super(x, y)
-
-    this.oldVec = new Vec2(this[0], this[1])
-    this.changedAccesed = false
-  }
-
-  get changed() {
-    if (this.changedAccesed) {
-      return false
-    }
-
-    const ret = !this.equals(this.oldVec)
-    // console.log(this, this.oldVec);
-    this.oldVec.set(this)
-    this.changedAccesed = true
-
-    return ret
-  }
-
-  get isDifferent() {
-    return this.equals(this.oldVec)
-  }
-
-  set(x, y) {
-    this.oldVec.set(this)
-    this.changedAccesed = false;
-
-    // this.__proto__.__proto__.set(x, y) NOPE, this points to __proto__.__proto__
-    [x, y] = getXY(x, y)
-    this[0] = x
-    this[1] = y
-
-    return this
-  }
-
-  equalize() {
-    this.oldVec.set(this)
-    return this
-  }
 }
