@@ -2,33 +2,39 @@
   API to js canvas API
 */
 
+// strokeStyle, fillStyle, globalAlpha, lineWidth, lineCap, lineJoin, miterLimit, lineDashOffset, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor, globalCompositeOperation, font, textAlign, textBaseline, direction, imageSmoothingEnabled
+const cachedStyles = ['strokeStyle', 'fillStyle', 'lineWidth', 'font', 'textAlign', 'textBaseline', 'imageSmoothingEnabled']
+
 class Context {
   constructor(canvas) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')
-    this.ctx.imageSmoothingEnabled = false
 
-    this.textSize = 10
-    this.textFont = 'sans-serif'
-    this.textStyle = 'normal'
+    // default imageSmoothingEnabled to false instead
+    this.ctx.imageSmoothingEnabled = false
 
     this.doStroke = true
     this.doFill = true
 
-    this.cachedFillStyle = false
-    this.cachedStrokeStyle = false
-    this.cachedStrokeWeight = false
-    this.cachedTextStyle = false
-    this.cachedTextAlign = false
-    this.cachedTextBaseline = false
+    this.cachedFillStyle = '#000'
+    this.cachedStrokeStyle = '#000'
+    this.cachedStrokeWeight = 1
+
+    this.textSize = 10
+    this.textFont = 'sans-serif'
+    this.textStyle = 'normal'
+    this.cachedTextStyle = '10px sans-serif'
+    this.cachedTextAlign = 'start'
+    this.cachedTextBaseline = 'alphabetic'
 
     this.applyTextStyle()
   }
 
-  get topCtx() { return this }
+  get topContext() { return this }
+  get topCtx() { return this.ctx }
 
   smooth(bool) {
-    this.canvas.imageSmoothingEnabled = bool
+    this.ctx.imageSmoothingEnabled = bool
   }
 
   // if black fillStyle = rgb(0) => true
@@ -56,7 +62,7 @@ class Context {
     this.doStroke = weight && this.cachedStrokeStyle
 
     if (strokeWeight && this.cachedStrokeWeight !== strokeWeight) {
-      this.ctx.strokeWeight = strokeWeight
+      this.ctx.lineWidth = strokeWeight
     }
 
     // set even if strokeWeight is false
@@ -120,16 +126,21 @@ class Context {
     this.ctx.clearRect(0, 0, this.width, this.height)
   }
 
-  image(img, x, y) {
-    this.ctx.drawImage(img, x, y)
+  image(img, ...args) {
+    const [x, y, w, h] = minMax(args, 2)
+
+    this.ctx.drawImage(img, x, y, w, h)
   }
 
-  rect(x, y, w, h) {
+  rect(...args) {
+    const [x, y, w, h] = minMax(args, 2)
+
     if (!this.doStroke && !this.doFill)
       return
 
     const {ctx} = this
-
+    // console.log(this.doStroke, x, y);
+    console.log(this.ctx.imageSmoothingEnabled);
     if (this.doStroke && this.lineWidth % 2 == 1) {
       ctx.translate(0.5, 0.5)
     }
@@ -327,4 +338,16 @@ class Context {
   //
   //   this.ctx.fillStyle = this.cachedFillStyle
   // }
+}
+
+function saveState(ctx, cache) {
+  valuesToSave.forEach(val => {
+    ret[val] = cache[val]
+  })
+}
+
+function restoreState(ctx, cache) {
+  valuesToSave.forEach(val => {
+    ctx[val] = cache[val]
+  })
 }

@@ -4,7 +4,24 @@
   Vec 2
 */
 
-const {round, floor, ceil, PI, abs, min, max, sign} = Math
+const {PI, abs, min, max, sign} = Math
+
+// expand to be called with arrays or multiple arguments
+const [floor, round, ceil] = ['floor', 'round', 'ceil'].map(funName => (...args) => {
+  if (args.length > 1) {
+    return args.map(x => Math[funName](x))
+  } else if (Array.isArray(args[0])) {
+    return args[0].map(x => Math[funName](x))
+  } else {
+    return Math[funName](args[0])
+  }
+})
+
+const minMax = (values, cycle) => {
+  return values.map((x, i) => i < cycle ? Math.floor(x) : Math.ceil(x))
+}
+// expand to be called with multiple arguments or
+// to chose a random element from an array
 const random = (...args) => {
   if (args.length == 0) {
     return Math.random()
@@ -123,8 +140,7 @@ class Vec2 extends Array {
   }
 
   copy() {
-    const copy = new this.constructor(this)
-    return copy
+    return new Vec2(this[0], this[1])
   }
 }
 
@@ -162,9 +178,16 @@ function addVec2(target, name, dim1, dim2) {
     }
   }
 
-  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'equals', 'reset', 'stagnate'].forEach(funName => {
+  // return attached class
+  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'reset', 'stagnate'].forEach(funName => {
     prototype[funName + capName] = function(...to) { this[name][funName](...to); return this; }
   });
+
+  // return customVec instance
+  ['equals', 'copy'].forEach(funName => {
+    prototype[funName + capName] = function(...to) { return this[name][funName](...to) }
+  });
+
 
   ['hasChanged', 'changed'].forEach(getName => {
     Object.defineProperty(prototype, getName + capName, {

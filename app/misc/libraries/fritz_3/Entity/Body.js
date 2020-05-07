@@ -2,7 +2,6 @@ class Body extends Frame {
   constructor(x, y, w, h) {
     super(x, y, w, h)
 
-    this.prevPos = [0, 0]
     this.vel = [0, 0]
     this.acc = [0, 0]
     this.drag = [0, 0]
@@ -147,7 +146,6 @@ class Body extends Frame {
   }
 }
 
-addVec2(Body, 'prevPos', 'px', 'py')
 addVec2(Body, 'vel', 'xv', 'yv')
 addVec2(Body, 'acc', 'xa', 'ya')
 addVec2(Body, 'drag', 'xd', 'yd')

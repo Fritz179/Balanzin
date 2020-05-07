@@ -30,10 +30,10 @@ function createMiddleware(to, name) {
       crawl(this.__proto__)
 
       Object.defineProperty(this.constructor.prototype, runName, {
-        value: function(args = {}) {
+        value: function(...args) {
           let ret
           funs.forEach(fun => {
-            const out = fun.call(this, args, ret)
+            const out = fun.call(this, ...args, ret)
             if (typeof out != 'undefined') ret = out
           })
 

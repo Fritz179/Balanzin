@@ -1,9 +1,10 @@
 class Master extends Layer {
-  static useHTML = true
+  // static useHTML = true
 
   constructor() {
     super({size: 'fit'})
 
+    this.setBaseScale(2, 2)
     this.addChild(this.main = new Main())
   }
 }
@@ -11,15 +12,11 @@ class Master extends Layer {
 class Main extends Layer {
   constructor() {
     super({align: 'center'})
-    // this.sprite.canvas.style.transform = 'matrix(1, 0, 0, 0.5, 0, 0)'
-    // this.sprite.canvas.style['transform-origin'] = 'top left'
-    // this.setPos(10, 10)
 
-    // this.setMult(2, 2)
+    // this.setBaseScale(2, 2)
   }
 
   render() {
-    console.log('fff');
     this.background(51)
     this.fill(255, 255, 153)
     this.rect(-50, -50, 100, 100)

@@ -57,12 +57,12 @@ class Frame extends Block {
     this.sprite.rect(x, y, w, h)
   }
 
-  image(img, x = 0, y = 0) {
+  image(img, x = 0, y = 0, w, h) {
     if (img instanceof RenderContext || img instanceof Context) {
       img = img.canvas
     }
 
-    this.sprite.image(img, x, y)
+    this.sprite.image(img, x, y, w, h)
   }
 
   // updateBubble() {
@@ -93,8 +93,6 @@ class Frame extends Block {
     })
   })
 });
-
-addVec2(Frame, 'prev', 'px', 'py')
 
 createMiddleware(Frame, 'update')
 createMiddleware(Frame, 'fixedUpdate')

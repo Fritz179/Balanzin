@@ -12,14 +12,15 @@ class RenderContext {
   }
 
   get to() { return this._to || this.from.parentLayer }
+  get topContext() { return this.to.topContext }
   get topCtx() { return this.to.topCtx }
   get canvas() { return this.to.canvas }
 
   background(...args) {
-    if (this.topCtx != this.to) {
+    if (this.topContext != this.to) {
       console.log('background in a not buffer layer?');
     }
-    this.topCtx.background(getColor(args))
+    this.topContext.background(getColor(args))
   }
 
   rect(x, y, w, h) {
@@ -29,8 +30,8 @@ class RenderContext {
     this.to.rect(x + width * xAlign, y + height * yAlign, w, h)
   }
 
-  image(img, x, y) {
-    this.to.image(img, x, y)
+  image(img, x, y, w, h) {
+    this.to.image(img, x, y, w, h)
   }
 
   // rotate(a) { this.topCtx._rotate(a) }

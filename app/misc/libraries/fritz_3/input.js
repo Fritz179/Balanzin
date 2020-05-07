@@ -270,14 +270,6 @@ addEventListenerAfterPreload('wheel', event => {
   crawl('onWheel', {dir: Math.sign(event.deltaY)})
 });
 
-addEventListenerAfterPreload('resize', () => {
-  const width = window.innerWidth
-  const height = window.innerHeight
-
-  masterLayer.updateCameraMode(null, width, height)
-});
-
-
 const hoverMapper = mapMouse((t, a, p) => pointIsInRange(a, t.w, t.h) && !t._hovered ? t._hovered = true : false)
 const unHoverMapper = mapMouse((t, a, p) => !pointIsInRange(a, t.w, t.h) && t._hovered ? !(t._hovered = false) : false)
 createCrawler(`onHover`, hoverMapper)

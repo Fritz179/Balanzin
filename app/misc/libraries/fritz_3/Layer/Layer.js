@@ -10,7 +10,12 @@ class Layer extends Frame {
     super(0, 0, 100, 100)
     this.useHTML = this.constructor.useHTML
 
-    this.mult = [1, 1]
+    this.scale = [1, 1]
+
+    // referenze for resizing
+    this.baseSize = this.copySize()
+    this.baseScale = this.copyScale()
+
     this.children = new ElementsHandler()
 
     const {from} = cameraMode
@@ -60,30 +65,33 @@ class Layer extends Frame {
     this.cameraMode.yAlign = yTable[align.split('-')[0]] || 0
   }
 
-  updateCameraMode(parent, width, height) {
-    const {size, ratio} = this.cameraMode
+  updateCameraMode(parent, parentW, parentH, parentSx, parentSy) {
+    console.assert(parentW && parentH, `Invalid parent size! ${parentW}, ${parentH}`)
 
-    // console.log(parent, this, width, height, size);
+    const {size, ratio} = this.cameraMode
+    let newW = parentW, newH = parentH, newSx = this.bsx, newSy = this.bsy
+
     if (size == 'fit') {
-      if (height * ratio <= width) {
-        const newWidth = Math.ceil(height * ratio)
-        this.setSize(newWidth, height)
-        this.setPos((width - newWidth) / 2 | 0, 0)
+      if (parentH * ratio <= parentW) {
+        // too wide
+        newW = parentH * ratio
       } else {
-        const newHeight = Math.ceil(width / ratio)
-        this.setSize(width, newHeight)
-        this.setPos(0, (height - newHeight) / 2 | 0)
+        // to tall
+        newH = parentW / ratio
       }
-    } else if (size == 'fill') {
-      this.setSize(width, height)
-    } else if (Array.isArray(size)){
-      this.setSize(width * size[0], height * size[1])
+      this.setPos(floor((parentW - newW) / 2), floor((parentH - newH) / 2))
     }
 
-    // console.log(this.children);
+    this.setScale(newSx, newSy)
+    // this.sprite.topContext.save()
+    this.setSize(...ceil(newW / newSx, newH / newSy))
+    // this.sprite.topContext.restore()
+  }
+
+  updateCameraModeBubble() {
     this.children.forEach(child => {
       if (child instanceof Layer) {
-        child.updateCameraMode(this, this.width, this.height)
+        child.runUpdateCameraMode(this, ...this.size, ...this.scale)
       }
     })
 
@@ -101,7 +109,7 @@ class Layer extends Frame {
 
   onChildAddedCapture(child) {
     if (child instanceof Layer) {
-      child.updateCameraMode(this, this.width, this.height)
+      child.runUpdateCameraMode(this, ...this.size, ...this.scale)
     }
 
     if (this.useHTML) {
@@ -130,7 +138,7 @@ class Layer extends Frame {
       }
     })
 
-    return this.changed || this.changedPos || this.chagedMult
+    return this.changed || this.changedPos || this.changedScale
   }
 
   fixedUpdateCapture() {
@@ -140,14 +148,14 @@ class Layer extends Frame {
   }
 
   renderCapture(parent) {
-    if (parent.useHTML && (this.hasChangedPos || this.hasChangedMult)) {
-      // if both pos and mult have changed, the above statement cuts short
-      // at the || and mult is't staganted
-      this.stagnateMult()
+    if (parent.useHTML && (this.hasChangedPos || this.changedScale)) {
+      // if both pos and scale have changed, the above statement cuts short
+      // at the || and scale is't staganted
+      this.stagnateScale()
 
       const {style} = this.useHTML ? this.container : this.sprite.canvas
-      const {mult, pos} = this
-      style.transform = `matrix(${1}, 0, 0, ${1}, ${pos.x}, ${pos.y})`
+      const {scale, pos} = this
+      style.transform = `matrix(${scale.x}, 0, 0, ${scale.y}, ${pos.x}, ${pos.y})`
     }
 
     if (this.useHTML) {
@@ -163,7 +171,7 @@ class Layer extends Frame {
           const sprite = child.runRender(this)
 
           if (sprite) {
-            this.image(sprite)
+            this.image(sprite, child.x, child.y, child.w * child.sx, child.h * child.sy)
           }
 
           child.changed = false
@@ -175,10 +183,14 @@ class Layer extends Frame {
   }
 }
 
-addVec2(Layer, 'mult', 'xm', 'ym')
+addVec2(Layer, 'scale', 'sx', 'sy')
+addVec2(Layer, 'baseSize', 'bw', 'bh')
+addVec2(Layer, 'baseScale', 'bsx', 'bsy')
+
 createMiddleware(Layer, 'render')
 createMiddleware(Layer, 'onChildAdded')
 createMiddleware(Layer, 'onChildRemoved')
+createMiddleware(Layer, 'updateCameraMode')
 
 Object.defineProperty(Layer.prototype, 'parentLayer', {
   get: function() {
