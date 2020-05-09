@@ -43,7 +43,6 @@ class Layer extends Frame {
   }
 
   setCameraMode({from, align, ratio = 16 / 9, size = 'fill'}) {
-    console.log('??');
     this.cameraMode = {size, ratio, from}
 
     if (align) {
@@ -69,23 +68,38 @@ class Layer extends Frame {
     console.assert(parentW && parentH, `Invalid parent size! ${parentW}, ${parentH}`)
 
     const {size, ratio} = this.cameraMode
-    let newW = parentW, newH = parentH, newSx = this.bsx, newSy = this.bsy
 
-    if (size == 'fit') {
-      if (parentH * ratio <= parentW) {
-        // too wide
-        newW = parentH * ratio
-      } else {
-        // to tall
-        newH = parentW / ratio
+
+    if (Array.isArray(size)) {
+      this.scale = this.baseScale
+      this.setSize(size[0], size[1])
+    } else {
+      let newW = parentW, newH = parentH, newSx = this.bsx, newSy = this.bsy
+
+      if (size == 'fit') {
+        if (parentH * ratio <= parentW) {
+          // too wide
+          newW = parentH * ratio
+        } else {
+          // to tall
+          newH = parentW / ratio
+        }
       }
-      this.setPos(floor((parentW - newW) / 2), floor((parentH - newH) / 2))
+
+      this.setScale(newSx, newSy)
+      this.setBaseSize(newW, newH)
+
+      if (this.useHTML) {
+        this.setSize(...ceil(newW / newSx, newH / newSy))
+      } else {
+        this.sprite.topContext.save()
+        this.setSize(...ceil(newW / newSx, newH / newSy))
+        this.sprite.topContext.restore()
+      }
     }
 
-    this.setScale(newSx, newSy)
-    // this.sprite.topContext.save()
-    this.setSize(...ceil(newW / newSx, newH / newSy))
-    // this.sprite.topContext.restore()
+
+    this.setPos(ceil((parentW - this.w * this.sx) / 2), ceil((parentH - this.h * this.sy) / 2))
   }
 
   updateCameraModeBubble() {
@@ -155,6 +169,7 @@ class Layer extends Frame {
 
       const {style} = this.useHTML ? this.container : this.sprite.canvas
       const {scale, pos} = this
+      console.log(scale, pos);
       style.transform = `matrix(${scale.x}, 0, 0, ${scale.y}, ${pos.x}, ${pos.y})`
     }
 

@@ -1,8 +1,8 @@
 class Master extends Layer {
-  // static useHTML = true
+  static useHTML = true
 
   constructor() {
-    super({size: 'fit'})
+    super({size: 'fill'})
 
     this.setBaseScale(2, 2)
     this.addChild(this.main = new Main())
@@ -11,15 +11,26 @@ class Master extends Layer {
 
 class Main extends Layer {
   constructor() {
-    super({align: 'center'})
+    super({align: 'center', size: [101, 101]})
 
-    // this.setBaseScale(2, 2)
+    this.setBaseScale(2, 2)
+    // this.setBaseScale(4, 4)
   }
 
   render() {
-    this.background(51)
+    this.background(102)
     this.fill(255, 255, 153)
-    this.rect(-50, -50, 100, 100)
+
+    const s = 50
+    this.rectMode = 'radius'
+    this.lineMode = 'radius'
+    this.rect(0, 0, s, s)
+    this.noStroke()
+    this.fill('red')
+    this.ellipse(s / 2, s / 2, s / 2)
+    this.strokeWeight(1)
+    this.line(0, 0, s, 0)
+    this.line(0, 0, 0, s)
   }
 
   onKey({key}) {

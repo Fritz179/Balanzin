@@ -30,6 +30,20 @@ class RenderContext {
     this.to.rect(x + width * xAlign, y + height * yAlign, w, h)
   }
 
+  line(x, y, w, h) {
+    const {width, height, cameraMode} = this.from
+    const {xAlign, yAlign} = cameraMode
+
+    this.to.line(x + width * xAlign, y + height * yAlign, w, h)
+  }
+
+  ellipse(x, y, w, h, r) {
+    const {width, height, cameraMode} = this.from
+    const {xAlign, yAlign} = cameraMode
+    
+    this.to.ellipse(x + width * xAlign, y + height * yAlign, w, h, r)
+  }
+
   image(img, x, y, w, h) {
     this.to.image(img, x, y, w, h)
   }
@@ -153,7 +167,7 @@ class RenderContext {
   // _drawHitbox(args) { this.parentSprite._drawHitbox(this.multiply(args, true)) }
 };
 
-['smooth', 'fill', 'stroke', 'strokeWeight', 'textSize', 'textFont', 'textStyle', 'textAlign', 'text', 'clear'].forEach(fun => {
+['smooth', 'fill', 'stroke', 'strokeWeight', 'textSize', 'textFont', 'textStyle', 'textAlign', 'text', 'clear', 'lineCap'].forEach(fun => {
   RenderContext.prototype[fun] = function(...args) {
     this.to[fun](...args)
     return this

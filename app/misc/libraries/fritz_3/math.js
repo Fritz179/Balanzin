@@ -18,6 +18,7 @@ const [floor, round, ceil] = ['floor', 'round', 'ceil'].map(funName => (...args)
 })
 
 const minMax = (values, cycle) => {
+  console.assert(cycle, 'No cycle')
   return values.map((x, i) => i < cycle ? Math.floor(x) : Math.ceil(x))
 }
 // expand to be called with multiple arguments or
@@ -212,10 +213,8 @@ function addVec2(target, name, dim1, dim2) {
       Object.defineProperty(this, name, {
         get: function() { return thisVec },
         set: function(to) {
-          console.log(to);
           if (Array.isArray(to) || typeof to != 'object') {
             thisVec.set(to)
-            console.log(typeof to);
           } else {
             const x = typeof to[dim1] != 'undefined' ? to[dim1] : to.x
             const y = typeof to[dim2] != 'undefined' ? to[dim2] : to.y

@@ -14,6 +14,10 @@ class Frame extends Block {
     this._hovered = false     // for hovered
 
     this.changed = true
+
+    this.rectMode = 'corner'
+    this.lineMode = 'corner'
+    this.ellipseMode = 'center'
   }
 
   noSmooth() {
@@ -42,7 +46,7 @@ class Frame extends Block {
   }
 
   noStroke() {
-    this.sprite.stroke(false)
+    this.sprite.strokeWeight(0)
     return this
   }
 
@@ -51,10 +55,20 @@ class Frame extends Block {
     return this
   }
 
+  line(x, y, w, h) {
+    this.sprite.line(...modeAdjust(x, y, w, h, this.lineMode))
+  }
+
+  ellipse(x, y, w, h, r = 0) {
+    if (!h) h = w
+
+    this.sprite.ellipse(...modeAdjust(x, y, w, h, this.ellipseMode), r)
+  }
+
   rect(x, y, w, h) {
     if (!h) h = w
 
-    this.sprite.rect(x, y, w, h)
+    this.sprite.rect(...modeAdjust(x, y, w, h, this.rectMode))
   }
 
   image(img, x = 0, y = 0, w, h) {
@@ -71,7 +85,7 @@ class Frame extends Block {
 };
 
 // pure drawing functions
-['strokeWeight', 'textSize', 'textFont', 'textStyle', 'textAlign', 'text', 'clear'].forEach(fun => {
+['strokeWeight', 'textSize', 'textFont', 'textStyle', 'textAlign', 'text', 'clear', 'lineCap'].forEach(fun => {
   Frame.prototype[fun] = function(...args) {
     this.sprite[fun](...args)
     return this

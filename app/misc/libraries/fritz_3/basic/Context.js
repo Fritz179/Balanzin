@@ -3,123 +3,58 @@
 */
 
 // strokeStyle, fillStyle, globalAlpha, lineWidth, lineCap, lineJoin, miterLimit, lineDashOffset, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor, globalCompositeOperation, font, textAlign, textBaseline, direction, imageSmoothingEnabled
-const cachedStyles = ['strokeStyle', 'fillStyle', 'lineWidth', 'font', 'textAlign', 'textBaseline', 'imageSmoothingEnabled']
+const cachedStyles = ['strokeStyle', 'fillStyle', 'lineWidth', 'font', 'textAlign', 'textBaseline', 'imageSmoothingEnabled', 'lineCap']
 
 class Context {
   constructor(canvas) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')
+    this.cache = {}
 
     // default imageSmoothingEnabled to false instead
     this.ctx.imageSmoothingEnabled = false
-
-    this.doStroke = true
-    this.doFill = true
-
-    this.cachedFillStyle = '#000'
-    this.cachedStrokeStyle = '#000'
-    this.cachedStrokeWeight = 1
-
-    this.textSize = 10
-    this.textFont = 'sans-serif'
-    this.textStyle = 'normal'
-    this.cachedTextStyle = '10px sans-serif'
-    this.cachedTextAlign = 'start'
-    this.cachedTextBaseline = 'alphabetic'
-
-    this.applyTextStyle()
+    this.ctx.lineCap = 'square'
+    this.save()
   }
 
   get topContext() { return this }
   get topCtx() { return this.ctx }
 
-  smooth(bool) {
-    this.ctx.imageSmoothingEnabled = bool
+  save() {
+    cachedStyles.forEach(style => {
+      this.cache[style] = this.ctx[style]
+    })
   }
 
-  // if black fillStyle = rgb(0) => true
-  fill(fillStyle) {
-    this.doFill = fillStyle
-
-    if (fillStyle && this.cachedFillStyle !== fillStyle) {
-      this.ctx.fillStyle = fillStyle
-      this.cachedFillStyle = fillStyle
-    }
-  }
-
-  stroke(strokeStyle) {
-    this.doStroke = strokeStyle && this.doStroke
-
-    if (strokeStyle && this.cachedStrokeStyle !== strokeStyle) {
-      this.ctx.strokeStyle = strokeStyle
-    }
-
-    // set even if strokeStyle is false
-    this.cachedStrokeStyle = strokeStyle
-  }
-
-  strokeWeight(strokeWeight = 1) {
-    this.doStroke = weight && this.cachedStrokeStyle
-
-    if (strokeWeight && this.cachedStrokeWeight !== strokeWeight) {
-      this.ctx.lineWidth = strokeWeight
-    }
-
-    // set even if strokeWeight is false
-    this.cachedStrokeWeight = strokeWeight
-  }
-
-  textSize(size = 10) {
-    this.textSize = size
-    this.applyTextStyle()
-  }
-
-  textFont(font = 'sans-serif') {
-    this.textFont = font
-    this.applyTextStyle()
-  }
-
-  textStyle(style = 'normal') {
-    this.textStyle = style
-    this.applyTextStyle()
-  }
-
-  applyTextStyle() {
-    const style = `${this.textStyle} ${this.textSize}px ${this.textFont}`
-
-    if (this.cachedTextStyle !== style) {
-      this.ctx.font = style
-      this.cachedTextStyle = style
-    }
+  restore() {
+    cachedStyles.forEach(style => {
+      this.ctx[style] = this.cache[style]
+    })
   }
 
   textAlign(w, h) {
-    if (w && w != this.cachedTextAlign) {
+    if (w && w != this.cache.textAlign) {
       this.ctx.textAlign = w
-      this.cachedTextAlign = w
+      this.cache.textAlign = w
     }
 
-    if (h && h != this.cachedTextBaseline) {
+    if (h && h != this.cache.textBaseline) {
       this.ctx.textBaseline = h
-      this.cachedTextBaseline = h
+      this.cache.textBaseline = h
     }
   }
 
   text(txt, x, y) {
-    if (this.doFill || this.doStroke) {
+    if (this.cache.fillStyle || this.cache.lineWidth) {
       this.ctx.fillText(txt, x, y)
     }
   }
 
   background(color) {
-    if (!this.cachedFillStyle) {
-      this.cachedFillStyle = this.ctx.fillStyle
-    }
-
     this.ctx.fillStyle = color
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.ctx.fillStyle = this.cachedFillStyle
+    this.ctx.fillStyle = this.cache.fillStyle
   }
 
   clear() {
@@ -133,15 +68,13 @@ class Context {
   }
 
   rect(...args) {
-    const [x, y, w, h] = minMax(args, 2)
-
-    if (!this.doStroke && !this.doFill)
+    if (!this.cache.lineWidth && !this.cache.fillStyle)
       return
 
+    const [x, y, w, h] = minMax(args, 2)
     const {ctx} = this
-    // console.log(this.doStroke, x, y);
-    console.log(this.ctx.imageSmoothingEnabled);
-    if (this.doStroke && this.lineWidth % 2 == 1) {
+
+    if (this.cache.lineWidth % 2 == 1) {
       ctx.translate(0.5, 0.5)
     }
 
@@ -149,30 +82,60 @@ class Context {
     ctx.rect(x, y, w, h);
     ctx.closePath()
 
-    if (this.doStroke) {
-      ctx.stroke();
-    }
-
-    if (this.doFill) {
+    if (this.cache.fillStyle) {
       ctx.fill();
     }
 
-    if (this.doStroke && this.lineWidth % 2 == 1) {
+    if (this.cache.lineWidth) {
+      ctx.stroke();
+    }
+
+    if (this.cache.lineWidth % 2 == 1) {
       ctx.translate(-0.5, -0.5)
     }
   }
 
+  line(...args) {
+    if (!this.cache.lineWidth)
+      return
 
+    const [x, y, w, h] = minMax(args, 2)
+    const {ctx} = this
 
+    if (this.cache.lineWidth % 2 == 1) {
+      ctx.translate(0.5, 0.5)
+    }
 
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w, y + h);
+    ctx.stroke();
 
+    if (this.cache.lineWidth % 2 == 1) {
+      ctx.translate(-0.5, -0.5)
+    }
+  }
 
+  ellipse(x, y, w, h, r) {
+    if (!this.cache.lineWidth && !this.cache.fillStyle)
+      return
 
+    [x, y, w, h] = minMax([x + w / 2, y + w / 2, w, h], 2)
+    const {ctx} = this
 
-  // clear() {
-  //   this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  // }
-  //
+    ctx.beginPath()
+    ctx.ellipse(x, y, w, h, r, 0, 2 * Math.PI);
+    ctx.closePath()
+
+    if (this.cache.fillStyle) {
+      ctx.fill();
+    }
+
+    if (this.cache.lineWidth) {
+      ctx.stroke();
+    }
+  }
+
   // image(...args) {
   //   let trusted = false
   //   if (args[args.length - 1] === true) {
@@ -273,81 +236,53 @@ class Context {
   //     this.ctx.drawImage(sprite, f(sx), f(sy), f(sw), f(sh), f(dx), f(dy), f(dw), f(dh))
   //   }
   // }
-  //
-  // drawHitbox(args) {
-  //
-  //   let {x, y, w, h} = args[0]
-  //   let color = '#515151', stroke = 1
-  //
-  //   if (args.length == 2) {
-  //     [color] = args.splice(1)
-  //   } else if (args.length == 3) {
-  //     [color, stroke] = args.splice(1)
-  //   } else if (args.length == 4) {
-  //     [x, y, w, h] = args
-  //   } else if (args.length == 5) {
-  //     [x, y, w, h, color] = args
-  //   } else if (args.length == 6) {
-  //     [x, y, w, h, color, stroke] = args
-  //   } else {
-  //     throw new Error('not enough (o magari trop) params.........')
-  //   }
-  //
-  //   const prevWidth = this.ctx.lineWidth
-  //   const prevColor = this.ctx.strokeStyle
-  //
-  //   this.ctx.translate(0.5, 0.5)
-  //   this.stroke(color)
-  //   this.strokeWeight(stroke)
-  //   const f = Math.floor
-  //   this.ctx.strokeRect(f(x), f(y), f(w - 1), f(h - 1))
-  //   this.ctx.translate(-0.5, -0.5)
-  //
-  //   this.ctx.lineWidth = prevWidth
-  //   this.ctx.strokeStyle = prevColor
-  // }
-  //
-  // line([x, y, w, h]) {
-  //   const {ctx} = this
-  //
-  //   if (!ctx.doStroke) {
-  //     return new Error('Cannot draw line with no stroke')
-  //   }
-  //
-  //   if (ctx.lineWidth % 2 == 1) {
-  //     ctx.translate(0.5, 0.5)
-  //   }
-  //
-  //   ctx.beginPath();
-  //   ctx.moveTo(x, y);
-  //   ctx.lineTo(x + w, y + w);
-  //   ctx.stroke();
-  //
-  //   if (ctx.lineWidth % 2 == 1) {
-  //     ctx.translate(-0.5, -0.5)
-  //   }
-  // }
-  //
-  // background(color) {
-  //   if (!this.cachedFillStyle) {
-  //     this.cachedFillStyle = this.ctx.fillStyle
-  //   }
-  //
-  //   this.ctx.fillStyle = color
-  //   this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-  //
-  //   this.ctx.fillStyle = this.cachedFillStyle
-  // }
 }
 
-function saveState(ctx, cache) {
-  valuesToSave.forEach(val => {
-    ret[val] = cache[val]
-  })
-}
+// text values
+['textStyle', 'textFont', 'textSize'].forEach(name => {
+  Object.defineProperty(Context.prototype, name, {
+    value: function(val) {
+      if (this.cache[name] != val) {
+        this.cache[name] = val
 
-function restoreState(ctx, cache) {
-  valuesToSave.forEach(val => {
-    ctx[val] = cache[val]
+        const {textStyle, textFont, textSize} = this.cache
+        this.applyTextStyle(`${textStyle} ${textSize}px ${textFont}`)
+      }
+    }
   })
+});
+
+// directy to ctx
+[
+  ['smooth', 'imageSmoothingEnabled'],
+  ['fill', 'fillStyle'],
+  ['stroke', 'strokeStyle'],
+  ['strokeWeight', 'lineWidth'],
+  ['applyTextStyle', 'font'],
+  ['lineCap']
+].forEach(([funName, propName]) => {
+  if (!propName) propName = funName
+
+  Object.defineProperty(Context.prototype, funName, {
+    value: function(val) {
+      if (this.cache[propName] != val) {
+        this.cache[propName] = val
+        this.ctx[propName] = val
+      }
+    }
+  })
+});
+
+function modeAdjust(x, y, w, h, mode) {
+  if (mode == 'corner') {
+    return minMax([x, y, w, h], 2)
+  } else if (mode == 'corners') {
+    return minMax([x, y, w - x, h - y], 2)
+  } else if (mode == 'radius') {
+    return minMax([x - w, y - h, w * 2, h * 2], 2)
+  } else if (mode == 'center') {
+    return minMax([x - w / 2, y - h / 2, w, h], 2)
+  } else {
+    throw new Error('Invalid mode: ' + mode)
+  }
 }
