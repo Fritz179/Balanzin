@@ -1,23 +1,31 @@
+const copies = 10
+
 class Master extends Layer {
   static useHTML = true
 
   constructor() {
     super({size: 'fill'})
 
-    this.setBaseScale(2, 2)
-    this.addChild(this.main = new Main())
+    for (let i = copies; i > 0; i--) {
+      this.addChild(this.main = new Main(i))
+    }
+  }
+
+  render() {
+    this.clear()
   }
 }
 
 class Main extends Layer {
-  constructor() {
+  constructor(scale) {
     super({align: 'center', size: [101, 101]})
 
-    this.setBaseScale(2, 2)
-    // this.setBaseScale(4, 4)
+    this.maxScale = scale
+    this.setBaseScale(scale, scale)
   }
 
   render() {
+    console.log('rendering main');
     this.background(102)
     this.fill(255, 255, 153)
 
@@ -41,6 +49,6 @@ class Main extends Layer {
   }
 
   zoom(dir) {
-
+    this.addBaseScale(dir, dir).capBaseScale(this.maxScale, this.maxScale + copies)
   }
 }

@@ -15,6 +15,10 @@ class Layer extends Frame {
     // referenze for resizing
     this.baseSize = this.copySize()
     this.baseScale = this.copyScale()
+    this.baseScale.listen(() => this.runUpdateSize())
+
+    this.pos.listen(() => this.changed = this.changed || !this.parentLayer.useHTML)
+    this.scale.listen(() => this.changed = this.changed || !this.parentLayer.useHTML)
 
     this.children = new ElementsHandler()
 
@@ -29,7 +33,13 @@ class Layer extends Frame {
         this.sprite = new RenderContext(this, new Context(canvas))
       }
 
-      this.size.bind(this.sprite.canvas, 'width', 'height')
+      this.size.listen(x => {
+        this.sprite.canvas.width = x
+        this.sprite.topContext.restore()
+      }, y => {
+        this.sprite.canvas.height = y
+        this.sprite.topContext.restore()
+      })
     } else {
       if (typeof from == 'string') {
         this.container = document.getElementById(from)
@@ -38,19 +48,11 @@ class Layer extends Frame {
       }
     }
 
-    if (!cameraMode.align) cameraMode.align = 'top-left'
-    this.setCameraMode(cameraMode)
+    this.cameraMode = addDefaultOptions(cameraMode, {ratio: 16 / 9, size: 'fill'})
+    this.align(cameraMode.align || 'top-left')
   }
 
-  setCameraMode({from, align, ratio = 16 / 9, size = 'fill'}) {
-    this.cameraMode = {size, ratio, from}
-
-    if (align) {
-      this.setAlignMode(align)
-    }
-  }
-
-  setAlignMode(align) {
+  align(align) {
     const xTable = {left: 0, right: 1, center: 0.5}
     const yTable = {top: 0, bottom: 1, center: 0.5}
 
@@ -64,9 +66,14 @@ class Layer extends Frame {
     this.cameraMode.yAlign = yTable[align.split('-')[0]] || 0
   }
 
-  updateCameraMode(parent, parentW, parentH, parentSx, parentSy) {
+  resize(parentW, parentH) {
     console.assert(parentW && parentH, `Invalid parent size! ${parentW}, ${parentH}`)
+    this.setBaseSize(parentW, parentH)
+    this.runUpdateSize()
+  }
 
+  updateSize() {
+    const [parentW, parentH] = this.baseSize
     const {size, ratio} = this.cameraMode
 
 
@@ -89,27 +96,19 @@ class Layer extends Frame {
       this.setScale(newSx, newSy)
       this.setBaseSize(newW, newH)
 
-      if (this.useHTML) {
-        this.setSize(...ceil(newW / newSx, newH / newSy))
-      } else {
-        this.sprite.topContext.save()
-        this.setSize(...ceil(newW / newSx, newH / newSy))
-        this.sprite.topContext.restore()
-      }
+      this.setSize(...ceil(newW / newSx, newH / newSy))
     }
 
 
     this.setPos(ceil((parentW - this.w * this.sx) / 2), ceil((parentH - this.h * this.sy) / 2))
   }
 
-  updateCameraModeBubble() {
+  updateSizeBubble() {
     this.children.forEach(child => {
       if (child instanceof Layer) {
-        child.runUpdateCameraMode(this, ...this.size, ...this.scale)
+        child.runResize(...this.size)
       }
     })
-
-    this.changed = true
   }
 
   addChild(child, layer) {
@@ -123,7 +122,7 @@ class Layer extends Frame {
 
   onChildAddedCapture(child) {
     if (child instanceof Layer) {
-      child.runUpdateCameraMode(this, ...this.size, ...this.scale)
+      child.runResize(...this.size)
     }
 
     if (this.useHTML) {
@@ -152,7 +151,17 @@ class Layer extends Frame {
       }
     })
 
-    return this.changed || this.changedPos || this.changedScale
+    if (this.parentLayer.useHTML && (this.hasChangedPos || this.changedScale)) {
+      // if both pos and scale have changed, the above statement cuts short
+      // at the || and scale is't staganted
+      this.stagnateScale()
+
+      const {style} = this.useHTML ? this.container : this.sprite.canvas
+      const {scale, pos} = this
+      style.transform = `matrix(${scale.x}, 0, 0, ${scale.y}, ${pos.x}, ${pos.y})`
+    }
+
+    return this.changed
   }
 
   fixedUpdateCapture() {
@@ -161,18 +170,7 @@ class Layer extends Frame {
     })
   }
 
-  renderCapture(parent) {
-    if (parent.useHTML && (this.hasChangedPos || this.changedScale)) {
-      // if both pos and scale have changed, the above statement cuts short
-      // at the || and scale is't staganted
-      this.stagnateScale()
-
-      const {style} = this.useHTML ? this.container : this.sprite.canvas
-      const {scale, pos} = this
-      console.log(scale, pos);
-      style.transform = `matrix(${scale.x}, 0, 0, ${scale.y}, ${pos.x}, ${pos.y})`
-    }
-
+  renderBubble(parent) {
     if (this.useHTML) {
       this.children.forEach(child => {
         if (child.changed) {
@@ -182,15 +180,14 @@ class Layer extends Frame {
       })
     } else {
       this.children.forEach(child => {
-        if (child.changed) {
-          const sprite = child.runRender(this)
+        // if something changed, then all must change
+        const sprite = child.runRender(this)
 
-          if (sprite) {
-            this.image(sprite, child.x, child.y, child.w * child.sx, child.h * child.sy)
-          }
-
-          child.changed = false
+        if (sprite) {
+          this.image(sprite, child.x, child.y, child.w * child.sx, child.h * child.sy)
         }
+
+        child.changed = false
       })
 
       return this.sprite.canvas
@@ -203,9 +200,10 @@ addVec2(Layer, 'baseSize', 'bw', 'bh')
 addVec2(Layer, 'baseScale', 'bsx', 'bsy')
 
 createMiddleware(Layer, 'render')
+createMiddleware(Layer, 'resize')
+createMiddleware(Layer, 'updateSize')
 createMiddleware(Layer, 'onChildAdded')
 createMiddleware(Layer, 'onChildRemoved')
-createMiddleware(Layer, 'updateCameraMode')
 
 Object.defineProperty(Layer.prototype, 'parentLayer', {
   get: function() {

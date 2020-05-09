@@ -140,6 +140,11 @@ class Vec2 extends Array {
     return this.normalize.mult(mag)
   }
 
+  cap(min, max) {
+    this[0] = this[0] < min ? min : this[0] > max ? max : this[0]
+    this[1] = this[1] < min ? min : this[1] > max ? max : this[1]
+  }
+
   copy() {
     return new Vec2(this[0], this[1])
   }
@@ -153,6 +158,8 @@ function addVec2(target, name, dim1, dim2) {
   class CustomVec extends Vec2 {
     constructor(x, y) {
       super(x, y)
+
+      this.listeners = []
     }
 
     get [dim1]() { return this[0] }
@@ -161,7 +168,7 @@ function addVec2(target, name, dim1, dim2) {
     set [dim1](x) { this[0] = x }
     set [dim2](y) { this[1] = y }
 
-    bind(binded, dim1, dim2, px, fun) {
+    bind(binded, dim1, dim2) {
       let x = this[0], y = this[1]
       const setX = px ? to => binded[dim1] = (x = to) + 'px' : to => binded[dim1] = x = to
       const setY = px ? to => binded[dim2] = (y = to) + 'px' : to => binded[dim2] = y = to
@@ -169,18 +176,35 @@ function addVec2(target, name, dim1, dim2) {
       Object.defineProperties(this, {
         0: {
           get: function() { return x },
-          set: fun ? to => { setX(to); fun(x, y) } : setX
+          set: to => { if (to != x) setX(to) }
         },
         1: {
           get: function() { return y },
-          set: fun ? to => { setY(to); fun(x, y) } : setY
+          set: to => { if (to != y) setY(to) }
+        }
+      })
+    }
+
+    listen(fun1, fun2) {
+      if (!fun2) fun2 = to => fun1(to, true)
+      let x = this[0], y = this[1]
+
+      Object.defineProperties(this, {
+        0: {
+          get: function() { return x },
+          set: to => { if (to != x) fun1(x = to) }
+        },
+        1: {
+          get: function() { return y },
+          set: to => { if (to != y) fun2(y = to) }
         }
       })
     }
   }
 
+
   // return attached class
-  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'reset', 'stagnate'].forEach(funName => {
+  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'reset', 'stagnate', 'cap'].forEach(funName => {
     prototype[funName + capName] = function(...to) { this[name][funName](...to); return this; }
   });
 

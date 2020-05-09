@@ -13,7 +13,6 @@ class Context {
 
     // default imageSmoothingEnabled to false instead
     this.ctx.imageSmoothingEnabled = false
-    this.ctx.lineCap = 'square'
     this.save()
   }
 
@@ -58,7 +57,7 @@ class Context {
   }
 
   clear() {
-    this.ctx.clearRect(0, 0, this.width, this.height)
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
   image(img, ...args) {

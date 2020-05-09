@@ -91,3 +91,17 @@ function addChunkMiddleware({prototype}, name, q = Infinity, chunks = false) {
     }
   })
 }
+
+function addChangeListener(to, of, listener) {
+  const real = Object.getOwnPropertyDescriptor(to.__proto__, of)
+
+  Object.defineProperty(to, of, {
+    get: function() {
+      return real;
+    },
+    set: function(value) {
+      real.set.call(to, value)
+      listener(value)
+    }
+  });
+}

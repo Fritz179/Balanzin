@@ -79,13 +79,15 @@ class Frame extends Block {
     this.sprite.image(img, x, y, w, h)
   }
 
-  // updateBubble() {
-  //   return this.hasChangedPos
-  // }
+  clear() {
+    if (!this.useHTML) {
+      this.sprite.clear()
+    }
+  }
 };
 
 // pure drawing functions
-['strokeWeight', 'textSize', 'textFont', 'textStyle', 'textAlign', 'text', 'clear', 'lineCap'].forEach(fun => {
+['strokeWeight', 'textSize', 'textFont', 'textStyle', 'textAlign', 'text', 'lineCap'].forEach(fun => {
   Frame.prototype[fun] = function(...args) {
     this.sprite[fun](...args)
     return this
