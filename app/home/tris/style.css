@@ -1,0 +1,50 @@
+body {
+  background: #226;
+  background: linear-gradient(to right, #34ebe1, #34eb65);
+  overflow: hidden;
+  --size: 150px;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 90vh;
+}
+
+h1 {
+  color: white;
+  font-size: 100px;
+}
+
+.gameboard {
+  display: grid;
+  grid-template-columns: repeat(3, var(--size));
+  align-items: start;
+}
+
+.gameboard > * {
+  height: var(--size);
+  width: var(--size);
+  background-color: gray;
+  border: solid black 2px;
+  box-shadow: 0 2px 20px black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 150px;
+  color: 0;
+}
+
+#button {
+  margin-top: 50px;
+  font-size: 40px;
+}
+
+#button:hover {
+  transform: scale(1.2, 1.2);
+}
