@@ -9,7 +9,24 @@
 </head>
 <body>
   <!-- <video autoplay class="local-video" id="local-video"></video> -->
-  <div id="container"></div>
+  <div class="select">
+    <div>
+      <label for="audioOutput">Dove al ven fo: </label><select id="audioOutput"></select>
+    </div>
+    <div>
+      <label for="audioInput">Dove l'entra: </label><select id="audioInput"></select>
+    </div>
+  </div>
+  <div class="name">
+    <label for="name">Al te nom :</label>
+    <input id="name">
+  </div>
+  <div class="master-volume">
+    <label for="master-volume">Volüm principal:</label>
+    <input type="range" id="master-volume" min="0" max="1" value="1" step="0.01">
+  </div>
+  <div id="container">
+  </div>
   <script src="./main.js" charset="utf-8"></script>
 </body>
 </html>
