@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Tris!</title>
+</head>
+<body>
+  <style media="screen">
+  body {
+    background: #226;
+    background: linear-gradient(to right, #34ebe1, #34eb65);
+    overflow: hidden;
+    --size: 150px;
+  }
+
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+  }
+
+  h1 {
+    color: white;
+    font-size: 100px;
+  }
+
+  .gameboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+  }
+
+  .gameboard > * {
+    height: 150px;
+    width: 150px;
+    background-color: gray;
+    border: solid black 2px;
+    box-shadow: 0 2px 20px black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 150px;
+    color: 0;
+  }
+
+  .draw {
+    background-color: yellow;
+  }
+
+  .won {
+    background-color: green;
+  }
+
+  .lost {
+    background-color: red;
+  }
+
+  #button {
+    margin-top: 50px;
+    font-size: 40px;
+  }
+
+  #button:hover {
+    transform: scale(1.2, 1.2);
+  }
+
+  @media (max-width: 800px) {
+    h1 {
+      margin: 20px;
+      font-size: 80px;
+    }
+
+    .container {
+      height: 80vh;
+    }
+
+    .gameboard > * {
+      height: 100px;
+      width: 100px;
+      font-size: 110px;
+    }
+
+    #button {
+      margin-top: 40px;
+      font-size: 30px;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .gameboard > * {
+      height: 80px;
+      width: 80px;
+      font-size: 90px;
+    }
+  }
+
+  </style>
+  <div class="container">
+    <h1>TRIS</h1>
+
+    <div class="gameboard">
+    		<div></div>
+    		<div></div>
+    		<div></div>
+    	  <div></div>
+    		<div></div>
+    		<div></div>
+    		<div></div>
+    		<div></div>
+    	  <div></div>
+    </div>
+    <button type="button" id="button">N'altra partida</button>
+  </div>
+
+  <script type="text/javascript">
+  const board = []
+  let done = false
+
+  document.getElementById('button').onclick = () => {
+    elements.forEach(el => el.classList = [])
+    board.splice(0, 9)
+    display()
+    done = false
+  }
+  const elements = [...document.getElementsByClassName('gameboard')[0].children]
+
+  function display() {
+    elements.forEach((el, i) => {
+      el.innerHTML = board[i] ? board[i] == 1 ? 'x' : 'o' : ''
+    })
+  }
+
+  elements.forEach((el, i) => {
+    el.addEventListener('click', () => {
+      if (done) {
+        return
+      }
+
+      if (!board[i]) {
+        board[i] = 1
+
+        if (board[4]) {
+          const [_, pos] = miniMax(board, -1)
+          board[pos] = -1
+        } else {
+          board[4] = -1
+        }
+
+        const score = getScore(board)
+        if (score) {
+          done = true
+          if (score == 2) {
+            elements.forEach(el => el.classList.add('draw'))
+          } else {
+            getScore(board, true).forEach(pos => elements[pos].classList.add(score == 1 ? 'won' : 'lost'))
+          }
+        }
+
+        display()
+      }
+    })
+  })
+
+  function miniMax(board, turn) {
+    let score = getScore(board)
+    if (score) {
+      return [score]
+    }
+
+    let move
+    let best = -turn
+
+    for (let i = 0; i < 9; i++) {
+      if (!board[i]) {
+        const newBoard = [...board]
+        newBoard[i] = turn
+
+        const [score] = miniMax(newBoard, -turn)
+
+        if (best == -turn) {
+          best = score
+          move = i
+        } else if (score == turn) {
+          best = score
+          move = i
+        }
+      }
+    }
+
+    return [best, move]
+  }
+
+  function getScore(board, pos = false) {
+    for (let i = 0; i < 3; i++) {
+      if (board[i] && board[i] == board[i + 3] && board[i] == board[i + 6]) return pos ? [i, i + 3, i + 6] : board[i]
+      if (board[i * 3] && board[i * 3] == board[i * 3 + 1] && board[i * 3] == board[i * 3 + 2]) return pos ? [i * 3, i * 3 + 1, i * 3 + 2] : board[i * 3]
+    }
+
+    if (board[0] && board[0] == board[4] && board[0] == board[8]) return pos ? [0, 4, 8] : board[4]
+    if (board[2] && board[2] == board[4] && board[2] == board[6]) return pos ? [2, 4, 6] : board[4]
+
+    for (let i = 0; i < 9; i++) {
+      if (!board[i]) return
+    }
+
+    return 2
+  }
+
+  </script>
+</body>
+</html>

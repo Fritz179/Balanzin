@@ -23,13 +23,13 @@ h1 {
 
 .gameboard {
   display: grid;
-  grid-template-columns: repeat(3, var(--size));
+  grid-template-columns: repeat(3, 1fr);
   align-items: start;
 }
 
 .gameboard > * {
-  height: var(--size);
-  width: var(--size);
+  height: 150px;
+  width: 150px;
   background-color: gray;
   border: solid black 2px;
   box-shadow: 0 2px 20px black;
@@ -40,6 +40,18 @@ h1 {
   color: 0;
 }
 
+.draw {
+  background-color: yellow;
+}
+
+.won {
+  background-color: green;
+}
+
+.lost {
+  background-color: red;
+}
+
 #button {
   margin-top: 50px;
   font-size: 40px;
@@ -47,4 +59,34 @@ h1 {
 
 #button:hover {
   transform: scale(1.2, 1.2);
+}
+
+@media (max-width: 800px) {
+  h1 {
+    margin: 20px;
+    font-size: 80px;
+  }
+
+  .container {
+    height: 80vh;
+  }
+
+  .gameboard > * {
+    height: 100px;
+    width: 100px;
+    font-size: 110px;
+  }
+
+  #button {
+    margin-top: 40px;
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 500px) {
+  .gameboard > * {
+    height: 80px;
+    width: 80px;
+    font-size: 90px;
+  }
 }

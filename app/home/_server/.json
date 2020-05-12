@@ -19,6 +19,11 @@
       "path": "tester"
     },
     {
+      "title": "Tris!",
+      "p": "Play Tris against an unbeatable AI",
+      "path": "tris"
+    },
+    {
       "title": "Chess",
       "p": "Play Chess against another human, yourself or my artificial intelligence!",
       "extend": "chess"
