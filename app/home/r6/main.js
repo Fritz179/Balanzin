@@ -8,6 +8,7 @@
   // const localVideo = document.getElementById('local-video');
   // localVideo.srcObject = localStream;
   const container = document.getElementById('container')
+  const status = document.getElementById('status')
   const master = document.getElementById('master-volume')
   master.oninput = () => {
     const children = container.children
@@ -67,6 +68,10 @@
   const rtcConfig = {iceServers: [{urls: ["stun:stun.l.google.com:19302"]}]}
 
   function addTrack(track, from) {
+    if (document.getElementById(from)) {
+      return
+    }
+
     // create stream
     const child = document.createElement('div')
     const label = document.createElement('label');
@@ -101,6 +106,8 @@
 
 
   socket.on('request-offer', (users, me) => {
+    status.innerHTML = 'request-offer'
+
     const name = document.getElementById('name')
     name.oninput = () => {
       const val = name.value
@@ -115,9 +122,14 @@
 
       // recive and send tracks
       conn.ontrack = event => addTrack(event.track, user)
-      localStream.getTracks().forEach(track => {
-        conn.addTrack(track, localStream);
-      });
+
+      if (typeof conn.addTrack == 'function') {
+        localStream.getTracks().forEach(track => {
+          conn.addTrack(track, localStream);
+        });
+      } else {
+        conn.addStream(localStream)
+      }
 
       // send ice candidate
       conn.onicecandidate = event => {
@@ -134,15 +146,21 @@
   })
 
   socket.on('offer', async (from, offer) => {
+    status.innerHTML = 'offer'
+
     // create response
     const conn = new RTCPeerConnection(rtcConfig)
     connections.set(from, conn)
 
     // recive and send tracks
     conn.ontrack = event => addTrack(event.track, from)
-    localStream.getTracks().forEach(track => {
-      conn.addTrack(track, localStream);
-    });
+    if (typeof conn.addTrack == 'function') {
+      localStream.getTracks().forEach(track => {
+        conn.addTrack(track, localStream);
+      });
+    } else {
+      conn.addStream(localStream)
+    }
 
     // send ice candidate
     conn.onicecandidate = event => {
@@ -159,6 +177,8 @@
   })
 
   socket.on('response', (from, response) => {
+    status.innerHTML = 'response'
+
     // close response
     const conn = connections.get(from)
 
@@ -169,6 +189,8 @@
   })
 
   socket.on('candidate', (from, candidate) => {
+    status.innerHTML = 'candidate'
+
     // add candidate
     const conn = connections.get(from)
 
@@ -179,6 +201,8 @@
   })
 
   socket.on('disconnectPeer', id => {
+    status.innerHTML = 'disconnectPeer'
+
     console.log('disconnected', id);
     const el = document.getElementById(id)
     if (el) el.remove()

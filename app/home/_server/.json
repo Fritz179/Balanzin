@@ -96,6 +96,9 @@
   ],
   "subDir": [
     {
+      "custom": "r6"
+    },
+    {
       "extend": "users"
     }
   ]
