@@ -18,6 +18,16 @@ class Frame extends Block {
     this.rectMode = 'corner'
     this.lineMode = 'corner'
     this.ellipseMode = 'center'
+
+    this.translateMode = [0, 0]
+  }
+
+  translate(x, y) {
+    if (typeof x == 'string') {
+      this.translateMode = getAlign(x)
+    } else {
+      this.sprite.translate(x, y)
+    }
   }
 
   noSmooth() {

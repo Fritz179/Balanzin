@@ -17,6 +17,7 @@ class Layer extends Frame {
     this.baseScale = this.copyScale()
     this.baseScale.listen(() => this.runUpdateSize())
 
+    // this.pos.listen(() => {this.changed = this.changed || !this.parentLayer.useHTML; console.log(this.changed);})
     this.pos.listen(() => this.changed = this.changed || !this.parentLayer.useHTML)
     this.scale.listen(() => this.changed = this.changed || !this.parentLayer.useHTML)
 
@@ -50,20 +51,11 @@ class Layer extends Frame {
 
     this.cameraMode = addDefaultOptions(cameraMode, {ratio: 16 / 9, size: 'fill'})
     this.align(cameraMode.align || 'top-left')
+    this.translate(cameraMode.translate || 'top-left')
   }
 
   align(align) {
-    const xTable = {left: 0, right: 1, center: 0.5}
-    const yTable = {top: 0, bottom: 1, center: 0.5}
-
-    if (align == 'center') align = 'center-center'
-    else if (align == 'top') align = 'top-center'
-    else if (align == 'right') align = 'center-right'
-    else if (align == 'bottom') align = 'bottom-center'
-    else if (align == 'left') align = 'center-left'
-
-    this.cameraMode.xAlign = xTable[align.split('-')[1]] || 0
-    this.cameraMode.yAlign = yTable[align.split('-')[0]] || 0
+    this.alignMode = getAlign(align)
   }
 
   resize(parentW, parentH) {
@@ -99,8 +91,8 @@ class Layer extends Frame {
       this.setSize(...ceil(newW / newSx, newH / newSy))
     }
 
-
-    this.setPos(ceil((parentW - this.w * this.sx) / 2), ceil((parentH - this.h * this.sy) / 2))
+    const [xAlign, yAlign] = this.alignMode
+    this.setPos(ceil((parentW - this.w * this.sx) * xAlign), ceil((parentH - this.h * this.sy) * yAlign))
   }
 
   updateSizeBubble() {
@@ -150,7 +142,9 @@ class Layer extends Frame {
         this.changed = true
       }
     })
+  }
 
+  updateBubble() {
     if (this.parentLayer.useHTML && (this.hasChangedPos || this.changedScale)) {
       // if both pos and scale have changed, the above statement cuts short
       // at the || and scale is't staganted
@@ -182,9 +176,15 @@ class Layer extends Frame {
       this.children.forEach(child => {
         // if something changed, then all must change
         const sprite = child.runRender(this)
-
         if (sprite) {
-          this.image(sprite, child.x, child.y, child.w * child.sx, child.h * child.sy)
+          if (child instanceof Layer) {
+            console.log(child.x, child.y, child.w * child.sx, child.h * child.sy);
+            this.image(sprite, child.x, child.y, child.w * child.sx, child.h * child.sy)
+          } else {
+            this.image(sprite, child.x, child.y, child.w, child.h)
+          }
+        } else if (sprite !== false) {
+          throw new Error('Illegal sprite return')
         }
 
         child.changed = false

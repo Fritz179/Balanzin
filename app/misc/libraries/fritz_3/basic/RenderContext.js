@@ -24,24 +24,31 @@ class RenderContext {
   }
 
   rect(x, y, w, h) {
-    const {width, height, cameraMode} = this.from
-    const {xAlign, yAlign} = cameraMode
+    const {width, height, translateMode} = this.from
+    const [xTran, yTran] = translateMode
 
-    this.to.rect(x + width * xAlign, y + height * yAlign, w, h)
+    this.to.rect(x + width * xTran, y + height * yTran, w, h)
+  }
+
+  translate(x, y) {
+    const {width, height, translateMode} = this.from
+    const [xTran, yTran] = translateMode
+
+    this.to.translate(x + width * xTran, y + height * yTran)
   }
 
   line(x, y, w, h) {
-    const {width, height, cameraMode} = this.from
-    const {xAlign, yAlign} = cameraMode
+    const {width, height, translateMode} = this.from
+    const [xTran, yTran] = translateMode
 
-    this.to.line(x + width * xAlign, y + height * yAlign, w, h)
+    this.to.line(x + width * xTran, y + height * yTran, w, h)
   }
 
   ellipse(x, y, w, h, r) {
-    const {width, height, cameraMode} = this.from
-    const {xAlign, yAlign} = cameraMode
-    
-    this.to.ellipse(x + width * xAlign, y + height * yAlign, w, h, r)
+    const {width, height, translateMode} = this.from
+    const [xTran, yTran] = translateMode
+
+    this.to.ellipse(x + width * xTran, y + height * yTran, w, h, r)
   }
 
   image(img, x, y, w, h) {

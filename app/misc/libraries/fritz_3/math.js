@@ -37,6 +37,21 @@ const random = (...args) => {
   }
 }
 
+const xTable = {left: 0, right: 1, center: 0.5}
+const yTable = {top: 0, bottom: 1, center: 0.5}
+function getAlign(align) {
+  if (align == 'center') align = 'center-center'
+  else if (align == 'top') align = 'top-center'
+  else if (align == 'right') align = 'center-right'
+  else if (align == 'bottom') align = 'bottom-center'
+  else if (align == 'left') align = 'center-left'
+
+  const x = xTable[align.split('-')[1]] || 0
+  const y = yTable[align.split('-')[0]] || 0
+
+  return [x, y]
+}
+
 function getXY(x, y) {
   if (Array.isArray(x)) {
     return x
@@ -158,8 +173,6 @@ function addVec2(target, name, dim1, dim2) {
   class CustomVec extends Vec2 {
     constructor(x, y) {
       super(x, y)
-
-      this.listeners = []
     }
 
     get [dim1]() { return this[0] }

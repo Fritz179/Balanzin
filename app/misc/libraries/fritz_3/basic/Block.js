@@ -21,7 +21,9 @@ class Block {
   get right() { return this.x + this.w }
   get bottom() { return this.y + this.h }
 
-  get center() { return {x: this.x + this.w / 2, y: this.y + this.h / 2} }
+  set center([x, y]) { this.pos.set(x - this.w / 2, y - this.h / 2) }
+
+  get center() { return [this.x + this.w / 2, this.y + this.h / 2] }
   get frame() { return [this.x, this.y, this.w, this.h] }
 
   set top(y) { this.y = y }

@@ -60,6 +60,11 @@ class Context {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
+  translate(x, y) {
+    console.log(x, y);
+    this.ctx.translate(x, y)
+  }
+
   image(img, ...args) {
     const [x, y, w, h] = minMax(args, 2)
 
