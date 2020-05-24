@@ -9,7 +9,11 @@ class Context {
   constructor(canvas) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')
-    this.cache = {}
+    this.cache = {
+      textSize: 10,
+      textStyle: 'normal',
+      textFont: 'sans-serif'
+    }
 
     // default imageSmoothingEnabled to false instead
     this.ctx.imageSmoothingEnabled = false

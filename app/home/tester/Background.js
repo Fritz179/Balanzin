@@ -30,6 +30,10 @@ class Background extends Layer {
     }
   }
 
+  updateSizeCapture() {
+    this.baseSize.set(0, 0)
+  }
+
   zoom(dir) {
     this.addBaseScale(dir, dir).capBaseScale(this.maxScale, this.maxScale + copies)
   }

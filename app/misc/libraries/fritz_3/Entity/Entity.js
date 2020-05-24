@@ -109,7 +109,6 @@
 //     Object.defineProperty(this, 'sprite', {value})
 //   }
 // })
-
 class Entity extends Frame {
   constructor(...args) {
     super(...args)
@@ -139,13 +138,13 @@ class Entity extends Frame {
   }
 
   updateBubble() {
-    if (this.parentLayer.useHTML && this.hasChangedPos) {
+    if (this.parentLayer.useHTML && (this.hasChangedPos || this.changedBasePos)) {
       // if both pos and scale have changed, the above statement cuts short
       // at the || and scale is't staganted
 
       const {style} = this.sprite.canvas
       const {scale, pos} = this
-      style.transform = `matrix(1, 0, 0, 1, ${pos.x}, ${pos.y})`
+      style.transform = `matrix(1, 0, 0, 1, ${Math.floor(pos.x)}, ${Math.floor(pos.y)})`
     }
 
     return this.changed

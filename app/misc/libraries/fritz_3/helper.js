@@ -86,20 +86,6 @@ function deCapitalize(string) {
     return string.charAt(0).toLowerCase() + string.slice(1);
 }
 
-function cap(value, max) {
-  if (!(typeof max == 'number')) {
-    throw new Error(`no cap value provided for ${value}`);
-  } else if (abs(max) >= abs(value)) {
-    return value
-  } else {
-    return max * sign(value)
-  }
-}
-
-function constrain(val, min, max) {
-  return Math.max(min, Math.min(val, max))
-}
-
 function loadImage(url, callback) {
   if (typeof callback == 'function') {
     _loadImage(url).then(img => callback(img))

@@ -13,13 +13,10 @@ class Layer extends Frame {
     this.scale = [1, 1]
 
     // referenze for resizing
-    this.baseSize = this.copySize()
-    this.baseScale = this.copyScale()
+    this.basePos = this.pos
+    this.baseSize = this.size
+    this.baseScale = this.scale
     this.baseScale.listen(() => this.runUpdateSize())
-
-    // this.pos.listen(() => {this.changed = this.changed || !this.parentLayer.useHTML; console.log(this.changed);})
-    this.pos.listen(() => this.changed = this.changed || !this.parentLayer.useHTML)
-    this.scale.listen(() => this.changed = this.changed || !this.parentLayer.useHTML)
 
     this.children = new ElementsHandler()
 
@@ -55,13 +52,22 @@ class Layer extends Frame {
   }
 
   align(align) {
-    this.alignMode = getAlign(align)
+    const [x, y] = this.alignMode = getAlign(align)
+    const {style} = this.useHTML ? this.container : this.sprite.canvas
+
+    style.transformOrigin = `${x * 100}% ${y * 100}%`
   }
 
   resize(parentW, parentH) {
     console.assert(parentW && parentH, `Invalid parent size! ${parentW}, ${parentH}`)
     this.setBaseSize(parentW, parentH)
     this.runUpdateSize()
+
+    this.children.forEach(child => {
+      if (child instanceof Layer) {
+        child.runResize(...this.baseSize)
+      }
+    })
   }
 
   updateSize() {
@@ -83,6 +89,8 @@ class Layer extends Frame {
           // to tall
           newH = parentW / ratio
         }
+      } else if (size == 'none') {
+        newW = newH = 0
       }
 
       this.setScale(newSx, newSy)
@@ -92,15 +100,9 @@ class Layer extends Frame {
     }
 
     const [xAlign, yAlign] = this.alignMode
-    this.setPos(ceil((parentW - this.w * this.sx) * xAlign), ceil((parentH - this.h * this.sy) * yAlign))
-  }
-
-  updateSizeBubble() {
-    this.children.forEach(child => {
-      if (child instanceof Layer) {
-        child.runResize(...this.size)
-      }
-    })
+    // this.setPos(ceil((parentW - this.w * this.sx) * xAlign), ceil((parentH - this.h * this.sy) * yAlign))
+    // this.setBasePos(ceil((parentW * xAlign - this.w * this.sx * xAlign)), ceil((parentH * yAlign - this.h * this.sy * yAlign)))
+    this.setBasePos(ceil((parentW * xAlign - this.w * xAlign)), ceil((parentH * yAlign - this.h * yAlign)))
   }
 
   addChild(child, layer) {
@@ -122,6 +124,10 @@ class Layer extends Frame {
         this.container.appendChild(child.container)
       } else {
         this.container.appendChild(child.sprite.canvas)
+      }
+    } else {
+      if (child.useHTML) {
+        this.sprite.canvas.appendChild(child.container)
       }
     }
   }
@@ -145,14 +151,21 @@ class Layer extends Frame {
   }
 
   updateBubble() {
-    if (this.parentLayer.useHTML && (this.hasChangedPos || this.changedScale)) {
+    if (this.parentLayer.useHTML && (this.hasChangedBasePos || this.hasChangedPos || this.changedScale)) {
       // if both pos and scale have changed, the above statement cuts short
       // at the || and scale is't staganted
       this.stagnateScale()
+      this.stagnatePos()
 
       const {style} = this.useHTML ? this.container : this.sprite.canvas
-      const {scale, pos} = this
-      style.transform = `matrix(${scale.x}, 0, 0, ${scale.y}, ${pos.x}, ${pos.y})`
+      const {scale, pos, basePos} = this
+
+      style.transform = `matrix(${scale.x}, 0, 0, ${scale.y},
+        ${Math.floor(pos.x + basePos.x)}, ${Math.floor(pos.y + basePos.y)})`
+    } else if (this.hasChangedPos || this.changedScale) {
+      this.stagnateScale()
+
+      this.changed = true
     }
 
     return this.changed
@@ -178,7 +191,6 @@ class Layer extends Frame {
         const sprite = child.runRender(this)
         if (sprite) {
           if (child instanceof Layer) {
-            console.log(child.x, child.y, child.w * child.sx, child.h * child.sy);
             this.image(sprite, child.x, child.y, child.w * child.sx, child.h * child.sy)
           } else {
             this.image(sprite, child.x, child.y, child.w, child.h)
@@ -196,6 +208,7 @@ class Layer extends Frame {
 }
 
 addVec2(Layer, 'scale', 'sx', 'sy')
+addVec2(Layer, 'basePos', 'bx', 'by')
 addVec2(Layer, 'baseSize', 'bw', 'bh')
 addVec2(Layer, 'baseScale', 'bsx', 'bsy')
 

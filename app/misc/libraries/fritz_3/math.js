@@ -21,6 +21,9 @@ const minMax = (values, cycle) => {
   console.assert(cycle, 'No cycle')
   return values.map((x, i) => i < cycle ? Math.floor(x) : Math.ceil(x))
 }
+
+const cap = (num, min, max) => Math.min(Math.max(num, min), max)
+
 // expand to be called with multiple arguments or
 // to chose a random element from an array
 const random = (...args) => {
@@ -53,91 +56,101 @@ function getAlign(align) {
 }
 
 function getXY(x, y) {
-  if (Array.isArray(x)) {
-    return x
-  }
+  if (x instanceof Vec2 || Array.isArray(x)) return x
 
   if (typeof y == 'undefined') y = x
 
   return [x, y]
 }
 
-class Vec2 extends Array {
+class Vec2 {
   constructor(x = 0, y) {
-    if (typeof y == 'undefined') y = x
+    [x, y] = getXY(x, y)
 
-    super(x, y)
+    this.x = x
+    this.y = y
+
+    this.px = x
+    this.py = y
   }
 
-  get x() { return this[0] }
-  get y() { return this[1] }
+  *[Symbol.iterator]() {
+    yield this.x
+    yield this.y
+  }
 
-  set x(x) { this[0] = x }
-  set y(y) { this[1] = y }
+  get [0]() { return this.x }
+  get [1]() { return this.y }
+
+  set [0](x) { return this.x = x }
+  set [1](y) { return this.y = y }
 
   get hasChanged() { return this.changed ? this.stagnate() : false}
-  get changed() { return this[0] != this[2] || this[1] != this[3] }
+  get changed() { return this.x != this.px || this.y != this.py }
 
   stagnate() {
-    this[2] = this[0]
-    this[3] = this[1]
+    this.px = this.x
+    this.py = this.y
     return this
   }
 
   set(x, y) {
     [x, y] = getXY(x, y)
 
-    this[0] = x
-    this[1] = y
+    this.x = x
+    this.y = y
     return this
   }
 
   add(x, y) {
     [x, y] = getXY(x, y)
 
-    this[0] += x
-    this[1] += y
+    this.x += x
+    this.y += y
     return this
   }
 
   sub(x, y) {
     [x, y] = getXY(x, y)
 
-    this[0] -= x
-    this[1] -= y
+    this.x -= x
+    this.y -= y
     return this
   }
 
   mult(x, y) {
     [x, y] = getXY(x, y)
 
-    this[0] *= x
-    this[1] *= y
+    this.x *= x
+    this.y *= y
     return this
   }
 
   div(x, y) {
     [x, y] = getXY(x, y)
 
-    this[0] /= x
-    this[1] /= y
+    this.x /= x
+    this.y /= y
     return this
   }
 
-  reset() {
-    this[0] = 0
-    this[1] = 0
-    return this
+  reset(stagnate) {
+    this.x = 0
+    this.y = 0
+
+    if (!stagnate) return this
+
+    return this.stagnate()
   }
 
   equals(x, y) {
     [x, y] = getXY(x, y)
 
-    return this[0] == x && this[1] == y
+    return this.x == x && this.y == y
   }
 
   magSq() {
-    return this[0] * this[0] + this[1] * this[1]
+    return this.x * this.x + this.y * this.y
   }
 
   mag() {
@@ -145,26 +158,26 @@ class Vec2 extends Array {
   }
 
   normalize() {
-    const len = this.mag()
-
-    if (len !== 0) this.mult(1 / len)
-    return this
+    return this.setMag(1)
   }
 
-  setMag(mag) {
-    return this.normalize.mult(mag)
+  setMag(mag = 1) {
+    const len = this.mag()
+
+    if (len == 0) {
+      console.error('Cannot setMag of Vec2 with no length')
+      return this
+    }
+
+    return this.div(len)
   }
 
   cap(min, max) {
-    this[0] = this[0] < min ? min : this[0] > max ? max : this[0]
-    this[1] = this[1] < min ? min : this[1] > max ? max : this[1]
-  }
-
-  copy() {
-    return new Vec2(this[0], this[1])
+    this.x = cap(this.x, min, max)
+    this.y = cap(this.y, min, max)
+    return this
   }
 }
-
 
 function addVec2(target, name, dim1, dim2) {
   const {prototype} = target
@@ -175,78 +188,91 @@ function addVec2(target, name, dim1, dim2) {
       super(x, y)
     }
 
-    get [dim1]() { return this[0] }
-    get [dim2]() { return this[1] }
-
-    set [dim1](x) { this[0] = x }
-    set [dim2](y) { this[1] = y }
-
-    bind(binded, dim1, dim2) {
-      let x = this[0], y = this[1]
-      const setX = px ? to => binded[dim1] = (x = to) + 'px' : to => binded[dim1] = x = to
-      const setY = px ? to => binded[dim2] = (y = to) + 'px' : to => binded[dim2] = y = to
-
-      Object.defineProperties(this, {
-        0: {
-          get: function() { return x },
-          set: to => { if (to != x) setX(to) }
-        },
-        1: {
-          get: function() { return y },
-          set: to => { if (to != y) setY(to) }
-        }
-      })
-    }
-
     listen(fun1, fun2) {
-      if (!fun2) fun2 = to => fun1(to, true)
-      let x = this[0], y = this[1]
+      if (!fun2) fun2 = fun1
 
-      Object.defineProperties(this, {
-        0: {
-          get: function() { return x },
-          set: to => { if (to != x) fun1(x = to) }
-        },
-        1: {
-          get: function() { return y },
-          set: to => { if (to != y) fun2(y = to) }
-        }
-      })
+      if (typeof Object.getOwnPropertyDescriptor(this, 'x').value != 'undefined') {
+        let x = this.x, y = this.y
+
+        Object.defineProperties(this, {
+          x: {
+            get: function() { return x },
+            set: function(to) { if (x != to) { fun1(x = to, false) } },
+            configurable: true
+          },
+          y: {
+            get: function() { return y },
+            set: function(to) { if (y != to) { fun2(y = to, true) } },
+            configurable: true
+          }
+        })
+      } else {
+        const xDesc = Object.getOwnPropertyDescriptor(this, 'x')
+        const yDesc = Object.getOwnPropertyDescriptor(this, 'y')
+
+        Object.defineProperties(this, {
+          x: {
+            set: function(to) { fun1(to, false); xDesc.set(to) },
+            configurable: true
+          },
+          y: {
+            set: function(to) { fun2(to, true); yDesc.set(to) },
+            configurable: true
+          }
+        })
+      }
     }
   }
 
+  // attach getters and setters to CustomVec
+  if (dim1 != 'x' && dim2 != 'y') {
+    Object.defineProperties(CustomVec.prototype, {
+      [dim1]: {
+        get: function() { return this.x },
+        set: function(x) { this.x = x }
+      },
+      [dim2]: {
+        get: function() { return this.y },
+        set: function(y) { this.y = y }
+      }
+    })
+  }
 
-  // return attached class
-  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'reset', 'stagnate', 'cap'].forEach(funName => {
-    prototype[funName + capName] = function(...to) { this[name][funName](...to); return this; }
+  // attach custom getter and setter to class
+  Object.defineProperties(prototype, {
+    [dim1]: {
+      get: function() { return this[name].x },
+      set: function(val) { this[name].x = val }
+    },
+    [dim2]: {
+      get: function() { return this[name].y },
+      set: function(val) { this[name].y = val }
+    }
   });
 
-  // return customVec instance
-  ['equals', 'copy'].forEach(funName => {
-    prototype[funName + capName] = function(...to) { return this[name][funName](...to) }
-  });
-
-
+  // attach getters to class
   ['hasChanged', 'changed'].forEach(getName => {
     Object.defineProperty(prototype, getName + capName, {
       get: function() { return this[name][getName] }
     });
-  })
-
-  Object.defineProperty(prototype, dim1, {
-    get: function() { return this[name][0] },
-    set: function(val) { this[name][0] = val }
   });
 
-  Object.defineProperty(prototype, dim2, {
-    get: function() { return this[name][1] },
-    set: function(val) { this[name][1] = val }
+  // attach functions to class that return class
+  ['set', 'add', 'sub', 'mult', 'div', 'magSq', 'mag', 'setMag', 'normalize', 'reset', 'stagnate', 'cap'].forEach(funName => {
+    prototype[funName + capName] = function(...to) { this[name][funName](...to); return this; }
   });
 
+  // attach functions to class that return default return
+  ['equals'].forEach(funName => {
+    prototype[funName + capName] = function(...to) { return this[name][funName](...to) }
+  });
+
+  // attach trap for Vec2 init in class
   Object.defineProperty(prototype, name, {
     set: function([x, y]) {
       const thisVec = new CustomVec(x, y)
 
+      // attach trap for new values
       Object.defineProperty(this, name, {
         get: function() { return thisVec },
         set: function(to) {

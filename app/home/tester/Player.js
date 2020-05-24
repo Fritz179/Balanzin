@@ -2,7 +2,14 @@ class Player extends Entity {
   constructor() {
     super()
     this.setSize(50, 50)
+    this.pos.set(this.size).div(-2)
+
     this.background(0)
+    this.fill(255)
+
+    this.textAlign('left', 'top')
+    this.textSize(30)
+    this.text('</>', 4, 13)
 
     this.speed = 10
   }

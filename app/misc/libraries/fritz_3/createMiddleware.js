@@ -16,14 +16,14 @@ function createMiddleware(to, name) {
           funs.unshift(proto[`${name}Capture`])
         }
 
-        // call al the bubble last, from bottom to top
-        if (proto.hasOwnProperty(`${name}Bubble`)) {
-          funs.push(proto[`${name}Bubble`])
-        }
-
         // recursive until to the SuperClass is passed
         if (proto.__proto__ != Object.prototype) {
           crawl(proto.__proto__)
+        }
+
+        // call al the bubble last, from bottom to top
+        if (proto.hasOwnProperty(`${name}Bubble`)) {
+          funs.push(proto[`${name}Bubble`])
         }
       }
 
