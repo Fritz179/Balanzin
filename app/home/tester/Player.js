@@ -2,21 +2,39 @@ class Player extends Entity {
   constructor() {
     super()
     this.setSize(50, 50)
-    this.pos.set(this.size).div(-2)
+    this.pos.set(this.size).div(-2);
 
-    this.background(0)
-    this.fill(255)
+    [true, false].forEach(bool => {
+      const s = this[bool ? 's1' : 's2'] = this.createSprite()
+      s.background(bool ? 255 : 0)
+      s.fill(bool ? 0 : 255)
 
-    this.textAlign('left', 'top')
-    this.textSize(30)
-    this.text('</>', 4, 13)
+      s.textAlign('left', 'top')
+      s.textSize(30)
+      s.text('</>', 4, 13)
+    })
 
-    this.speed = 10
+    this.speed = 1.5
+    this.drag = 0.85
+    this.timer = 0
+
+    this.flip = false
+  }
+
+  update() {
+    if (++this.timer >= 10) {
+      this.timer = 0
+
+      this.s1.display(this.flip)
+      this.s2.display(!this.flip)
+
+      this.flip = !this.flip
+    }
   }
 
   render() {
     console.log('rendering Player');
-    return this.sprite
+    return false
   }
 
   onKey({key}) {
@@ -29,10 +47,11 @@ class Player extends Entity {
 
   move(key, dir) {
     switch (key) {
-      case 'w': this.addVel(0, -this.speed * dir); break;
-      case 'a': this.addVel(-this.speed * dir, 0); break;
-      case 's': this.addVel(0, this.speed * dir); break;
-      case 'd': this.addVel(this.speed * dir, 0); break;
+      case 'w': this.addAcc(0, -this.speed * dir); break;
+      case 'a': this.addAcc(-this.speed * dir, 0); break;
+      case 's': this.addAcc(0, this.speed * dir); break;
+      case 'd': this.addAcc(this.speed * dir, 0); break;
+      case 'Shift': this.setDrag(dir < 0 ? 0.85 : 0.925); break;
     }
   }
 }

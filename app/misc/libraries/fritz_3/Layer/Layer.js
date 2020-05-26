@@ -3,14 +3,16 @@
   Has cameraSettings
   Has children
   Has getsprite
+
+  container is first node
+  childContainer is the container where childs are inserted
+  canvas not required
 */
 
 class Layer extends Frame {
-  constructor(cameraMode = {}) {
+  constructor(cameraMode = {}, useHTML) {
     super(0, 0, 100, 100)
-    this.useHTML = this.constructor.useHTML
-
-    this.scale = [1, 1]
+    this.useHTML = useHTML
 
     // referenze for resizing
     this.basePos = this.pos
@@ -22,28 +24,27 @@ class Layer extends Frame {
 
     const {from} = cameraMode
 
-    if (!this.useHTML) {
-      if (typeof from == 'string') {
-        const canvas = document.getElementById(from)
-        this.sprite = new RenderContext(this, new Context(canvas))
-      } else {
-        const canvas = document.createElement('canvas')
-        this.sprite = new RenderContext(this, new Context(canvas))
-      }
+    if (!useHTML) {
+      this.container = document.createElement('div')
+      this.childContainer = document.createElement('div')
 
-      this.size.listen(x => {
-        this.sprite.canvas.width = x
-        this.sprite.topContext.restore()
-      }, y => {
-        this.sprite.canvas.height = y
-        this.sprite.topContext.restore()
-      })
+      if (typeof from == 'string') {
+        this.canvas = document.getElementById(from)
+      } else {
+        this.canvas = document.createElement('canvas')
+      }
+      this.sprite = new RenderContext(this, new Context(this.canvas))
+
+      this.container.appendChild(this.childContainer)
+      this.container.appendChild(this.canvas)
     } else {
       if (typeof from == 'string') {
         this.container = document.getElementById(from)
       } else {
         this.container = document.createElement('div')
       }
+
+      this.childContainer = this.container
     }
 
     this.cameraMode = addDefaultOptions(cameraMode, {ratio: 16 / 9, size: 'fill'})
@@ -53,9 +54,13 @@ class Layer extends Frame {
 
   align(align) {
     const [x, y] = this.alignMode = getAlign(align)
-    const {style} = this.useHTML ? this.container : this.sprite.canvas
+    const {style} = this.container
 
     style.transformOrigin = `${x * 100}% ${y * 100}%`
+
+    if (this.canvas) {
+      this.canvas.style.transformOrigin = style.transformOrigin
+    }
   }
 
   resize(parentW, parentH) {
@@ -119,17 +124,7 @@ class Layer extends Frame {
       child.runResize(...this.size)
     }
 
-    if (this.useHTML) {
-      if (child.useHTML) {
-        this.container.appendChild(child.container)
-      } else {
-        this.container.appendChild(child.sprite.canvas)
-      }
-    } else {
-      if (child.useHTML) {
-        this.sprite.canvas.appendChild(child.container)
-      }
-    }
+    this.childContainer.appendChild(child.container)
   }
 
   removeChild(child) {
@@ -151,21 +146,25 @@ class Layer extends Frame {
   }
 
   updateBubble() {
-    if (this.parentLayer.useHTML && (this.hasChangedBasePos || this.hasChangedPos || this.changedScale)) {
-      // if both pos and scale have changed, the above statement cuts short
-      // at the || and scale is't staganted
+    if (this.changedBasePos || this.changedPos || this.changedScale) {
+      // cannot use hasChange because if multiple have changed,
+      // the above statement cuts short and not everything is stagnated
+
+      // set transform of container
+      const {scale, pos, basePos} = this
+      this.childContainer.style.transform = `matrix(${scale.x}, 0, 0, ${scale.y},
+        ${Math.floor(pos.x + basePos.x)}, ${Math.floor(pos.y + basePos.y)})`
+
+      if (this.canvas && (this.changedBasePos || this.changedScale)) {
+        const {scale, basePos} = this
+
+        this.canvas.style.transform = `matrix(${scale.x}, 0, 0, ${scale.y},
+          ${Math.floor(basePos.x)}, ${Math.floor(basePos.y)})`
+      }
+
+      this.stagnateBasePos()
       this.stagnateScale()
       this.stagnatePos()
-
-      const {style} = this.useHTML ? this.container : this.sprite.canvas
-      const {scale, pos, basePos} = this
-
-      style.transform = `matrix(${scale.x}, 0, 0, ${scale.y},
-        ${Math.floor(pos.x + basePos.x)}, ${Math.floor(pos.y + basePos.y)})`
-    } else if (this.hasChangedPos || this.changedScale) {
-      this.stagnateScale()
-
-      this.changed = true
     }
 
     return this.changed
@@ -187,9 +186,11 @@ class Layer extends Frame {
       })
     } else {
       this.children.forEach(child => {
+        if (child instanceof Layer && !child.changed) return
         // if something changed, then all must change
         const sprite = child.runRender(this)
         if (sprite) {
+          console.log(sprite);
           if (child instanceof Layer) {
             this.image(sprite, child.x, child.y, child.w * child.sx, child.h * child.sy)
           } else {
@@ -201,13 +202,12 @@ class Layer extends Frame {
 
         child.changed = false
       })
-
-      return this.sprite.canvas
+      // return this.sprite.canvas
     }
+    return false
   }
 }
 
-addVec2(Layer, 'scale', 'sx', 'sy')
 addVec2(Layer, 'basePos', 'bx', 'by')
 addVec2(Layer, 'baseSize', 'bw', 'bh')
 addVec2(Layer, 'baseScale', 'bsx', 'bsy')

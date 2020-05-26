@@ -2,7 +2,7 @@ class Background extends Layer {
   constructor(scale) {
     super({align: 'center', translate: 'center', size: [101, 101]})
 
-    this.maxScale = scale
+    this.minScale = scale
     this.setBaseScale(scale, scale)
   }
 
@@ -35,6 +35,6 @@ class Background extends Layer {
   }
 
   zoom(dir) {
-    this.addBaseScale(dir, dir).capBaseScale(this.maxScale, this.maxScale + copies)
+    this.addBaseScale(dir, dir).capBaseScale(this.minScale, Infinity)
   }
 }

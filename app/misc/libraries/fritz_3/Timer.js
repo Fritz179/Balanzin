@@ -13,7 +13,7 @@ class Timer {
     this._fps = this.fps = 0
     this._ups = this.ups = 0
     this._runTime = this.runTime = 0
-    this.totalUpdates = this.totalFixedUpdates = this.totalrender = 0
+    this.totalUpdates = this.totalFixedUpdates = this.totalRender = 0
 
     if (start) {
       this.start()
@@ -47,7 +47,7 @@ class Timer {
       this.updated = false
 
       if (this.update(timeStamp)) {
-        this.totalrender++
+        this.totalRender++
       }
 
       this._fps++

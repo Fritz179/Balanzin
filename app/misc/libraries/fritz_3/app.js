@@ -6,7 +6,7 @@ function onPreloaDone() {
   masterLayer.runResize(window.innerWidth, window.innerHeight, 1, 1)
 
   // add sprite/container to document if not prenset
-  const node = masterLayer.useHTML ? masterLayer.container : masterLayer.sprite.canvas
+  const node = masterLayer.container
   if (!document.contains(node)) {
     document.body.appendChild(node)
   }

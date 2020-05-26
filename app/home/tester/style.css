@@ -1,0 +1,9 @@
+p {
+  font-size: 30px;
+  white-space: nowrap;
+  background: white;
+  /* text-transform: uppercase; */
+  padding-right: 10px;
+  text-align: right;
+  font-family: monospace;
+}

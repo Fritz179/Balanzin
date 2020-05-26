@@ -119,30 +119,36 @@ class Entity extends Frame {
 
     this.pos.listen(() => this.changed = this.changed || !this.parentLayer.useHTML)
 
-    const canvas = document.createElement('canvas')
-    this.sprite = new RenderContext(this, new Context(canvas))
+    this.container = document.createElement('div')
 
-    this.size.listen(x => {
-      this.sprite.canvas.width = x
-      this.sprite.topContext.restore()
-    }, y => {
-      this.sprite.canvas.height = y
-      this.sprite.topContext.restore()
-    })
+    this.minVel = 0.1
+    this.minAcc = 0.001
+  }
+
+  createSprite() {
+    const sprite = new Sprite(this.w, this.h)
+    this.container.appendChild(sprite.canvas)
+    return sprite
   }
 
   fixedUpdateBubble() {
-    this.acc.mult(this.drag)
-    this.vel.add(this.acc)
-    this.pos.add(this.vel)
+    this.vel.x += this.acc.x
+    this.vel.y += this.acc.y
+    this.vel.x *= this.drag.x
+    this.vel.y *= this.drag.y
+    this.pos.x += this.vel.x
+    this.pos.y += this.vel.y
+
+    if (Math.abs(this.vel.x) < this.minVel) this.vel.x = 0
+    if (Math.abs(this.vel.y) < this.minVel) this.vel.y = 0
   }
 
   updateBubble() {
-    if (this.parentLayer.useHTML && (this.hasChangedPos || this.changedBasePos)) {
+    if (this.hasChangedPos || this.hasChangedBasePos) {
       // if both pos and scale have changed, the above statement cuts short
       // at the || and scale is't staganted
 
-      const {style} = this.sprite.canvas
+      const {style} = this.container
       const {scale, pos} = this
       style.transform = `matrix(1, 0, 0, 1, ${Math.floor(pos.x)}, ${Math.floor(pos.y)})`
     }
