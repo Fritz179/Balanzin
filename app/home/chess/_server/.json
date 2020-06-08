@@ -20,6 +20,12 @@
       "p": "Play against yourself",
       "path": "single",
       "authenticate": false
+    },
+    {
+      "title": "Tournaments",
+      "p": "Find out all the epic tournaments",
+      "path": "tournaments",
+      "authenticate": false
     }
   ]
 }
