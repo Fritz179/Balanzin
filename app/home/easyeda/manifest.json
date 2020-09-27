@@ -1,0 +1,6 @@
+{
+	"name": "querverweis",
+	"description": "na estension ca agiüng i querverweis, nümerazion dali pagini e navigazion cun li freci",
+	"version": "1.0",
+	"scripts": [ "main.js" ]
+}
