@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 40px;
+}
+.container div {
+  margin: 20px;
+  transform: scale(2, 2)
+}
+
+.container div input {
+  margin-left: 5px;
+  margin-right: 10px;
+}
+
+.container button {
+  height: 3rem;
+  width: 8rem;
+  font-size: 2rem;
+  margin-top: 25px;
+}
+
+.container canvas {
+  margin: 40px;
+}
