@@ -14,6 +14,11 @@
       "path": "terraria"
     },
     {
+      "title": "Fritz V3",
+      "p": "Testing app for Fritz V3 (failed)",
+      "path": "tester"
+    },
+    {
       "title": "Block_Racer V1",
       "p": "Block racer in js",
       "path": "block_racer"

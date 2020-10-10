@@ -6,6 +6,7 @@ class Master extends Layer {
 
     this.addChild(this.main = new Main())
     this.addChild(this.overlay = new Test())
+    // this.baseScale = 4
   }
 
   render() {
@@ -22,7 +23,7 @@ class Main extends Layer {
     }
 
     this.addChild(this.player = new Player())
-    // this.baseScale = 2
+    // this.baseScale = 4
   }
 
   render() {
@@ -33,7 +34,11 @@ class Main extends Layer {
   update() {
     const [x, y] = this.player.center
     const [w, h] = this.baseSize
+    const [sx, sy] = this.scale
 
-    this.pos = [Math.ceil(Math.ceil(w / 2) - x * this.scale.x), Math.ceil(Math.ceil(h / 2) - y * this.scale.y)]
+    const newX = ceil(ceil(w / 2, sx) - x * sx, sx)
+    const newY = ceil(ceil(h / 2, sy) - y * sy, sy)
+
+    this.pos = [newX, newY]
   }
 }

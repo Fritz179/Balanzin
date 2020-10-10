@@ -19,11 +19,6 @@
       "path": "gen"
     },
     {
-      "title": "Test!",
-      "p": "Test of fritz 3",
-      "path": "tester"
-    },
-    {
       "title": "Tris!",
       "p": "Play Tris against an unbeatable AI",
       "path": "tris"

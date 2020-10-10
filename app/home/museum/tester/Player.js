@@ -25,8 +25,8 @@ class Player extends Entity {
     if (++this.timer >= 10) {
       this.timer = 0
 
-      this.s1.display(this.flip)
-      this.s2.display(!this.flip)
+      // this.s1.display(this.flip)
+      // this.s2.display(!this.flip)
 
       this.flip = !this.flip
     }

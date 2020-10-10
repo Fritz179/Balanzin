@@ -19,6 +19,10 @@ mongoose.connect(process.env.URI, {useNewUrlParser: true, useUnifiedTopology: tr
 const router = require('./setup/createRouter.js')(io, path.join(__dirname, 'home'));
 app.use('/', router)
 
+app.get(/.*69.*/, (req, res) => {
+  res.send('NICE!')
+})
+
 //connect the error page to all remaining requests (404)
 app.get('*', (req, res) => {
   if (!res._header) {
