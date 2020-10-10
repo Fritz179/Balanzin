@@ -1,8 +1,9 @@
 .env
 node_modules
 deleteme
+old
 
-#roboto
+#roboto font
 app/misc/fonts
 
 #plc
@@ -10,9 +11,9 @@ app/home/transpiler/lager.js
 
 #original size images, in any folder
 original
-old
 
-#tests
+#VIP
+calc
 angela
 tester2
 tester4

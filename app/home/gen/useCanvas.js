@@ -1,7 +1,7 @@
 // https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
 const {useEffect, useRef} = React
 
-const useCanvas = (draw, w = 100, h = 100) => {
+const useCanvas = (draw, w = 100, h = 100, loop) => {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -16,7 +16,12 @@ const useCanvas = (draw, w = 100, h = 100) => {
       draw(ctx)
       request = window.requestAnimationFrame(render)
     }
-    render()
+
+    if (loop) {
+      render()
+    } else {
+      draw(ctx)
+    }
 
     return () => window.cancelAnimationFrame(request)
   }, [draw])

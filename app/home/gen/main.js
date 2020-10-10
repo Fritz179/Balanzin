@@ -1,50 +1,64 @@
 const {useState} = React
 
 const App = () => {
-  const [res, setRes] = useState([[20, 0], [15, 120], [10, 240]])
+  const [values, setValues] = useState([[23, 0], [92, 120], [46, 240]])
+  const [unit, setUnit] = useState(false) // unit = usingCurrent
 
   function update(e, i, j) {
     const newVal = +e.target.value
 
     if (newVal + 1) {
-      const copy = [...res]
+      const copy = [...values]
       copy[i][j] = newVal
-      setRes(copy)
+      setValues(copy)
     }
   }
 
   function zerofy() {
-    const [[a], [b], [c]] = res
+    const [a, b, c] = values.map(([l]) => unit ? l : 230 / l)
 
     const a1 = 180 - cosLawAngle(a, b, c)
     const a2 = a1 + 180 - cosLawAngle(b, c, a)
 
     if (!a1 || !a2) {
-      return alert('nope')
+      return alert('ta pos miga creà an triangul cun una ipotenusa plù granda dala somma dai cateti.')
     }
 
-    const copy = [...res]
+    const copy = [...values]
+    copy[0][1] = 0
     copy[1][1] = a1
     copy[2][1] = a2
-    setRes(copy)
+    setValues(copy)
 
     console.log(a1, a2);
   }
+
+  function chageUnit() {
+    setValues(values.map(([l, a]) => [230 / l, a]))
+    setUnit(!unit)
+  }
+
+  const mapped = values.map(([l, a]) => [l, a / 360 * Math.PI * 2 + Math.PI])
+  const other = mapped.map(([l, a]) => [230 / l, a])
 
   return (
     <div className="container">
       {[0, 1, 2].map(i => (
         <div key={i}>
-          <label>I{i}:
-            <input type="text" value={res[i][0]} onChange={e => update(e, i, 0)}/>
+          <label>{unit ? 'I' : 'R'}{i + 1}:
+            <input type="text" value={values[i][0]} onChange={e => update(e, i, 0)}/>
           </label>
-          <label>°{i}:
-            <input type="text" value={res[i][1]} onChange={e => update(e, i, 1)}/>
+          <label>°{i + 1}:
+            <input type="text" value={values[i][1]} onChange={e => update(e, i, 1)}/>
           </label>
         </div>
       ))}
-      <button onClick={zerofy}>Magia</button>
-      <Canvas i={res}/>
+      <button onClick={zerofy}>Met al centru al centru</button>
+      <button onClick={chageUnit}>{unit ? 'resistenze' : 'correnti'}</button>
+      <section>
+        <ICanvas i={unit ? mapped : other}/>
+        <UCanvas i={unit ? other : mapped}/>
+      </section>
     </div>
   )
 }
