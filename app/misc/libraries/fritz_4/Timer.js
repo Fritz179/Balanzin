@@ -1,8 +1,8 @@
 export default class Timer {
-  constructor(fps, fixedUpdate, update = () => { }, start = true, throttle = 8) {
+  constructor(fps, fixedUpdate, start = true, throttle = 8) {
     this.timeStep = 1000 / fps
     this.fixedUpdate = fixedUpdate
-    this.update = update
+    this.update = () => { }
 
     this.time = 0
     this.accTime = 0

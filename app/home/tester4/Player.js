@@ -3,13 +3,14 @@
 import Entity from '/libraries/fritz_4/Entity.js'
 import PlayerController from './PlayerController.js'
 import Sprite from '/libraries/fritz_4/Sprite.js'
+import Trigger from '/libraries/fritz_4/Trigger.js'
 
 class PlayerSprite extends Sprite {
   render() {
     const player = this.master
-    const {x, y, w, h} = player
+    const {x, y, w, h, white} = player
 
-    this.ctx.fillStyle = '#000'
+    this.ctx.fillStyle = white ? '#F00' : '#000'
     this.ctx.fillRect(0, 0, w, h)
     this.canvas.style.left = x + 'px'
     this.canvas.style.top = y + 'px'
@@ -21,14 +22,15 @@ class PlayerSprite extends Sprite {
 }
 
 export default class Player extends Entity {
-  constructor() {
-    super(0, 0, 50, 50)
+  constructor(parent, x, y) {
+    super(x, y, 50, 50)
 
     this.addTrait(PlayerSprite)
     this.addTrait(PlayerController)
-    // this.addTrait(RigidBody, '')
+    this.addTrait(Trigger)
 
     this.speed = 10
+    this.white = false
   }
 
   init(parent) {
@@ -37,8 +39,13 @@ export default class Player extends Entity {
     })
   }
 
+  trigger(to) {
+    this.white = true
+  }
+
   render(context) {
     this.getTrait(PlayerSprite).render(context)
+    this.white = false
   }
 
   update() {

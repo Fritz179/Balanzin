@@ -1,4 +1,5 @@
 import Rect from './Rect.js'
+import Events from './Events.js'
 
 export default class Entity extends Rect {
   constructor(x, y, w, h) {
@@ -8,10 +9,14 @@ export default class Entity extends Rect {
     this.yv = 0
 
     this.traits = new Map()
+    this.events = new Events()
+
+    this.events.listen('update', (...args) => this.update(...args))
+    this.events.listen('render', (...args) => this.render(...args))
   }
 
-  addTrait(TraitClass, ...options) {
-    const trait = new TraitClass(this, ...options)
+  addTrait(TraitClass, ...args) {
+    const trait = new TraitClass(this, ...args)
     trait.master = this
     this.traits.set(TraitClass, trait)
   }
@@ -20,18 +25,26 @@ export default class Entity extends Rect {
     return this.traits.get(TraitClass)
   }
 
-  removeTrait() {
+  update() {
+
+  }
+
+  render() {
 
   }
 }
 
 export class Trait {
-  constructor(master, ...options) {
+  constructor(master, ...args) {
 
   }
 
   init(player) {
     abstract;
+  }
+
+  update() {
+
   }
 
   terminate(parent) {
