@@ -18,6 +18,13 @@ export default class Event {
     callbacks.forEach(callback => callback(...options))
   }
 
+  getRegister(to) {
+    return (name, fun) => {
+      if (!fun) fun = to[name].bind(to)
+      this.listen(name, fun)
+    }
+  }
+
   remove(callback) {
     const name = events.constructor
 

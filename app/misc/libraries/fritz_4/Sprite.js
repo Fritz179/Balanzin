@@ -1,9 +1,5 @@
-import {Trait} from './Entity.js'
-
-export default class Sprite extends Trait {
+export default class Sprite {
   constructor(player) {
-    super()
-
     this.canvas = document.createElement('canvas')
     this.canvas.width = 50
     this.canvas.height = 50

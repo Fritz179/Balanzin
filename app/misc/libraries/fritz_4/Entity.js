@@ -10,44 +10,16 @@ export default class Entity extends Rect {
 
     this.traits = new Map()
     this.events = new Events()
-
-    this.events.listen('update', (...args) => this.update(...args))
-    this.events.listen('render', (...args) => this.render(...args))
   }
 
   addTrait(TraitClass, ...args) {
-    const trait = new TraitClass(this, ...args)
+    const trait = new TraitClass(...args, this)
     trait.master = this
+
     this.traits.set(TraitClass, trait)
   }
 
   getTrait(TraitClass) {
     return this.traits.get(TraitClass)
-  }
-
-  update() {
-
-  }
-
-  render() {
-
-  }
-}
-
-export class Trait {
-  constructor(master, ...args) {
-
-  }
-
-  init(player) {
-    abstract;
-  }
-
-  update() {
-
-  }
-
-  terminate(parent) {
-
   }
 }

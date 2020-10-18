@@ -1,10 +1,7 @@
-import {Trait} from '/libraries/fritz_4/Entity.js'
 import Keyboard from '/libraries/fritz_4/Keyboard.js'
 
-export default class PlayerController extends Trait {
-  init() {
-    const player = this.master
-
+export default class PlayerController {
+  register(listen, player) {
     Keyboard.onKeyDown(key => {
       switch (key) {
         case 'a': player.xv -= player.speed; break;
