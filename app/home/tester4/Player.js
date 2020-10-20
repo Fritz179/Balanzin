@@ -4,17 +4,16 @@ import Sprite from '/libraries/fritz_4/Sprite.js'
 import Trigger from '/libraries/fritz_4/Trigger.js'
 
 class PlayerSprite extends Sprite {
-  constructor() {
-    super()
+  constructor(master) {
+    super(master)
 
     this.color = '#000'
     this.lastCollision = null
   }
 
-  register(listen) {
-    const parent = document.getElementById('screenDiv')
+  register(listen, player, parent) {
     listen('render', this.render.bind(this))
-    listen('Trigger1', to => {
+    listen('blockyCollision', to => {
       if (this.lastCollision == to) return
 
       this.lastCollision = to
@@ -22,7 +21,7 @@ class PlayerSprite extends Sprite {
       this.color = to.color
       to.color = temp
     })
-    parent.appendChild(this.canvas)
+    parent.div.appendChild(this.canvas)
   }
 
   render() {
@@ -35,6 +34,11 @@ class PlayerSprite extends Sprite {
 }
 
 class BasePhysic {
+  constructor(player) {
+    player.xv = 0
+    player.yv = 0
+  }
+
   register(listen) {
     listen('update', () => this.update())
   }
@@ -54,7 +58,7 @@ export default class Player extends Entity {
     this.addTrait(PlayerSprite)
     this.addTrait(PlayerController)
     this.addTrait(BasePhysic)
-    this.addTrait(Trigger, 'Trigger1')
+    this.addTrait(Trigger, 'blockyCollision')
 
     this.speed = 10
   }

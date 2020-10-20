@@ -5,16 +5,20 @@ export default class Entity extends Rect {
   constructor(x, y, w, h) {
     super(x, y, w, h)
 
-    this.xv = 0
-    this.yv = 0
-
     this.traits = new Map()
     this.events = new Events()
+
+    if (this.register)
+      this.events.listen('register', this.register.bind(this))
   }
 
   addTrait(TraitClass, ...args) {
     const trait = new TraitClass(...args, this)
     trait.master = this
+
+    if (trait.register) {
+      this.events.listen('register', (listen, ...args) => trait.register(listen, this, ...args))
+    }
 
     this.traits.set(TraitClass, trait)
   }

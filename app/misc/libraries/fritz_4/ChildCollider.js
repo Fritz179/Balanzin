@@ -1,12 +1,12 @@
 import Trigger from './Trigger.js'
 
 export default class ChildCollider {
-  constructor() {
+  constructor(master) {
     this.triggers = new Map()
-    // this.triggersArray = []
+    master.events.listen('addTrigger', this.registerTrigger.bind(this))
   }
 
-  register(listen, parent) {
+  register(listen, master) {
     listen('update', () => this.update())
   }
 

@@ -9,14 +9,14 @@ export default class Trigger {
     const callback = this.callback
 
     if (typeof callback == 'string') {
-      return layer.getTrait(ChildCollider).registerTrigger(this.master, (...args) => this.master.events.fire(callback, ...args))
+      return layer.events.fire('addTrigger', entity, (...args) => this.master.events.fire(callback, ...args))
     }
 
     if (typeof callback == 'function') {
-      return layer.getTrait(ChildCollider).registerTrigger(this.master, callback)
+      return layer.events.fire('addTrigger', entity, (...args) => callback(...args))
     }
 
-    layer.getTrait(ChildCollider).registerTrigger(this.master, () => {})
+    layer.events.fire('addTrigger', entity, () => { })
   }
 
   unregister() {
