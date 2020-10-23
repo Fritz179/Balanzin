@@ -1,4 +1,4 @@
-export default class Timer {
+export class Engine {
   constructor(fps, fixedUpdate, start = true, throttle = 8) {
     this.timeStep = 1000 / fps
     this.fixedUpdate = fixedUpdate
@@ -55,3 +55,30 @@ export default class Timer {
     window.cancelAnimationFrame(this.request)
   }
 }
+
+export default class Timer extends Engine {
+  constructor(master, update) {
+    super(60, () => {
+      master.events.fire('update')
+      master.events.fire('render')
+    }, false)
+
+    if (document.readyState  == 'complete') {
+      master.events.fire('register', master.events.listen.bind(master.events))
+      this.start()
+    } else {
+      window.addEventListener('load', () => {
+        master.events.fire('register', master.events.listen.bind(master.events))
+        this.start()
+      })
+    }
+  }
+}
+
+/*
+  new App
+
+  register App => register App traits
+  register Children => register Children traits
+
+*/

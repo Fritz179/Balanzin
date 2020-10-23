@@ -1,5 +1,5 @@
 import Entity from '/libraries/fritz_4/Entity.js'
-import Trigger from '/libraries/fritz_4/Trigger.js'
+import Trigger from '/libraries/fritz_4/traits/Trigger.js'
 
 export default class Blocky extends Entity {
   static tags = ['enemy']

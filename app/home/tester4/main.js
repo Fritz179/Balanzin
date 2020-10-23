@@ -1,9 +1,11 @@
 import Player from './Player.js'
 import Blocky from './Blocky.js'
-import App, {Layer} from '/libraries/fritz_4/App.js'
-import Trigger from '/libraries/fritz_4/Trigger.js'
-import ChildCollider from '/libraries/fritz_4/ChildCollider.js'
-import Sprite from '/libraries/fritz_4/Sprite.js'
+import ChildCollider from '/libraries/fritz_4/traits/ChildCollider.js'
+import HTMLDiv from '/libraries/fritz_4/traits/HTMLDiv.js'
+import ChildHolder from '/libraries/fritz_4/traits/ChildHolder.js'
+import Sprite from '/libraries/fritz_4/traits/Sprite.js'
+import Timer from '/libraries/fritz_4/traits/Timer.js'
+import Entity from '/libraries/fritz_4/Entity.js'
 
 const hexVals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
 function randomHex() {
@@ -15,40 +17,49 @@ function randomColor() {
   return `#${r()}${r()}${r()}`
 }
 
-class BackGroundLayer extends Layer {
+class BackGroundLayer extends Entity {
   register(listen, master) {
+    this.addTrait(HTMLDiv, this)
+    this.addTrait(ChildHolder)
+
+    this.events.listen('render', this.render.bind(this), true)
     this.w = window.innerWidth
     this.h = window.innerHeight
     this.addTrait(Sprite)
 
-    listen('render')
+    window.addEventListener('resize', () => {
+      this.w = window.innerWidth
+      this.h = window.innerHeight
+    })
+
     listen('addTrigger', (...args) => master.events.fire('addTrigger', ...args))
 
-    this.addChild(Blocky, 100, 100, 200, 100, randomColor())
-    this.addChild(Blocky, 600, 800, 100, 500, randomColor())
-    this.addChild(Blocky, 200, 600, 600, 150, randomColor())
-    this.addChild(Blocky, 1200, 200, 300, 300, randomColor())
-    this.addChild(Blocky, 1050, 700, 100, 200, randomColor())
-    this.addChild(Blocky, 600, 300, 500, 50, randomColor())
+    this.children.add(Blocky, 100, 100, 200, 100, randomColor())
+    this.children.add(Blocky, 600, 800, 100, 500, randomColor())
+    this.children.add(Blocky, 200, 600, 600, 150, randomColor())
+    this.children.add(Blocky, 1200, 200, 300, 300, randomColor())
+    this.children.add(Blocky, 1050, 700, 100, 200, randomColor())
+    this.children.add(Blocky, 600, 300, 500, 50, randomColor())
   }
 
   render() {
     this.ctx.fillStyle = '#333'
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-
-    this.children.forEach(set => {
-      set.forEach(child => {
-        child.events.fire('render', this.ctx)
-      })
-    })
   }
 }
 
-new class Tester4 extends App {
-  register(listen, parent) {
-    this.addTrait(ChildCollider)
+window.app = new class Tester4 extends Entity {
+  constructor() {
+    super()
 
-    this.addChild(BackGroundLayer)
-    this.player = this.addChild(Player, 500, 500)
+    this.addTrait(HTMLDiv, 'screen')
+    this.addTrait(ChildHolder)
+    this.addTrait(ChildCollider)
+    this.addTrait(Timer)
+  }
+
+  register(listen, parent) {
+    this.children.add(BackGroundLayer)
+    this.player = this.children.add(Player, 500, 500)
   }
 }

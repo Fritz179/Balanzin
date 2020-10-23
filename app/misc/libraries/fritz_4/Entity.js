@@ -14,6 +14,7 @@ export default class Entity extends Rect {
 
   addTrait(TraitClass, ...args) {
     const trait = new TraitClass(...args, this)
+
     trait.master = this
 
     if (trait.register) {

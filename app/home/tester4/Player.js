@@ -1,7 +1,7 @@
 import Entity from '/libraries/fritz_4/Entity.js'
 import PlayerController from './PlayerController.js'
-import Sprite from '/libraries/fritz_4/Sprite.js'
-import Trigger from '/libraries/fritz_4/Trigger.js'
+import Sprite from '/libraries/fritz_4/traits/Sprite.js'
+import Trigger from '/libraries/fritz_4/traits/Trigger.js'
 
 class PlayerSprite extends Sprite {
   constructor(master) {
