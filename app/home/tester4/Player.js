@@ -1,7 +1,7 @@
 import Entity from '/libraries/fritz_4/Entity.js'
 import PlayerController from './PlayerController.js'
 import Sprite from '/libraries/fritz_4/traits/Sprite.js'
-import Trigger from '/libraries/fritz_4/traits/Trigger.js'
+import Trigger, {TileCollider} from '/libraries/fritz_4/traits/Trigger.js'
 
 class PlayerSprite extends Sprite {
   constructor(master) {
@@ -53,13 +53,14 @@ export default class Player extends Entity {
   static tags = ['player']
 
   constructor(x, y) {
-    super(x, y, 50, 50)
+    super(x, y, 24, 38)
 
     this.addTrait(PlayerSprite)
     this.addTrait(PlayerController)
     this.addTrait(BasePhysic)
     this.addTrait(Trigger, 'blockyCollision')
+    this.addTrait(TileCollider)
 
-    this.speed = 10
+    this.speed = 5
   }
 }

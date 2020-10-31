@@ -3,10 +3,13 @@
   margin: 0;
   padding: 0;
   font-size: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
+  image-rendering: pixelated;
+  /* image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges; */
 }
 
-body canvas {
+body * {
   position: absolute;
 }
 

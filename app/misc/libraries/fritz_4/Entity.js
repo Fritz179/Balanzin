@@ -1,7 +1,7 @@
 import Rect from './Rect.js'
 import Events from './Events.js'
 
-export default class Entity extends Rect {
+export default class Frame extends Rect {
   constructor(x, y, w, h) {
     super(x, y, w, h)
 

@@ -5,7 +5,7 @@ export default class Blocky extends Entity {
   static tags = ['enemy']
 
   constructor(x, y, w, h, color) {
-    super(x, y, w, h)
+    super(x / 2, y / 2, w / 2, h / 2)
 
     this.color = color
     this.addTrait(Trigger)

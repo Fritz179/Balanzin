@@ -1,8 +1,9 @@
 import Player from './Player.js'
 import Blocky from './Blocky.js'
+import TileLayer from './TileLayer.js'
 import ChildCollider from '/libraries/fritz_4/traits/ChildCollider.js'
 import HTMLDiv from '/libraries/fritz_4/traits/HTMLDiv.js'
-import ChildHolder from '/libraries/fritz_4/traits/ChildHolder.js'
+import Children from '/libraries/fritz_4/traits/Children.js'
 import Sprite from '/libraries/fritz_4/traits/Sprite.js'
 import Timer from '/libraries/fritz_4/traits/Timer.js'
 import Entity from '/libraries/fritz_4/Entity.js'
@@ -19,9 +20,10 @@ function randomColor() {
 
 class BackGroundLayer extends Entity {
   register(listen, master) {
-    this.addTrait(HTMLDiv, this)
-    this.addTrait(ChildHolder)
+    this.addTrait(HTMLDiv)
+    this.addTrait(Children)
 
+    this.div.style.transform = `scale(2)`
     this.events.listen('render', this.render.bind(this), true)
     this.w = window.innerWidth
     this.h = window.innerHeight
@@ -43,8 +45,22 @@ class BackGroundLayer extends Entity {
   }
 
   render() {
-    this.ctx.fillStyle = '#333'
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    // this.ctx.fillStyle = '#333'
+    // this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+  }
+}
+
+class EntityLayer extends Entity {
+  register(listen, master) {
+    this.addTrait(HTMLDiv)
+    this.addTrait(Children)
+
+    this.div.style.transform = `scale(2)`
+
+    listen('addTileCollider', (...args) => master.events.fire('addTileCollider', ...args))
+    listen('addTrigger', (...args) => master.events.fire('addTrigger', ...args))
+
+    master.player = this.children.add(Player, 500, 500)
   }
 }
 
@@ -53,13 +69,21 @@ window.app = new class Tester4 extends Entity {
     super()
 
     this.addTrait(HTMLDiv, 'screen')
-    this.addTrait(ChildHolder)
+    this.addTrait(Children)
     this.addTrait(ChildCollider)
     this.addTrait(Timer)
   }
 
   register(listen, parent) {
+    listen('update', this.update.bind(this))
+
+    this.children.add(TileLayer)
     this.children.add(BackGroundLayer)
-    this.player = this.children.add(Player, 500, 500)
+    this.children.add(EntityLayer)
+  }
+
+  update() {
+    this.div.style.left = -this.player.x * 2 + Math.ceil(window.innerWidth / 2) + 'px'
+    this.div.style.top = -this.player.y * 2 + Math.ceil(window.innerHeight / 2) + 'px'
   }
 }
