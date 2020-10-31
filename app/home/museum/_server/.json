@@ -14,9 +14,19 @@
       "path": "terraria"
     },
     {
+      "title": "WebGL",
+      "p": "Using the GPU with WebGL2",
+      "path": "webgl"
+    },
+    {
       "title": "Fritz V3",
       "p": "Testing app for Fritz V3 (failed)",
       "path": "tester"
+    },
+    {
+      "title": "Drawing",
+      "p": "An application for drawing geometrical shapes, it even kinda almost supports 3D<br>Instructions are currently missing...",
+      "path": "drawing"
     },
     {
       "title": "Block_Racer V1",
@@ -32,11 +42,6 @@
       "title": "Colorbox",
       "p": "Copy of a phone game that my old classmates were addicted to...",
       "path": "colorbox"
-    },
-    {
-      "title": "Drawing",
-      "p": "An application for drawing geometrical shapes, it even kinda almost supports 3D<br>Instructions are currently missing...",
-      "path": "drawing"
     },
     {
       "title": "Jack lo smilzo",
