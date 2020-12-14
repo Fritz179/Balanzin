@@ -1,4 +1,4 @@
-attribute vec2 a_Destination;
+attribute vec3 a_Destination;
 attribute vec2 a_Source;
 attribute vec4 a_Color;
 
@@ -11,5 +11,5 @@ varying vec2 v_Source;
 void main() {
   v_Color = a_Color;
   v_Source = a_Source;
-  gl_Position = vec4(a_Destination + u_Offset, 0.0, 1.0) * u_MVP;
+  gl_Position = vec4(a_Destination + vec3(u_Offset, 0), 1.0) * u_MVP;
 }

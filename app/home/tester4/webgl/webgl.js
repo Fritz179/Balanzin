@@ -8,15 +8,16 @@ class Program {
     this.program = program
     this.uniforms = new Map()
 
-    this.vao = this.createVAO(['a_Destination', 2], ['a_Source', 2], ['a_Color', 4])
+    this.vao = this.createVAO(['a_Destination', 3], ['a_Source', 2], ['a_Color', 4])
 
     this.getUniformLocations()
     this.indexes = this.createIndexBuffer(maxIndexes)
 
     this.currentQuad = 0
+    this.baseQuad = 0
 
     this.gl.enable(this.gl.BLEND);
-    this.gl.blendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA)
+    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
   }
 
   getUniformLocations() {
@@ -57,8 +58,8 @@ class Program {
     this.stride = 0
     map.forEach(length => this.stride += length);
 
-    const vao = this.gl.createVertexArray();
-    this.gl.bindVertexArray(vao);
+    this.vao = this.gl.createVertexArray();
+    this.gl.bindVertexArray(this.vao);
 
     const buffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
@@ -74,15 +75,32 @@ class Program {
       offset += length
     })
 
-    return vao
+    return this.vao
+  }
+
+  getQuad() {
+    const thisQuad = this.baseQuad
+    this.baseQuad++
+    this.currentQuad++
+
+    return (x, y, w, h, z) => {
+      const vertices = [
+        x, y, z, 0, 0, 1, 1, 1, 1,
+        x, y + h, z, 0, 1, 1, 1, 1, 1,
+        x + w, y + h, z, 1, 1, 1, 1, 1, 1,
+        x + w, y, z, 1, 0, 1, 1, 1, 1
+      ]
+
+      this.view.set(vertices, thisQuad * this.stride * 4) // view is't in bytes
+    }
   }
 
   drawImage(x, y, w, h, img) {
     this.loadVertices([
-      x, y, 0, 0, 1, 1, 1, 1,
-      x, y + h, 0, 1, 1, 1, 1, 1,
-      x + w, y + h, 1, 1, 1, 1, 1, 1,
-      x + w, y, 1, 0, 1, 1, 1, 1
+      x, y, 0, 0, 0, 1, 1, 1, 1,
+      x, y + h, 0, 0, 1, 1, 1, 1, 1,
+      x + w, y + h, 0, 1, 1, 1, 1, 1, 1,
+      x + w, y, 0, 1, 0, 1, 1, 1, 1
     ])
   }
 
@@ -174,12 +192,10 @@ class Program {
     // this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexes);
     // this.gl.bindVertexArray(this.vao)
 
-    const quadLength = this.stride * 4 * 4
     this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, this.buffer)
-
     this.gl.drawElements(this.gl.TRIANGLES, this.currentQuad * 6, this.indexes.type, 0);
 
-    if (reset) this.currentQuad = 0
+    if (reset) this.currentQuad = this.baseQuad
   }
 
   clear(r = 1, g, b, a = 1) {
@@ -197,7 +213,6 @@ export default class WebGl {
     this.canvas.height = h
 
     this.gl = this.canvas.getContext('webgl2', { antialias: false }, 'false');
-    // this.gl = this.canvas.getContext('webgl2');
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
   }
 
@@ -230,5 +245,9 @@ export default class WebGl {
     this.gl.useProgram(program);
 
     return new Program(this.gl, program)
+  }
+
+  useProgram(program) {
+    this.gl.useProgram(program.program)
   }
 }
