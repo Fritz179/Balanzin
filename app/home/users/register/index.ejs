@@ -14,7 +14,7 @@
     <div class="register-wrapper">
       <section class="register">
         <%- include('messages') %>
-        
+
         <h1>Register</h1>
         <form method="post" action="/users/register">
           <div><label>Name:</label><input name="name" type="text"></div>
@@ -25,6 +25,7 @@
           <input class="btn" type="submit" value="Create account">
         </form>
         <h6>Do you already have an account? <a class="link" href='/users/login'>click here to log in.</a></h6>
+        <h6>Forgot your password? <a class="link" href='/users/reset'>click here to reset your password.</a></h6>
         <%- include('footer') %>
       </section>
     </div>

@@ -11,6 +11,9 @@
       "custom": "logout"
     },
     {
+      "custom": "reset"
+    },
+    {
       "path": "report"
     }
   ]

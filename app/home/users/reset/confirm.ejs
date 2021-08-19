@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
+
+  </head>
+  <body>
+
+    <%- include('navbar') %>
+
+    <div class="wrapper">
+
+      <div class="reset">
+
+        <%- include('messages') %>
+
+        <h1>Set new password</h1>
+
+        <form method="post" action="/users/reset/<%= token %>">
+          <div><label>New password:</label><input name="password1" type="password" autofocus></div>
+          <div><label>Confirm new password:</label><input name="password2" type="empasswordail"></div>
+          <input class="btn" type="submit" value="Reset password">
+        </form>
+
+        <%- include('footer') %>
+      </div>
+
+    </div>
+
+
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>

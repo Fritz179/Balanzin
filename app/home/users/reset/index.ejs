@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
+
+  </head>
+  <body>
+
+    <%- include('navbar') %>
+
+    <div class="wrapper">
+
+      <div class="reset">
+
+        <%- include('messages') %>
+
+        <h1>Reset password</h1>
+        <p>
+          Fill the form and an email will be sent within a couple minutes to reset your password!<br>
+          Note that the email and username must match with the ones used to create the account
+        </p>
+
+        <form method="post" action="/users/reset">
+          <div><label>Username:</label><input name="username" type="text" autofocus></div>
+          <div><label>Email:</label><input name="email" type="email"></div>
+          <input class="btn" type="submit" value="Send email">
+        </form>
+
+        <h6>Do you already have an account? <a class="link" href='/users/login'>click here to log in.</a></h6>
+        <h6>Don't you have an account? <a class="link" href='/users/register'>click here to create a new one.</a></h6>
+
+        <%- include('footer') %>
+      </div>
+
+    </div>
+
+
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>

@@ -66,7 +66,7 @@ function createUser(req, res) {
             const {name, username, email} = req.body
             console.log(`New user created! name: ${name}, username: ${username}`);
             req.flash("success", "You are now registered");
-            res.redirect('/users/home')
+            res.redirect('/users/login')
           }
         })
       }
