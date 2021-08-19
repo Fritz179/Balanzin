@@ -1,0 +1,29 @@
+.messages {
+  margin: auto;
+  width: 100%;
+  font-size: 1.5rem;
+  font-family: roboto-light;
+  margin-bottom: 4rem;
+}
+
+.messages * {
+  padding: 1rem 2rem;
+  background: #FF00FF;
+
+  color: #000;
+  border-radius: 2rem;
+  box-shadow: var(--shadow);
+  border: 1px solid #333333;
+}
+
+.message-error {
+  background: #FF8888;
+}
+
+.message-success {
+  background: #88FF88;
+}
+
+.message-info {
+  background: #8888FF;
+}

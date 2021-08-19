@@ -13,6 +13,9 @@
     <!-- Articles -->
     <div class="login-wrapper">
       <section class="login">
+
+        <%- include('messages') %>
+
         <h1>Login</h1>
         <form method="post" action="<%= '/users/login?from=' + locals.from || '' %>">
           <div><label>Username:</label><input name="username" type="text" autofocus></div>

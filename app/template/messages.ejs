@@ -1,0 +1,10 @@
+<style><%- include('messages.css') %></style>
+
+<div class='messages'>
+  <% msgs = messages() %>
+  <% Object.keys(msgs).forEach(type => { %>
+    <% msgs[type].forEach(msg => { %>
+      <div class='message-<%= type %>'><%= msg %></div>
+    <% }) %>
+  <% }) %>
+</div>

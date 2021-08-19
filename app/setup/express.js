@@ -16,11 +16,29 @@ module.exports = (app, io, dirname) => {
 
   app.use(sessionMiddleware);
 
-  app.use(require('connect-flash')());
+  app.use((req, res, next) => {
+    if (req.flash) return next()
 
-  app.use(function (req, res, next) {
-    res.locals.messages = require('express-messages')(req, res);
-    next();
+    req.flash = function (type, message) {
+      const messages = this.session.flash = this.session.flash || {}
+
+      if (type && message) {
+        // if it's a new type, create a new array
+        if (!messages[type])
+          messages[type] = []
+
+        messages[type].push(message)
+        return
+      }
+
+      // with no parameters return messages and delete them
+      this.session.flash = {}
+      return messages
+    }
+
+    res.locals.messages = () => req.flash()
+
+    next()
   });
 
   io.use(function(socket, next) {
@@ -58,7 +76,6 @@ module.exports = (app, io, dirname) => {
 
   app.use((req, res, next) => {
     res.locals.user = req.user || null
-    res.locals.messages = req.messages || []
     next()
   })
 
