@@ -7,12 +7,13 @@ const levels = {
 }
 
 export function prettyPrint(str) {
+  return str
   function iterate([lhs, op, rhs]) {
-    if (Array.isArray(lhs)) {
-      if (lhs[1] == op && op == '*') {
-        return [`${iterate(lhs[0])} ${op} ${iterate(lhs[2])}`, op, rhs]
-      }
-    }
+    // if (Array.isArray(lhs)) {
+    //   if (lhs[1] == op && op == '*') {
+    //     return [`${iterate(lhs[0])} ${op} ${iterate(lhs[2])}`, op, rhs]
+    //   }
+    // }
 
     return [lhs, op, rhs]
   }
@@ -23,7 +24,7 @@ export function prettyPrint(str) {
 }
 
 export default function splitExpr(str, recursive) {
-  const ops = str.split(/(\b| |\(|\))/).map(el => el.trim()).filter(el => el.length)
+  const ops = str.split(/(  | |\(|\))/).map(el => el.trim()).filter(el => el.length)
 
   if (ops.length <= 1) return ops[0]
 

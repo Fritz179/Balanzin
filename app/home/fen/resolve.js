@@ -3,6 +3,7 @@ const SISteps = [
   [[1000, 'm'], [1000, 'μ'], [1000, 'n'], [1000, 'p'], [1000, 'f'], [1000, 'a'], [1000, 'z'], [1000, 'y']]
 ]
 
+window.prefix = prefix
 export function prefix(unit) {
   const sign = unit < 0 ? -1 : 1
   const r = () => (sign * unit).toString().match(/(-?\d*(\.\d\d\d)?)/)[1]
@@ -19,7 +20,7 @@ export function prefix(unit) {
     while (unit < 1 && i < vals.length - 1) unit *= vals[i++][0]
 
     console.log(unit, vals, i);
-    return `${unit >= 1 ? r() : unit} ${vals[i][1]}`
+    return `${unit >= 1 ? r() : unit} ${vals[--i][1]}`
   }
 
   const vals = SISteps[0]

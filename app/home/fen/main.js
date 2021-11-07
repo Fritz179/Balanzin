@@ -4,17 +4,37 @@ import parse from './parse.js'
 
 const input = `
 
+; Α α, Β β, Γ γ, Δ δ, Ε ε, Ζ ζ, Η η, Θ θ, Ι ι, Κ κ, Λ λ, Μ μ, Ν ν, Ξ ξ, Ο ο, Π  π, Ρ ρ, Σ σ/ς, Τ τ, Υ υ, Φ φ, Χ χ, Ψ ψ, Ω ω.
+
 ; Corente Basi
-  U as Tensione in      V is Volt
-  R as Resistenza in    Ω is Ohm
-  G as Conduttività in  ℧ is Siemens
-  I as Corrente in      A is Ampere
-  P as Potenza in       W is Watt
-  t as Tempo in         s is Secondi
-  E as Energia in       J,Ws is Joule,Watt_Secondi
+  U as Tensione in          V is Volt
+  R as Resistenza in        Ω is Ohm
+  Y as Conduttività in      S is Siemens
+  I as Corrente in          A is Ampere
+  S as Potenza_apparente in W,VA is Watt,Volt_Ampere
+  P as Potenza_attiva in    W is Watt
+  Q as Potenza_reattiva in  W,var is Watt,Var
+  Pη as Potenza_resa in     W is Watt
+  t as Tempo in             s is Secondi
+  E as Energia in           J,Ws is Joule,Watt_Secondi
+  η as Rendimento in        n is -
+  cosφ as Sfasamento in     ° is gradi
+
+  Y = 1 / R
+  U = R * I
+  E = P * t
+  S = U * I
+  P = S * cosφ
+  Q = (S ** 2 - P ** 2) // 2
+
+  cosφ of Resistenza is 1
+  cosφ of Condesatore is 0
+  cosφ of Induttore is 0
+
 
   a as Accelerazione in m/s2 is metri/secondo_quadri
   g as Gravità in m/s2 is metri/secondo_quadri
+  a = g
 
   g of Tera is 9.807
   g of Lüna is 1.62
@@ -29,13 +49,6 @@ const input = `
   g of stella_nana is 3432450
   g of stella_neutroni is 2000000000000
   g of buco_nero is Infinity
-
-  a = g
-  G = 1 / R
-  U = R * I
-  P = U * I
-  E = P * t
-
 ; Roh ρ
 
   ρ as Resistività in Ω*mm2/m is rho

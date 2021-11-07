@@ -72,7 +72,7 @@ export default function parse(input) {
     }
 
     if (eq == 'of') {
-      assertLine(info, a && b && parseFloat(b), 'Invalid of')
+      assertLine(info, a && b && typeof parseFloat(b) == 'number', 'Invalid of')
 
       if (!insts[d].consts) insts[d].consts = {}
 
@@ -122,6 +122,10 @@ function invertOP(d, a, op, b) {
   } else if (op == '**') {
     fun(d, [a, b], (a, b) => a ** b, `${a} ** ${b}`) // d = a ** b
     fun(a, [d, b], (d, b) => rootN(b, d), `${d} \/\/ ${b}`) // a = d // b
+    // fun(b, [a, d], (a, d) => a / d, `${a} / ${d}`) // b = a / d
+  } else if (op == '//') {
+    fun(d, [a, b], (a, b) => rootN(b, a), `${a} // ${b}`) // d = a // b
+    fun(a, [d, b], (d, b) => b ** d, `${d} ** ${b}`) // a = d // b
     // fun(b, [a, d], (a, d) => a / d, `${a} / ${d}`) // b = a / d
   } else {
     console.log('Unknown op: ' + op)
