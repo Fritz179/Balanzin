@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
+
+  </head>
+  <body>
+
+    <%- include('navbar') %>
+
+    <!-- Articles -->
+    <div class="main">
+      <pre id="pre"></pre>
+
+      <input type="text" id="unit" list="unitList"></input>
+    	<datalist id="unitList"></datalist>
+    	<input type="text" id="value" list="valueList"></input>
+    	<datalist id="valueList"></datalist>
+    	<button onclick="calc()">Calculate!</button>
+
+    	<pre id="result"></pre>
+    </div>
+
+    <script src="./main.js" charset="utf-8"></script>
+    <%- include('footer') %>
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>

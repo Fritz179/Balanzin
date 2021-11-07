@@ -29,6 +29,11 @@
       "extend": "chess"
     },
     {
+      "title": "FEN",
+      "p": "Fritz Expression Notation",
+      "path": "fen"
+    },
+    {
       "title": "WWE Game",
       "p": "Play a game made in collaboration with Custasch!",
       "custom": "wwe"

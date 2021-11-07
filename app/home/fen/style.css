@@ -1,0 +1,19 @@
+html {
+  background: var(--secondary);
+  min-width: 40rem;
+}
+
+.main {
+  padding: 3rem;
+  margin: auto;
+  max-width: 65rem;
+}
+
+pre {
+  color: #000;
+  font-size: 1rem;
+}
+
+footer .copy {
+  padding: 0;
+}
