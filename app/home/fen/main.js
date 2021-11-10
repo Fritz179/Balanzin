@@ -11,14 +11,40 @@ const input = `
   R as Resistenza in        Ω is Ohm
   Y as Conduttività in      S is Siemens
   I as Corrente in          A is Ampere
-  S as Potenza_apparente in W,VA is Watt,Volt_Ampere
+  S as Potenza_apparente in W,VA is Watt,Volt*Ampere
   P as Potenza_attiva in    W is Watt
   Q as Potenza_reattiva in  W,var is Watt,Var
   Pη as Potenza_resa in     W is Watt
   t as Tempo in             s is Secondi
-  E as Energia in           J,Ws is Joule,Watt_Secondi
+  E as Energia in           J,Ws is Joule,Watt*Secondi
   η as Rendimento in        n is -
   cosφ as Sfasamento in     ° is gradi
+  n_spire as numero_spire in - is -
+  Θ as Forza_magnetomotrice in A_spire is Ampere_spire
+  Η as Intensità_campo_magnetico in A/m is Amprete/metri
+  Β as Densità_flusso_magnetico in T is Tesla
+  Φ as Flusso_magnetico in W is Weber
+  μ as Permeabilità_assoluta in Tm/A is Tesla*metro/SAmpere
+  μ0 as Permeabilità_vuoto in Tm/a is Tesla*metro/Ampere
+  μr as Permeabilità_relativa in - is -
+  μ0 is 0.000001256637061
+
+  Θ = n_spire * I
+  μ = μ0 * μr
+  Β = μ * Η
+  Η = Θ / l
+  Φ = Β * A
+
+  n_spire = 1.648 k-[-]         => Dato
+  l = 165 mm[metri]             => Dato
+  R = 583  Ω[Ohm]               => Dato
+  U = 35  V[Volt]               => Dato
+  Β = 400 mT[Tesla]             => Dato
+
+  μr of Aria is 1
+  μr of Ferro_dolce is 10000
+  μr of Ferro_Silicio is 20000
+  μr of Ferro_Nichel is 90000
 
   Y = 1 / R
   U = R * I
@@ -105,9 +131,9 @@ function printInst() {
     let [name, unit, nameIn] = insts[res]
     nameIn = nameIn ? `[${nameIn}]` : ''
 
-    let line = `${name}`.padEnd(20, ' ')
+    let line = `${name}`.padEnd(26, ' ')
     line += `${res}[${unit}]`
-    line = line.padEnd(30, ' ') + ' = '
+    line = line.padEnd(36, ' ') + ' = '
 
     for (let pos of list[res]) {
       line += pos.print + ' = '
@@ -145,7 +171,7 @@ function addUnit() {
 
     const [_, name, desc] = insts[key]
     const val = prefix(result[key].value)
-    return `${key} = ${val}${name}[${desc}]`.padEnd(30) + `=> ${result[key].print}\n`
+    return `${key} = ${val}${name}[${desc}]`.padEnd(36) + ` => ${result[key].print}\n`
   }
 
   for (const key in given) {

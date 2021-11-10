@@ -6,7 +6,7 @@ const SISteps = [
 window.prefix = prefix
 export function prefix(unit) {
   const sign = unit < 0 ? -1 : 1
-  const r = () => (sign * unit).toString().match(/(-?\d*(\.\d\d\d)?)/)[1]
+  const r = () => (sign * unit).toString().match(/(-?\d*(\.\d\d?\d?)?)/)[1]
 
   if (unit == 0) return r()
   if (!Number.isFinite(unit)) return 'Infinity '
