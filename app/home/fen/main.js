@@ -35,12 +35,6 @@ const input = `
   Η = Θ / l
   Φ = Β * A
 
-  n_spire = 1.648 k-[-]         => Dato
-  l = 165 mm[metri]             => Dato
-  R = 583  Ω[Ohm]               => Dato
-  U = 35  V[Volt]               => Dato
-  Β = 400 mT[Tesla]             => Dato
-
   μr of Aria is 1
   μr of Ferro_dolce is 10000
   μr of Ferro_Silicio is 20000
