@@ -1,4 +1,4 @@
-  import TileResolver from './tileResolver.js'
+import TileResolver from './tileResolver.js'
 
 window.TileResolver = TileResolver
 

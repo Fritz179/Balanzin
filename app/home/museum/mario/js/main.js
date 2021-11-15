@@ -51,3 +51,5 @@ Promise.all([
   time.start()
   window.Matrix = Matrix
 })
+
+console.log("Press 'C' to activate debug mode");
