@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>Balanzin</title>
+
+  </head>
+  <body>
+
+    <%- include('navbar') %>
+
+    <div class="main print">
+      <textarea id="source" cols="80" rows="15">
+        ; Test 1, test registers
+
+        ldi a, 0xffff
+        ldi b, 0xfffe
+        ldi c, 0xffff
+        ldi si, 0xffff
+        ldi di, 0xffff
+        ldi sp, 0xffff
+
+        ldi a, 0x0000
+        ldi b, 0x0000
+        ldi c, 0x0000
+        ldi si, 0x0000
+        ldi di, 0x0000
+        ldi sp, 0x0000
+
+        ldi a, 0b1010101010101010
+        ldi a, 0b0101010101010101
+        ldi b, 0b1010101010101010
+        ldi b, 0b0101010101010101
+        ldi c, 0b1010101010101010
+        ldi c, 0b0101010101010101
+        ldi si, 0b1010101010101010
+        ldi si, 0b0101010101010101
+        ldi di, 0b1010101010101010
+        ldi di, 0b0101010101010101
+        ldi sp, 0b1010101010101010
+        ldi sp, 0b0101010101010101
+
+
+        ; Test 2, test shift left
+        ldi c, 0xffff
+        ldi c, 0x0002
+
+        ldi a, 0x8001
+        shl a
+        shl a
+
+
+        ; Test 3, test rot left
+        ldi c, 0xffff
+        ldi c, 0x0003
+
+        ldi a, 0x8001
+        rol a
+        rol a
+
+        ; Test 4, test shift right
+        ldi c, 0xffff
+        ldi c, 0x0004
+
+        ldi a, 0x8001
+        shr a
+        shr a
+
+
+        ; Test 5, test rot right
+        ldi c, 0xffff
+        ldi c, 0x0005
+
+        ldi a, 0x8001
+        ror a
+        ror a
+
+        ; Test 6, test AND
+        ldi c, 0xffff
+        ldi c, 0x0006
+
+        ldi a, 0x0003
+        ldi b, 0x0005
+        and a, b
+
+
+        ; Test 7, test OR
+        ldi c, 0xffff
+        ldi c, 0x0007
+
+        ldi a, 0x0003
+        ldi b, 0x0005
+        or  a, b
+
+
+        ; Test 8, test XOR
+        ldi c, 0xffff
+        ldi c, 0x0008
+
+        ldi a, 0x0003
+        ldi b, 0x0005
+        xor a, b
+
+
+        ; Test 9, test NOT
+        ldi c, 0xffff
+        ldi c, 0x0009
+
+        ldi a, 0xaaaa
+        not a
+
+
+        ; Test A, test ADD
+        ldi c, 0xffff
+        ldi c, 0x000A
+
+        ldi a, 0x23
+        ldi b, 0x22
+        add a, b
+
+
+        ; Test B, test ADI
+        ldi c, 0xffff
+        ldi c, 0x000A
+
+        ldi a, 0x23
+        adi a, 0x22
+
+
+        ; Test C, test ADC
+        ldi c, 0xffff
+        ldi c, 0x000C
+
+        ldi a, 0x7fff
+        ldi b, 0x0000
+        add a, a
+        adc b, b ; No carry => 0
+
+        ldi a, 0xffff
+        ldi b, 0x0000
+        add a, a
+        adc b, b ; Carry => 1
+
+
+        ; Test D, test SUB
+        ldi c, 0xffff
+        ldi c, 0x000D
+
+        ldi a, 0x45
+        ldi b, 0x22
+        sub a, b
+
+
+        ; Test E, test SBI
+        ldi c, 0xffff
+        ldi c, 0x000E
+
+        ldi a, 0x45
+        sbi a, 0x22
+
+
+        ; Test F, test SBB
+        ldi c, 0xffff
+        ldi c, 0x000F
+
+        ldi a, 0x0001
+        ldi b, 0x0001
+        sub a, b
+        sbb b, b ; No Borrow => 0
+
+        ldi a, 0x0000
+        ldi b, 0x0001
+        add a, a
+        adc b, b ; Borrow => -1
+
+
+        ; Test 10, test SWP
+        ldi c, 0xffff
+        ldi c, 0x0010
+
+        ldi a, 0x000f
+        swp a
+
+
+        ; Test 11, test INV
+        ldi c, 0xffff
+        ldi c, 0x0011
+
+        ldi a, 0x000f
+        inv a
+
+
+        ; Test 12, test MOV
+        ldi c, 0xffff
+        ldi c, 0x0012
+
+        ldi a, 0xaaaa
+        mov b, a
+        ldi a, 0x000
+        mov a, b
+
+        data: dw 0xaaaa, 0x5555
+
+        str: dw "Hello, World!", 13, 0
+
+        here:
+        jmp here
+      </textarea>
+      <br>
+      <button id="parse">Parse!</button>
+      <button id="low">Copy LOW Bytes!</button>
+      <button id="high">Copy HIGH Bytes!</button>
+      <pre id="print" class="print"></pre>
+      <pre id="pre"></pre>
+
+      <script type="module" src="./main.js" charset="utf-8"></script>
+    </div>
+
+    <%- include('footer') %>
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>

@@ -1,0 +1,41 @@
+html {
+  background: #202126;
+  /* background: var(--secondary); */
+  min-width: 40rem;
+}
+
+.main {
+  padding: 3rem;
+  margin: auto;
+  max-width: 65rem;
+}
+
+pre {
+  color: #ccc;
+  /* font-size: 1.5rem; */
+  page-break-after: always;
+}
+
+footer .copy {
+  padding: 0;
+}
+
+@media screen {
+  body > * {
+    display: auto;
+  }
+
+  script, style, #print {
+    display: none;
+  }
+}
+
+@media print {
+  body * {
+    display: none !important;
+  }
+
+  .print {
+    display: block !important;
+  }
+}

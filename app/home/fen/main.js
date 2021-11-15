@@ -69,10 +69,13 @@ const input = `
   g of stella_nana is 3432450
   g of stella_neutroni is 2000000000000
   g of buco_nero is Infinity
+
+  v = a * t
 ; Roh ρ
 
   ρ as Resistività in Ω*mm2/m is rho
   l as Lunghezza in m is metri
+  v as Velocità in m/s is metri/secondo
   s as Strada in m is metri
 
   l = s

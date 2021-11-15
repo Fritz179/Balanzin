@@ -19,9 +19,9 @@
       "path": "gen"
     },
     {
-      "title": "Tris!",
-      "p": "Play Tris against an unbeatable AI",
-      "path": "tris"
+      "title": "16-Bit compiler",
+      "p": "Compile FASM (Fritz-ASseMbly)",
+      "path": "16"
     },
     {
       "title": "Chess",
@@ -32,6 +32,11 @@
       "title": "FEN",
       "p": "Fritz Expression Notation",
       "path": "fen"
+    },
+    {
+      "title": "Tris!",
+      "p": "Play Tris against an unbeatable AI",
+      "path": "tris"
     },
     {
       "title": "WWE Game",
