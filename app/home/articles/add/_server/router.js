@@ -1,5 +1,5 @@
 const ensureAuthenticated = require('../../../../setup/ensureAuthenticated');
-const {check, validationResult} = require('express-validator/check');
+const {check, validationResult} = require('express-validator');
 const {join} = require('path');
 
 const Article = require('../../../../models/Article');
