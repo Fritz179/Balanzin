@@ -92,7 +92,7 @@ insts['dw'] = (inst, consts, ...data) => {
 				if (inString) {
 					values.push(char)
 				} else {
-					if (lasts.length) values.push(numToOp(inst, Number(lasts)))
+					if (lasts.length) values.push(numToOp(inst, lasts))
 					lasts = ''
 				}
 			break;
@@ -154,14 +154,40 @@ insts['ldi'] = (inst, consts, d, val) => {
 	if (val >= 0xffff - 64) return insts.adi(inst, consts, d, 'sp', val - 0x10000)
 
 	const ops = regToOp(inst, 'ram', 'pc', d)
-	const num = numToOp(inst, parseInt(Number(val)))
 
 	return [[
 	2, (locations, pos) => {
+		const num = numToOp(inst, parseInt(Number(locations[val] || val)))
 		const line = ` imm ${num}`
 		return [[(0 << 9) + ops, inst], [num, {printLine: line}]]
 	}]]
 }
+
+insts['lod'] = (inst, consts, d, pos, offset) => {
+	assertLine(d && pos, inst, `Not enough parameters for ldi instruction!`)
+	assertLine(!offset, inst, `LOD with offset not supported`)
+
+	const ops = regToOp(inst, 'ram', pos, d)
+
+	return [[
+	1, (locations, pos) => {
+		return [[(0 << 9) + ops, inst]]
+	}]]
+}
+
+insts['sto'] = (inst, consts, pos, a, offset) => {
+	console.log(a, pos, offset);
+	assertLine(a && pos, inst, `Not enough parameters for ldi instruction!`)
+	assertLine(!offset, inst, `STO with offset not supported`)
+
+	const ops = regToOp(inst, a, pos, 'ram')
+
+	return [[
+	1, (locations, pos) => {
+		return [[(0 << 9) + ops, inst]]
+	}]]
+}
+
 
 insts['sbi'] = (inst, consts, d, s, val) => {
 	if (typeof val == 'undefined') {
@@ -280,11 +306,12 @@ addJEC('jne', 'jd', 'jnz', false, false)
 
 insts['ignore'] = inst => [[0, () => [[-1, inst]]]]
 
-insts['.equ'] = (inst, line) => {
+insts['.equ'] = (inst, consts, line) => {
 	const name = line.match(/(\w+)/)?.[1]
 
 	const value = line.slice(name.length).trim()
-	numToOp(inst, value)
+	const num = numToOp(inst, Number(value))
 
+	consts[name] = num
 	return [[0, () => [[-1, inst]]]]
 }
