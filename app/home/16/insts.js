@@ -92,7 +92,7 @@ insts['dw'] = (inst, consts, ...data) => {
 				if (inString) {
 					values.push(char)
 				} else {
-					if (lasts.length) values.push(numToOp(inst, lasts))
+					if (lasts.length) values.push(numToOp(inst, Number(lasts)))
 					lasts = ''
 				}
 			break;
@@ -123,11 +123,11 @@ insts['dw'] = (inst, consts, ...data) => {
 
 			if (typeof n == 'number') {
 				const num = numToOp(inst, parseInt(n))
-				return [num, {printLine: `${name} dw ${n}`}]
+				return [num, {printLine: `${name.padEnd(12, ' ')} dw ${n}`}]
 			}
 
 			const num = numToOp(inst, n.charCodeAt(0))
-			return [num, {printLine: `${name} dw '${n}'`}]
+			return [num, {printLine: `${name.padEnd(12, ' ')} dw '${n}'`}]
 		})
 	}]]
 }
@@ -159,7 +159,7 @@ insts['ldi'] = (inst, consts, d, val) => {
 	return [[
 	2, (locations, pos) => {
 		const num = numToOp(inst, parseInt(Number(locations[val] ?? val)))
-		const line = ` imm ${num}`
+		const line = ''.padStart(12, ' ') + `imm ${hex(num)}`
 		return [[(0 << 9) + ops, inst], [num, {printLine: line}]]
 	}]]
 }

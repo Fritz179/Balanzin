@@ -12,25 +12,29 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
-            .equ argc 0xfeff
-            .equ argv 0xfef0    ; stack starts here
-            .equ argv_cap 0xf   ; there can be a max of 15 arguments
+            .equ argc    0xfeff ; top of adressable memory
+            .equ argv    0xfef0 ; stack starts here
+            .equ maxArgc 0x000f ; there can be a max of 15 arguments
+            .equ spTop   0xfeef ; start of stack pointer
 
-            .equ NULL 0
+            .equ NULL 0         ; used as NULL pointer
 
-; Entry point is memory[0]
-; copy EEPROM contents to RAM
-; Prepare argc, argv, stack
+; entry point is memory[0]
+; TODO: copy EEPROM contents to RAM
+
+
+; prepare argc, argv, stack
 ; set interrupt vector then jump to main
-entry:      ldi a, argc
+entry:      ldi a, argc         ; -> argc
             ldi b, NULL
             sto a, b            ; set argc to 0
 
             ldi a, argv         ; -> argv
-            sto a, b            ; argv is null-terminated
-            xor sp, sp          ; Clear stack pointer
-            or  sp, a
-; sp points at last argv, must increment before use of stack
+            sto a, b            ; set argv to 0 => null-terminated
+
+            ldi a, spTop
+            xor sp, sp          ; clear stack pointer
+            or  sp, a           ; sp is empty-descending
 
             jmp main            ; start update loop
 
@@ -62,7 +66,7 @@ main:       ldi di, index       ; -> index
             sto di, c           ; save new index
 
             ldi b, NULL         ; END of input
-            je  a, b, exit       ; perform clean exit
+            je  a, b, exit      ; perform clean exit
 
             jmp parseChar       ; call parseChar  ; call subroutine
 
@@ -84,9 +88,9 @@ addChar:    ldi si, argv        ; -> cahr* argv[]
             ldi di, argc        ; -> argc
             lod c, di           ; argc
             add si, c           ; -> last cahr* argv[]
-            lod si, si          ; -> char*
+            lod c, si           ; -> char*
             ldi b, NULL
-            jne si, b, appendArg; Check if extra argv has to be added
+            jne c, b, appendArg ; Check if extra argv has to be added
 
             ldi di, malloc      ; -> malloc
             lod c, di           ; malloc
@@ -102,7 +106,7 @@ appendArg:  ldi di, malloc      ; -> malloc
             ldi b, NULL
             sto si, b           ; new null-termination
             ldi c, 1
-            add si, b           ; new malloc
+            add si, c           ; new malloc
             sto di, si          ; save new malloc
             ldi b, -2
             add si, b
@@ -122,7 +126,7 @@ parseSpace: ldi di, argc        ; -> argc
 
             ldi b, 1
             add c, b            ; inc argc
-            ldi b, argv_cap
+            ldi b, maxArgc
             ldi a, ERR_ARGS     ; ERROR code for to many args
             jge c, b, panic     ; should never ne greater, but just in case
             ldi si, argv        ; -> char* argv[]
@@ -137,7 +141,7 @@ parseSpace: ldi di, argc        ; -> argc
 parseNL:    ldi si, argc        ; -> argc
             lod c, si           ; argc
             ldi b, 0
-            je  c, b, main       ; If only a new line was printed
+            je  c, b, main      ; If only a new line was printed
 
             ldi di, argv        ; -> argv
             lod di, di          ; -> char*
@@ -147,9 +151,9 @@ parseNL:    ldi si, argc        ; -> argc
 
 compare:    lod a, si
             lod b, di
-            jne a, b, cmp_ne  ; fail not equal
-            jne a, c, compare ; not NULL
-            jmp ping          ; string terminated
+            jne a, b, cmp_ne    ; fail not equal
+            jne a, c, compare   ; not NULL
+            jmp ping            ; string terminated
 
 cmp_ne:     ldi a, ERR_NOCMD
             jmp exit

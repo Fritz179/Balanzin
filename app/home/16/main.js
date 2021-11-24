@@ -22,7 +22,7 @@ function startParse() {
 
 		const instructions = parse(source)
 		const {locations, solution} = compile(instructions)
-		console.log(locations, solution);
+		console.log(locations);
 
 		const printable = getPrint(solution)
 		pre.innerHTML = printable
