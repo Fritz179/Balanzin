@@ -21,7 +21,7 @@ export default function decode(words, solutions) {
 
     let inst = opToInst(pos, word, words[0])
 
-		const norm = str => str.replaceAll(/(0x\d+|0b\d+)/g, n => '0x' + Number(n).toString(16))
+		const norm = str => str.replaceAll(/(0x\d+|0b\d+|\d+)/g, n => '0x' + Number(n).toString(16))
 
     let separator = '|'
 		if (!inst || norm(inst) != norm(sol)) {

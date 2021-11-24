@@ -33,7 +33,7 @@ export function regToOp(inst, a, b, d) {
 
 export function immToOp(inst, val, signed) {
 	if (signed) {
-		assertLine(val >= -63 && val < 64, inst,
+		assertLine(val >= -64 && val < 64, inst,
 			`Immediate: ${val} out of bounds (-64/63)`)
 		if (val >= 0) return val
 		return 63 - val

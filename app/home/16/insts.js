@@ -61,7 +61,7 @@ addUnaOP("rol", 0b0001101)
 addUnaOP("ror", 0b0010110)
 addUnaOP("inv", 0b0000111)
 
-addNilOp("HLT", 0b0010111)
+addNilOp("hlt", 0b0010111)
 addNilOp("CRY", 0b0011111)
 addNilOp("IE",  0b0100111)
 addNilOp("ID",  0b0101111)
@@ -81,7 +81,7 @@ insts['mov'] = (inst, consts, d, s) => {
 insts['dw'] = (inst, consts, ...data) => {
 	assertLine(data.length, inst, `Not enough parameters for dw instruction!`)
 
-	const string = inst.originalLine.split(/ dw /)[1]
+	const string = inst.originalLine.match(/ dw (.*?(?=;)|.*)/)[1].trim()
 	const values = []
 
 	let inString = false
@@ -97,6 +97,7 @@ insts['dw'] = (inst, consts, ...data) => {
 				}
 			break;
 			case '"':
+			case "'":
 				inString = !inString
 			break;
 			default:
@@ -157,7 +158,7 @@ insts['ldi'] = (inst, consts, d, val) => {
 
 	return [[
 	2, (locations, pos) => {
-		const num = numToOp(inst, parseInt(Number(locations[val] || val)))
+		const num = numToOp(inst, parseInt(Number(locations[val] ?? val)))
 		const line = ` imm ${num}`
 		return [[(0 << 9) + ops, inst], [num, {printLine: line}]]
 	}]]
@@ -176,7 +177,6 @@ insts['lod'] = (inst, consts, d, pos, offset) => {
 }
 
 insts['sto'] = (inst, consts, pos, a, offset) => {
-	console.log(a, pos, offset);
 	assertLine(a && pos, inst, `Not enough parameters for ldi instruction!`)
 	assertLine(!offset, inst, `STO with offset not supported`)
 
@@ -230,7 +230,7 @@ function addJMP(name, condition, inverseCondition) {
 			const ops = regToOp(inst, 'ram', 'pc', 'pc')
 			const num = numToOp(inst, target, true)
 
-			const line = {printLine: `${name} (${hex(dist, true)})`}
+			const line = {printLine: `${name} (${hex(target - pos, true)})`}
 			return [[(0 << 9) + ops, inst], [num, line]]
 		}], [
 		3, (locations, pos) => {
@@ -244,7 +244,7 @@ function addJMP(name, condition, inverseCondition) {
 			const num = numToOp(inst, target, true)
 
 			const l1 = {printLine: `jmp far`}
-			const l2 = {printLine: `${name} (${hex(dist, true)})`}
+			const l2 = {printLine: `${name} (${hex(target - pos, true)})`}
 			return [[3 << 9 + ops, inst], [(0 << 9) + JMPOps, l1], [num, l2]]
 		}], [
 		4, (locations, pos) => {
@@ -275,7 +275,8 @@ function addJEC(name1, name2, op, aBeforeB, noMinusOne) {
 			const ops = aBeforeB ? regToOp(inst, a, b, 'sp') : regToOp(inst, b, a, 'sp')
 			const opcode = noMinusOne ? 0b1111000 : 0b1011000
 
-			return [(opcode << 9) + ops, inst].concat(solution)
+			console.log();
+			return [[(opcode << 9) + ops, inst].concat(solution)]
 		}])
 	}
 }
