@@ -27,8 +27,9 @@ function read(location, ram) {
   return ram[num]
 }
 
-function write(location) {
-
+function write(location, ram, to) {
+  const num = assertNumber(location)
+  return ram[num] = assertNumber(to)
 }
 
 function inc() {
@@ -49,8 +50,11 @@ function exec([op, a, b, d], ram) {
       inc()
       break;
     case 'sto':
-      set(a, b == 'pc' ? 0 : read(b, ram))
+      write(get(a), ram, b == 'pc' ? 0 : get(b))
       inc()
+      break;
+    case 'jmp':
+      set('pc', assertNumber(a))
       break;
     case 'shl':
       set(a, (get(b) << 1) & 65535)
@@ -139,10 +143,11 @@ function printStatus() {
     if (source) {
       const sol = source.originalLine || source.printLine
 
-      if (sol.match(/(.*?:)?dw/) || sol.slice(1, 4) == 'imm') {
+      if (sol.match(/(.*?:)?dw/) || sol.match(/ *imm/)) {
         return `${hex(pos)}: ${hex(word)} | data!\n`
       }
     }
+
     const inst = opToInst(pos, word, word2, true) || 'data?'
     return `${hex(pos)}: ${hex(word)} | ${inst}\n`
   }
@@ -153,7 +158,7 @@ function printStatus() {
     out += printLine(i < 0 ? 65536 + i : i)
   }
 
-  out += `------\n<span style="color: #4f4">${printLine(pc)}</span>------\n`
+  out += `<span style="color: #4f4">------\n${printLine(pc)}------\n</span>`
 
   // after
   for (let i = pc + 1; i <= end; i++) {
@@ -163,9 +168,13 @@ function printStatus() {
   function getValueAt(loc, depth = 0) {
     if (depth > 5) return ''
 
+    if (loc == 0) return ''
+
     const value = symMemory[loc]
 
     if (typeof value == 'undefined') return ''
+
+    if (value == 0) return ' -> NULL'
 
     return ` -> ${hex(value)}${getValueAt(value, depth + 1)}`
   }
@@ -175,7 +184,7 @@ function printStatus() {
   for (const key in symLocations) {
     if (key[0] == '$') continue
 
-    out += `${key}\t = ${hex(symLocations[key])}${getValueAt(symLocations[key])}\n`
+    out += `${key.padEnd(15, ' ')} = ${hex(symLocations[key])}${getValueAt(symLocations[key])}\n`
   }
 
   document.getElementById('pre').innerHTML = out
