@@ -1,0 +1,7 @@
+ldi a, 0
+ldi b, 1
+loop: 
+add c, a, b
+mov a, b
+mov b, c
+jmp loop

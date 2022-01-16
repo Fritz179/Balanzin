@@ -1,0 +1,11 @@
+ldi a, 0
+ldi b, 0
+ldi c, 1
+
+add_a:
+add a, c
+jnc add_a
+
+add b, c
+jnc add_a
+loop: jmp loop

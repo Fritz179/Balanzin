@@ -1,0 +1,42 @@
+Requirements:
+  - Read and write to memory
+  - Jump conditionally
+  - Register operations
+
+Mistakes:
+  Tester:
+    - USB3 Desc
+    - pulldown
+  CLK:
+    - 555 Desc missing
+    - alimentazion mask
+    - pullup
+    - SR
+  BP:
+    - Alimentazion CLK
+    - PC_CLR püntu cun RESET
+    - Floating input da REGS
+  Decoder:
+    - SR
+    - DID_FETCH = FETCH &! PRE_INT
+    - ALU_INC miga settu cura adi
+    - LDI da RAM al incrementa miga PC -> al eseguis al dato dopu
+  REGISTER_193:
+    - Load le continuo => offset da pc al va in loop
+
+Defects:
+  - Cannot load immediate
+  - Jump?
+
+Solutions:
+  - Stored in first 64 bytes
+  - Stored near PC
+
+TODO:
+  - Correct jump location
+  - proper I/O
+  - al jmp la da fa amo -1 parchi cura al fa al jmp al pc le +1
+
+DONE:
+  - Assert capabilities => lod, jump
+  - Test programs => fib

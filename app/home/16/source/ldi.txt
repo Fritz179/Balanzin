@@ -1,0 +1,4 @@
+ldi a, 1
+ldi a, 0xaa
+ldi b, 0x55
+ldi a, 0

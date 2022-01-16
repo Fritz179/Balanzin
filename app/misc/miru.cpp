@@ -56,5 +56,5 @@ void loop() {
     return;
   }
 
-  myservo.write(90);  // Bloca al servo in pusizion
+  servo.write(90);  // Bloca al servo in pusizion
 }
