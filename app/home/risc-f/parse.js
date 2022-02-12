@@ -1,3 +1,5 @@
+const keywords = ['a', 'b', 'c', 'si', 'di', 'pc', 'sp']
+
 export default function parse(source) {
   const parsed = []
 
@@ -15,7 +17,7 @@ export default function parse(source) {
     const place = placeMatch ? placeMatch[0] : null
 
     // separate inst
-    const instMatch = trimmed.match(/[a-zA-Z0-9_-]*/)
+    const instMatch = trimmed.match(/[a-zA-Z0-9_-]+/)
     if (instMatch) trimmed = trimmed.slice(instMatch[0].length).trim()
     const inst = instMatch ? instMatch[0] : null
 
@@ -53,6 +55,16 @@ export default function parse(source) {
         }
       }
 
+      // keyword
+      if (keywords.includes(arg)) {
+        return {
+          type: 'keyword',
+          value: arg,
+          orignal: arg,
+        }
+      }
+
+      // probably const
       return {
         type: 'const',
         value: arg,
@@ -67,6 +79,9 @@ export default function parse(source) {
       comment,
       line: text,
       lineNumber: i,
+      bytePos: null,
+      opcode: null,
+      multiLine: false
     })
   })
 

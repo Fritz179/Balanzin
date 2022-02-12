@@ -12,22 +12,23 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
-        inst0
-        instText text
-        instNums 15, 0x15, 0b100110
-        instNULL NULL
-        instChar 'a'
-        instString "abcd"
-        salve ; comment
-        place: place
-        combo: combo '1' ; combo
+        ldi a, 0
+        ldi b, 1 ; Initialize to 1 and 0
+        loop:
 
-        ; noma comment
-        noma_place:
+        add a, b ; a is newest number
+        mov c, a
+
+        add b, a ; b is newest number
+        mov c, b
+
+        jmp loop ; infinite loop
 
       </textarea>
       <br>
       <button id="parse">Parse!</button>
+
+      <pre id="output"></pre>
 
       <script type="module" src="./main.js" charset="utf-8"></script>
     </div>

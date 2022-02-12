@@ -1,14 +1,25 @@
 import parse from './parse.js'
+import compile from './compile.js'
+import {printParsed} from './print.js'
 
 window.addEventListener('load', () => {
-  const input = document.getElementById('source')
+  const source = document.getElementById('source')
   const parseButton = document.getElementById('parse')
+  const output = document.getElementById('output')
 
   parseButton.onclick = () => {
-    const parsed = parse(input.innerHTML)
+    try {
+      const parsed = parse(source.value)
+      const program = compile(parsed)
+
+      console.log(program);
+      output.innerHTML = printParsed(program)
+    } catch (e) {
+      console.error(e);
+      output.innerHTML = e
+    }
   }
 
-  const parsed = parse(input.innerHTML)
-
-  console.log(parsed);
+  parseButton.onclick()
 })
+

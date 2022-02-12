@@ -9,6 +9,18 @@ html {
   max-width: 65rem;
 }
 
+pre {
+  color: #ccc;
+}
+
+footer {
+  background: #202126;
+  color: #ccc;
+  padding: 3rem;
+  margin: auto;
+  max-width: 65rem;
+}
+
 footer .copy {
   padding: 0;
 }
