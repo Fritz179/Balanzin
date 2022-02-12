@@ -24,9 +24,14 @@ function resolveLine(line, consts, places) {
   return instSet[inst](...vals)
 }
 
+let bytePos = 0
+export function getBytePos() {
+  return bytePos
+}
+
 export default function compile(source) {
-  const consts = {NULL: 0}
-  let bytePos = 0
+  const consts = {}
+  bytePos = 0
 
   // first pass => resolve all consts and max program length
   const firstPassPlaces = {}
@@ -60,15 +65,15 @@ export default function compile(source) {
       continue
     }
 
-    for (const sol of solution) {
+    solution.forEach((sol, i) => {
       const line = JSON.parse(JSON.stringify(src))
       line.bytePos = bytePos
       line.opcode = sol
-      line.multiLine = solution.length > 1
+      line.multiLine = i >= 1
 
       program.push(line)
       bytePos++
-    }
+    })
   }
 
   return program

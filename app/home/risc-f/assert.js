@@ -31,3 +31,16 @@ export function assertRegisters(a, b, d) {
 
 	return( REGISTERS[a] << 0) + (REGISTERS[b] << 3) + (REGISTERS[d] << 6)
 }
+
+const MIN_SIMM = -64
+const MAX_SIMM = +63
+const MIN_UIMM = 0
+const MAX_UIMM = 127
+
+export function assertImmediate(value) {
+  assertLine(value >= MIN_SIMM, `Immedaite value ${value} below ${MIN_SIMM}`)
+  assertLine(value <= MAX_SIMM, `Immedaite value ${value} above ${MAX_SIMM}`)
+
+  if (value < 0) return MAX_UIMM + value + 1
+  return value
+}

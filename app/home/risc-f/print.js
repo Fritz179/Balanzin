@@ -6,32 +6,33 @@ function hexImm() {
 
 }
 
-function hex(num) {
+function hex(num, len = 4) {
   const base = num < 0 ? '-0x' : '0x'
-  return base + Math.abs(num).toString(16).padStart(4, '0')
+  return base + Math.abs(num).toString(16).padStart(len, '0')
 }
 
 const REGISTERS = ['pc ', 'sp ', 'si ', 'di ', 'a  ', 'b  ', 'c  ', 'ram']
 function decode({opcode}) {
-  const a = REGISTERS[(opcode << 0) & 7]
-  const b = REGISTERS[(opcode << 3) & 7]
-  const d = REGISTERS[(opcode << 6) & 7]
+  const a = REGISTERS[(opcode >> 0) & 7]
+  const b = REGISTERS[(opcode >> 3) & 7]
+  const d = REGISTERS[(opcode >> 6) & 7]
+  const val = (opcode >> 9).toString(16).padStart(2, 0)
 
-  return `${a} ${b} ${d}`
+  return `${val}  ${a} ${b} ${d}`
 }
 
-export function printParsed(parsed) {
-  let output = `ADDRESS OPCODE  a   b   d   |\n`
-  output += `${'|'.padStart(29, '-')}\n`
+export default function print(parsed) {
+  let output = `ADDRESS OPCODE  | op  a   b   d   |\n`
+  output += `${'----------------|-----------------|'.padEnd(80, '-')}\n`
 
   parsed.forEach(line => {
     if (line.inst) {
-      output += `${hex(line.bytePos)}: ${hex(line.opcode)}: ${decode(line)} |`
+      output += `${hex(line.bytePos)}: ${hex(line.opcode)}: | ${decode(line)} |`
     } else {
-      output += '|'.padStart(29, ' ')
+      output += '|                 |'.padStart(35, ' ')
     }
 
-    output += line.line
+    if (!line.multiLine) output += line.line
     output += '\n'
   })
 
