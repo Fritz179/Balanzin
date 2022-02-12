@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>RISC-F</title>
+
+  </head>
+  <body>
+
+    <%- include('navbar') %>
+
+    <div class="main print">
+      <textarea id="source" cols="80" rows="15">
+        inst0
+        instText text
+        instNums 15, 0x15, 0b100110
+        instNULL NULL
+        instChar 'a'
+        instString "abcd"
+        salve ; comment
+        place: place
+        combo: combo '1' ; combo
+
+        ; noma comment
+        noma_place:
+
+      </textarea>
+      <br>
+      <button id="parse">Parse!</button>
+
+      <script type="module" src="./main.js" charset="utf-8"></script>
+    </div>
+
+    <%- include('footer') %>
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>

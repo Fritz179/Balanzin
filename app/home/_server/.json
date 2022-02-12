@@ -21,7 +21,7 @@
     {
       "title": "16-Bit compiler",
       "p": "Compile FASM (Fritz-ASseMbly)",
-      "path": "16"
+      "path": "risc-f"
     },
     {
       "title": "Chess",
@@ -113,6 +113,9 @@
     },
     {
       "path": "shop"
+    },
+    {
+      "path": "16"
     },
     {
       "path": "jessica"

@@ -1,0 +1,14 @@
+html {
+  background: #202126;
+  min-width: 40rem;
+}
+
+.main {
+  padding: 3rem;
+  margin: auto;
+  max-width: 65rem;
+}
+
+footer .copy {
+  padding: 0;
+}
