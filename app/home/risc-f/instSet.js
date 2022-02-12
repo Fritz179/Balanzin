@@ -17,7 +17,17 @@ function binOP(name, opcode) {
 	})
 }
 
+function nilOP(name, opcode) {
+  addOP(name, () => {
+		const registers = assertRegisters('a', 'pc', 'sp')
+		return [(opcode << 9) + registers]
+	})
+}
+
 binOP('add', 0b0011000)
+binOP("sub", 0b1111000)
+
+nilOP("HLT", 0b0010111)
 
 addOP('adi', (d, a, val) => {
 	if (typeof val == 'undefined') {
@@ -61,6 +71,33 @@ addOP('ldi', (d, val) => {
 // 	}]]
 // }
 
+addOP('lod', (d, pos, offset = 0) => {
+  const registers = assertRegisters('ram', pos, d)
+  const immediate = assertImmediate(offset)
+
+  return [(immediate << 9) | registers]
+})
+
+addOP('sto', (pos, a, offset = 0) => {
+  const registers = assertRegisters(a, pos, 'ram')
+  const immediate = assertImmediate(offset)
+
+  return [(immediate << 9) | registers]
+})
+
+// insts['lod'] = (inst, consts, d, pos, offset = 0) => {
+// 	assertLine(d && pos, inst, `Not enough parameters for ldi instruction!`)
+// 	// assertLine(!offset, inst, `LOD with offset not supported`)
+//
+// 	const ops = regToOp(inst, 'ram', pos, d)
+// 	return [[
+// 	1, (locations, pos) => {
+// 		const off = numToOp(inst, parseInt(Number(locations[offset] ?? offset)))
+// 		console.log(off);
+// 		return [[(off << 9) + ops, inst]]
+// 	}]]
+// }
+
 addOP('mov', (d, a) => instSet.add(d, a, 'pc'))
 
 addOP('jmp', (to) => {
@@ -68,6 +105,16 @@ addOP('jmp', (to) => {
   const diff = to - here
 
   return instSet.adi('pc', diff)
+})
+
+addOP('jc', (to) => {
+  const here = getBytePos()
+  const diff = to - here
+
+  const registers = assertRegisters('sp', 'di', 'pc')
+  const immediate = assertImmediate(diff)
+  console.log(immediate, diff, to);
+  return [(immediate << 9) | registers]
 })
 
 // function addJMP(name, condition, inverseCondition) {

@@ -1,11 +1,9 @@
-import {setCurrentLine, assertUnreachable} from './assert.js'
+import {setCurrentLine, setLastPass, assertLine} from './assert.js'
 import instSet from './instSet.js'
 
 function resolveLine(line, consts, places) {
   const {inst, args} = line
   if (!inst) return []
-
-  setCurrentLine(line)
 
   const vals = args.map(arg => {
     if (arg.type == 'char') return arg.value
@@ -18,10 +16,13 @@ function resolveLine(line, consts, places) {
       return Infinity
     }
 
-    console.log('asdfasdf');
+    unreachable
   })
 
-  return instSet[inst](...vals)
+  const resolver = instSet[inst]
+  assertLine(resolver, 'Unknow instruction')
+
+  return resolver(...vals)
 }
 
 let bytePos = 0
@@ -29,14 +30,21 @@ export function getBytePos() {
   return bytePos
 }
 
+function assertDefine(dest, prop, val) {
+  assertLine(typeof dest[prop] == 'undefined', 'Already defined')
+  dest[prop] = val
+}
+
 export default function compile(source) {
+  setLastPass(false)
   const consts = {}
   bytePos = 0
 
   // first pass => resolve all consts and max program length
   const firstPassPlaces = {}
   for (const line of source) {
-    if (line.place) firstPassPlaces[line.place] = bytePos
+    setCurrentLine(line)
+    if (line.place) assertDefine(firstPassPlaces, line.place, bytePos)
 
     const solution = resolveLine(line, consts, firstPassPlaces)
     bytePos += solution.length
@@ -46,7 +54,8 @@ export default function compile(source) {
   bytePos = 0
   const secondPassPlaces = {}
   for (const line of source) {
-    if (line.place) secondPassPlaces[line.place] = bytePos
+    setCurrentLine(line)
+    if (line.place) assertDefine(secondPassPlaces, line.place, bytePos)
 
     const solution = resolveLine(line, consts, firstPassPlaces)
     bytePos += solution.length
@@ -55,9 +64,11 @@ export default function compile(source) {
   // Can a third pass shorten the opcodes even furhter? If it can, not by much
 
   // resolution pass => correct every opcode with exact symbol => fix-up list
+  setLastPass(true)
   bytePos = 0
   const program = []
   for (const src of source) {
+    setCurrentLine(src)
     const solution = resolveLine(src, consts, secondPassPlaces)
 
     if (!solution.length) {

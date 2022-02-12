@@ -1,15 +1,15 @@
-export function assertUnreachable(msg = 'assertUnreachable') {
-  throw msg
-}
-
 export function assert(cond, msg) {
-  if (!cond) assertUnreachable(msg)
+  if (!cond) throw msg
 }
 
 // Used when assertion arises while compiling
 let line = null
+let lastPass = false
 export function setCurrentLine(currentLine) {
   line = currentLine
+}
+export function setLastPass(currentLastPass) {
+  lastPass = currentLastPass
 }
 
 export function assertLine(cond, msg) {
@@ -38,6 +38,8 @@ const MIN_UIMM = 0
 const MAX_UIMM = 127
 
 export function assertImmediate(value) {
+  if (value == Infinity && !lastPass) return Infinity
+
   assertLine(value >= MIN_SIMM, `Immedaite value ${value} below ${MIN_SIMM}`)
   assertLine(value <= MAX_SIMM, `Immedaite value ${value} above ${MAX_SIMM}`)
 

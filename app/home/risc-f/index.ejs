@@ -12,9 +12,25 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
+        start:
+
+        ; Copy from start to 0x20 (END) to RAM
+        ldi c, end
+        ldi a, 0
+
+        loop:
+        lod b, a ; b = [a] => load from EEPROM to register
+        sto a, b ; [a] = b => store to RAM from register
+        adi a, 1
+
+        sub b, a, c
+        jc loop
+
+        HLT
+
         ldi a, 0
         ldi b, 1 ; Initialize to 1 and 0
-        loop:
+        fib:
 
         add a, b ; a is newest number
         mov c, a
@@ -22,7 +38,9 @@
         add b, a ; b is newest number
         mov c, b
 
-        jmp loop ; infinite loop
+        jmp fib ; infinite loop
+
+        end:
 
       </textarea>
       <br>

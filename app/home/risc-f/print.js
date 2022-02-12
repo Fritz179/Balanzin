@@ -16,7 +16,7 @@ function decode({opcode}) {
   const a = REGISTERS[(opcode >> 0) & 7]
   const b = REGISTERS[(opcode >> 3) & 7]
   const d = REGISTERS[(opcode >> 6) & 7]
-  const val = (opcode >> 9).toString(16).padStart(2, 0)
+  const val = (opcode >> 9).toString(16).padEnd(2, ' ')
 
   return `${val}  ${a} ${b} ${d}`
 }
