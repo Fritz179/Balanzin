@@ -1,4 +1,9 @@
 ldi a, 1
-ldi a, 0xaa
-ldi b, 0x55
+ldi a, 0xaaaa
+ldi b, 0x5555
 ldi a, 0
+
+ldi a, 1
+loop: jmp loop
+loop2: ldi a, 0
+jmp loop2

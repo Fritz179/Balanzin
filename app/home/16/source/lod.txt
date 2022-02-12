@@ -1,0 +1,8 @@
+ldi a, 0
+ldi a, 1
+ldi c, 0
+lod a, c, xaa
+ldi a, 0
+ldi a, 1
+
+xaa: dw 0xaaaa

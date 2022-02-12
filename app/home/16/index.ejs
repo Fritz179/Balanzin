@@ -12,14 +12,31 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
-        start: ldi a, 0
+        start:
+
+        ; Copy from start to 0x20 (END) to RAM
+        ldi c, 0x20
+        ldi a, 0
+        ldi si, 1
+
+        loop:
+        lod b, a ; b = [a] => load from EEPROM to register
+        sto a, b ; [a] = b => store to RAM from register
+        add a, si ; increment a
+
+        sub b, a, c
+        jc loop
+
+        CRY
+
         ldi a, 0
         ldi a, 1
+        b:
         ldi b, 0
         ldi b, 1
-        ldi a, 0
-        ldi a, 1
-        jmp start
+        jmp b
+
+        end: dw 0x20 ; Not the end...
       </textarea>
       <br>
       <button id="parse">Parse!</button>

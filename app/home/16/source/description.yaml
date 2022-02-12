@@ -38,5 +38,5 @@ TODO:
   - al jmp la da fa amo -1 parchi cura al fa al jmp al pc le +1
 
 DONE:
-  - Assert capabilities => lod, jump
+  - lod first 64 bytes, ldi 0-63, jump
   - Test programs => fib

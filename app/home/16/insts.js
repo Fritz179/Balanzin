@@ -59,7 +59,7 @@ addUnaOP("shl", 0b0011101)
 addUnaOP("shr", 0b0011110)
 addUnaOP("rol", 0b0001101)
 addUnaOP("ror", 0b0010110)
-addUnaOP("inv", 0b0000111)
+addUnaOP("inv", 0b0000111) // sigür?
 
 addNilOp("hlt", 0b0010111)
 addNilOp("CRY", 0b0011111)
@@ -151,28 +151,41 @@ insts['adi'] = (inst, consts, d, s, val) => {
 
 insts['ldi'] = (inst, consts, d, val) => {
 	assertLine(d, inst, `Not enough parameters for ldi instruction!`)
-	if (val < 64) return insts.adi(inst, consts, d, 'sp', val)
-	if (val >= 0xffff - 64) return insts.adi(inst, consts, d, 'sp', val - 0x10000)
 
-	const ops = regToOp(inst, 'ram', 'pc', d)
+	const num = Number(val)
 
+	if (typeof num == 'number') {
+		if (val < 64) return insts.adi(inst, consts, d, 'sp', val)
+		if (val >= 0xffff - 64) return insts.adi(inst, consts, d, 'sp', val - 0x10000)
+	}
+
+	const ops = regToOp(inst, 'pc', 'pc', d)
+	console.log(d, val);
+	assert(false, 'Not implemented')
 	return [[
-	2, (locations, pos) => {
+	3, (locations, pos) => {
 		const num = numToOp(inst, parseInt(Number(locations[val] ?? val)))
 		const line = ''.padStart(12, ' ') + `imm ${hex(num)}`
-		return [[(0 << 9) + ops, inst], [num, {printLine: line}]]
+
+		const jmp = regToOp(inst, 'pc', 'pc', 'pc') + (7 << 3) + (1 << 9)
+		return [
+			[(1 << 9) + ops, inst],
+			[jmp, {printLine: 'skip imm'}],
+			[num, {printLine: line}]
+		]
 	}]]
 }
 
-insts['lod'] = (inst, consts, d, pos, offset) => {
+insts['lod'] = (inst, consts, d, pos, offset = 0) => {
 	assertLine(d && pos, inst, `Not enough parameters for ldi instruction!`)
-	assertLine(!offset, inst, `LOD with offset not supported`)
+	// assertLine(!offset, inst, `LOD with offset not supported`)
 
 	const ops = regToOp(inst, 'ram', pos, d)
-
 	return [[
 	1, (locations, pos) => {
-		return [[(0 << 9) + ops, inst]]
+		const off = numToOp(inst, parseInt(Number(locations[offset] ?? offset)))
+		console.log(off);
+		return [[(off << 9) + ops, inst]]
 	}]]
 }
 
@@ -209,7 +222,7 @@ function addJMP(name, condition, inverseCondition) {
 		1, (locations, pos) => {
 			if (name == 'jnx') return false
 
-			const target = locations[name]
+			const target = locations[name] - 1
 			assertLine(typeof target == 'number', inst, 'No jump label: ' + name)
 
 			const dist = target - pos
