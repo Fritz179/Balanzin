@@ -13,6 +13,10 @@ pre {
   color: #ccc;
 }
 
+.error {
+  color: #c00;
+}
+
 footer {
   background: #202126;
   color: #ccc;

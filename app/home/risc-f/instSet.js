@@ -113,7 +113,7 @@ addOP('jc', (to) => {
 
   const registers = assertRegisters('sp', 'di', 'pc')
   const immediate = assertImmediate(diff)
-  console.log(immediate, diff, to);
+
   return [(immediate << 9) | registers]
 })
 
