@@ -10,6 +10,11 @@ html {
   max-width: 65rem;
 }
 
+.main a {
+  color: #fff;
+  font-size: 2rem;
+}
+
 pre {
   color: #ccc;
   /* font-size: 1.5rem; */

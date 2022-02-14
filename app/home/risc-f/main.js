@@ -1,10 +1,12 @@
 import parse from './parse.js'
 import compile from './compile.js'
 import print from './print.js'
+import run from './run.js'
 
 window.addEventListener('load', () => {
   const source = document.getElementById('source')
   const parseButton = document.getElementById('parse')
+  const runButton = document.getElementById('run')
   const lowButton = document.getElementById('low')
   const highButton = document.getElementById('high')
   const output = document.getElementById('output')
@@ -14,8 +16,11 @@ window.addEventListener('load', () => {
     if (sending) {
       output.innerHTML = 'ERROR: Already writing bytes'
       output.classList.add('error')
+      return
     }
     sending = true
+    output.innerHTML = 'Sending bytes...'
+    output.classList.remove('error')
 
     const url = 'http://raspberrypi.local:17980/'
     const res = await fetch(url, {
@@ -42,12 +47,16 @@ window.addEventListener('load', () => {
   high.onclick = () => send(parseButton.onclick(true))
 
   parseButton.onclick = (highBytes) => {
+    run(false)
     try {
       const parsed = parse(source.value)
       const program = compile(parsed)
 
       output.innerHTML = print(program)
       output.classList.remove('error')
+
+      // for run button
+      if (highBytes == null) return program
 
       const opcodes = []
       for (const {opcode, bytePos} of program) {
@@ -80,6 +89,10 @@ window.addEventListener('load', () => {
     }
   }
 
-  parseButton.onclick()
+  runButton.onclick = () => {
+    run(parseButton.onclick(null));
+  }
+
+  runButton.onclick()
 })
 

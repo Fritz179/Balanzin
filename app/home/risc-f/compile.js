@@ -1,7 +1,7 @@
 import {setCurrentLine, setLastPass, assertLine} from './assert.js'
-import instSet from './instSet.js'
+import {instSet} from './instSet/instSet.js'
 
-function resolveLine(line, consts, places) {
+function resolveLine(line, consts, places, last) {
   const {inst, args} = line
   if (!inst) return []
 
@@ -11,8 +11,14 @@ function resolveLine(line, consts, places) {
     if (arg.type == 'keyword') return arg.value
 
     if (arg.type == 'const') {
-      if (typeof consts[arg.value] == 'number') return consts[arg.value]
-      if (typeof places[arg.value] == 'number') return places[arg.value]
+      if (typeof consts[arg.value] == 'number') {
+        if (last) arg.exec = consts[arg.value]
+        return consts[arg.value]
+      }
+      if (typeof places[arg.value] == 'number') {
+        if (last) arg.exec = places[arg.value]
+        return places[arg.value]
+      }
       return Infinity
     }
 
@@ -46,7 +52,7 @@ export default function compile(source) {
     setCurrentLine(line)
     if (line.place) assertDefine(firstPassPlaces, line.place, bytePos)
 
-    const solution = resolveLine(line, consts, firstPassPlaces)
+    const solution = resolveLine(line, consts, firstPassPlaces, false)
     bytePos += solution.length
   }
 
@@ -57,7 +63,7 @@ export default function compile(source) {
     setCurrentLine(line)
     if (line.place) assertDefine(secondPassPlaces, line.place, bytePos)
 
-    const solution = resolveLine(line, consts, firstPassPlaces)
+    const solution = resolveLine(line, consts, firstPassPlaces, false)
     bytePos += solution.length
   }
 
@@ -69,7 +75,7 @@ export default function compile(source) {
   const program = []
   for (const src of source) {
     setCurrentLine(src)
-    const solution = resolveLine(src, consts, secondPassPlaces)
+    const solution = resolveLine(src, consts, secondPassPlaces, true)
 
     if (!solution.length) {
       program.push(src)

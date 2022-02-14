@@ -1,0 +1,14 @@
+ldi a, 0
+ldi a, 1
+ldi a, 0xf
+ldi a, 0b101010
+
+ldi c, 0
+start:
+ldi b, 10
+loop:
+add b, a
+jnc loop
+inc c
+jmp start
+

@@ -8,6 +8,9 @@ let lastPass = false
 export function setCurrentLine(currentLine) {
   line = currentLine
 }
+export function getCurrentLine() {
+  return line
+}
 export function setLastPass(currentLastPass) {
   lastPass = currentLastPass
 }

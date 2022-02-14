@@ -12,39 +12,25 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
+        ldi a, 0
+        ldi a, 1
+        ldi a, 0xf
+        ldi a, 0b101010
+
+        ldi c, 0
         start:
-
-        ; Copy from start to 0x20 (END) to RAM
-        ldi c, end
-        ldi a, 0
-
+        ldi b, 10
         loop:
-        lod b, a ; b = [a] => load from EEPROM to register
-        sto a, b ; [a] = b => store to RAM from register
-        adi a, 1
+        add b, a
+        jnc loop
+        inc c
+        jmp start
 
-        sub b, a, c
-        jc loop
-
-        HLT
-
-        ldi a, 0
-        ldi b, 1 ; Initialize to 1 and 0
-        fib:
-
-        add a, b ; a is newest number
-        mov c, a
-
-        add b, a ; b is newest number
-        mov c, b
-
-        jmp fib ; infinite loop
-
-        end:
 
       </textarea>
       <br>
       <button id="parse">Parse!</button>
+      <button id="run">Run!</button>
       <button id="low">Write LOW bytes!</button>
       <button id="high">Write HIGH bytes!</button>
 

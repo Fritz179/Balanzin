@@ -31,6 +31,7 @@ export default function parse(source) {
         return {
           type: 'number',
           value: number,
+          exec: number,
           orignal: arg,
         }
       }
@@ -41,6 +42,7 @@ export default function parse(source) {
           type: 'char',
           char: arg[1],
           value: arg.charCodeAt(1),
+          exec: arg.charCodeAt(1),
           orignal: arg,
         }
       }
@@ -52,6 +54,7 @@ export default function parse(source) {
           string: arg.slice(1, -1),
           length: arg.length - 2,
           orignal: arg,
+          exec: null
         }
       }
 
@@ -61,6 +64,7 @@ export default function parse(source) {
           type: 'keyword',
           value: arg,
           orignal: arg,
+          exec: arg
         }
       }
 
@@ -69,6 +73,7 @@ export default function parse(source) {
         type: 'const',
         value: arg,
         orignal: arg,
+        exec: null
       }
     })
 
@@ -81,7 +86,9 @@ export default function parse(source) {
       lineNumber: i,
       bytePos: null,
       opcode: null,
-      multiLine: false
+      multiLine: false,
+      prevLines: null,
+      printLine: null,
     })
   })
 
