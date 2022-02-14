@@ -1,4 +1,4 @@
-import {assertRegisters, assertImmediate} from '../../assert.js'
+import {assertRegisters, assertImmediate, assertLine} from '../../assert.js'
 import {addOP, instSet} from '../instSet.js'
 import {getBytePos} from '../../compile.js'
 
@@ -11,6 +11,8 @@ function addJMP(name, cond) {
     const immediate = assertImmediate(diff)
 
     return [(immediate << 9) | registers]
+  }, () => {
+    assertLine(false, 'Not implemented')
   })
 }
 

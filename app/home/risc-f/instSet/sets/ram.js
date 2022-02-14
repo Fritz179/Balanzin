@@ -2,7 +2,9 @@ import {assertRegisters, assertImmediate} from '../../assert.js'
 import {addOP, instSet} from '../instSet.js'
 
 addOP('ldi',
-(d, val) => instSet.adi(d, 'sp', val), (m, d, val) => m[d] = val)
+  (d, val) => instSet.adi(d, 'sp', val),
+  (m, d, val) => m[d] = val
+)
 
 // insts['ldi'] = (inst, consts, d, val) => {
 // 	assertLine(d, inst, `Not enough parameters for ldi instruction!`)
@@ -36,6 +38,8 @@ addOP('lod', (d, pos, offset = 0) => {
   const immediate = assertImmediate(offset)
 
   return [(immediate << 9) | registers]
+}, (m, d, pos, offset = 0) => {
+  m[d] = m[(pos + offset) & 65535]
 })
 
 addOP('sto', (pos, a, offset = 0) => {
@@ -43,6 +47,8 @@ addOP('sto', (pos, a, offset = 0) => {
   const immediate = assertImmediate(offset)
 
   return [(immediate << 9) | registers]
+}, (m, pos, a, offset = 0) => {
+  m[(pos + offset) & 65535] = m[a]
 })
 
-addOP('mov', (d, a) => instSet.add(d, a, 'pc'))
+addOP('mov', (d, a) => instSet.add(d, a, 'pc'), (m, d, a) => m[d] = m[a])

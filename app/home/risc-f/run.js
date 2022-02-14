@@ -6,6 +6,8 @@ let eeprom = []
 let ram = []
 let registers = {}
 let running = false
+let currActions = []
+const prevActions = []
 
 const registerNames = ['a', 'b', 'c', 'si', 'di', 'pc', 'sp']
 
@@ -34,13 +36,15 @@ const memory = new Proxy([], {
 
     // memory access
     if (!Number.isNaN(i)) {
-      console.log(i);
+      currActions.push([index, readMemory(i)])
+      assertLine(false, 'not implemented')
       return true
     }
 
     assertLine(registerNames.includes(index), `Invalid memory store: ${index}`)
 
     // register access
+    currActions.push([index, registers[index]])
     registers[index] = {value, line: getCurrentLine()}
     return true
 	}
@@ -56,9 +60,26 @@ function runNext() {
   const resolver = execSet[line.inst]
 
   assertLine(resolver, 'Invalid instruction')
+  console.log(line);
   resolver(memory, ...line.args.map(el => el.exec))
 
   memory.pc++
+
+  prevActions.push(currActions)
+  currActions = []
+  printState(registers, readMemory)
+}
+
+function runBack() {
+  if (!prevActions.length) return
+
+  const undoActions = prevActions.pop()
+  while (undoActions.length) {
+    const [index, value] = undoActions.pop()
+    registers[index] = value
+  }
+
+  currActions = []
   printState(registers, readMemory)
 }
 
@@ -77,7 +98,9 @@ window.addEventListener('keydown', (e) => {
   try {
     switch (e.key) {
       case 'n': runNext(); break;
+      case 'b': runBack(); break;
       case 'i': inspect(); break;
+      case 'a': console.log(prevActions); break;
     }
   } catch (e) {
     console.error(e);
