@@ -1,7 +1,11 @@
-import { assertRegisters, assertImmediate } from '../../assert.js';
-import { addOP, instSet } from '../instSet.js';
-import { memory as m } from '../../run.js';
-addOP('ldi', (d, val) => instSet.adi(d, 'sp', val), (d, val) => m[d] = val);
+import {assertRegisters, assertImmediate} from '../../assert.js'
+import {addOP, instSet} from '../instSet.js'
+
+addOP('ldi',
+  (d, val) => instSet.adi(d, 'sp', val),
+  (m, d, val) => m[d] = val
+)
+
 // insts['ldi'] = (inst, consts, d, val) => {
 // 	assertLine(d, inst, `Not enough parameters for ldi instruction!`)
 //
@@ -28,20 +32,23 @@ addOP('ldi', (d, val) => instSet.adi(d, 'sp', val), (d, val) => m[d] = val);
 // 		]
 // 	}]]
 // }
+
 addOP('lod', (d, pos, offset = 0) => {
-    const registers = assertRegisters('ram', pos, d);
-    const immediate = assertImmediate(offset);
-    return [(immediate << 9) | registers];
-}, (d, pos, offset = 0) => {
-    // @ts-ignore
-    m[d] = m[(pos + offset) & 65535];
-});
+  const registers = assertRegisters('ram', pos, d)
+  const immediate = assertImmediate(offset)
+
+  return [(immediate << 9) | registers]
+}, (m, d, pos, offset = 0) => {
+  m[d] = m[(pos + offset) & 65535]
+})
+
 addOP('sto', (pos, a, offset = 0) => {
-    const registers = assertRegisters(a, pos, 'ram');
-    const immediate = assertImmediate(offset);
-    return [(immediate << 9) | registers];
-}, (pos, a, offset = 0) => {
-    // @ts-ignore
-    m[(pos + offset) & 65535] = m[a];
-});
-addOP('mov', (d, a) => instSet.add(d, a, 'pc'), (d, a) => m[d] = m[a]);
+  const registers = assertRegisters(a, pos, 'ram')
+  const immediate = assertImmediate(offset)
+
+  return [(immediate << 9) | registers]
+}, (m, pos, a, offset = 0) => {
+  m[(pos + offset) & 65535] = m[a]
+})
+
+addOP('mov', (d, a) => instSet.add(d, a, 'pc'), (m, d, a) => m[d] = m[a])

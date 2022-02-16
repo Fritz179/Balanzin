@@ -1,0 +1,30 @@
+html {
+  background: #202126;
+  min-width: 40rem;
+}
+
+.main {
+  padding: 3rem;
+  margin: auto;
+  max-width: 65rem;
+}
+
+pre {
+  color: #ccc;
+}
+
+.error {
+  color: #c00;
+}
+
+footer {
+  background: #202126;
+  color: #ccc;
+  padding: 3rem;
+  margin: auto;
+  max-width: 65rem;
+}
+
+footer .copy {
+  padding: 0;
+}

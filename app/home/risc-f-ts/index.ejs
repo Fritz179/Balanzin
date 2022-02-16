@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>RISC-F</title>
+
+  </head>
+  <body>
+
+    <%- include('navbar') %>
+
+    <div class="main print">
+      <textarea id="source" cols="80" rows="15">
+        ldi a, 0
+        ldi a, 1
+        ldi a, 0xf
+        ldi a, 0b101010
+
+        ldi c, 0
+        start:
+        ldi b, 10
+        loop:
+        add b, a
+        jnc loop
+        inc c
+        jmp start
+
+
+      </textarea>
+      <br>
+      <button id="parse">Parse!</button>
+      <button id="run">Run!</button>
+      <button id="low">Write LOW bytes!</button>
+      <button id="high">Write HIGH bytes!</button>
+
+      <pre id="output"></pre>
+
+      <script type="module" src="./main.js" charset="utf-8"></script>
+    </div>
+
+    <%- include('footer') %>
+  </body>
+
+  <link rel="stylesheet" href="./style.css">
+</html>
