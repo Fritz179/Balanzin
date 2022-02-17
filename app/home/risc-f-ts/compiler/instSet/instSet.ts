@@ -1,4 +1,4 @@
-import {instSet, execSet, inst, exec} from './sets/emptySets.js'
+import {instSet, execSet, inst, exec} from './emptySets.js'
 export {instSet, execSet}
 
 export function addOP(name: string, inst: inst, exec: exec) {
@@ -6,6 +6,6 @@ export function addOP(name: string, inst: inst, exec: exec) {
   execSet[name] = exec
 }
 
-import './sets/alu.js'
-import './sets/ram.js'
-import './sets/jmp.js'
+import './alu.js'
+import './ram.js'
+import './jmp.js'

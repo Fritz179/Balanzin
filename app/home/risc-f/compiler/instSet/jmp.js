@@ -1,20 +1,23 @@
-import { assertRegisters, assertImmediate, assertLine } from '../../assert.js';
-import { addOP } from '../instSet.js';
-import { getBytePos } from '../../compile.js';
-function addJMP(name, cond) {
+import { assertRegisters, assertImmediate } from '../../assert.js';
+import { addOP } from './instSet.js';
+import { getConst } from '../assembler.js';
+import { memory as m } from '../../run.js';
+function addJMP(name, cond, exec) {
     addOP(name, (to) => {
-        const here = getBytePos();
+        const here = getConst('bytePos');
         const diff = to - here;
         const registers = assertRegisters('pc', cond, 'pc');
         const immediate = assertImmediate(diff);
         return [(immediate << 9) | registers];
-    }, () => {
-        assertLine(false, 'Not implemented');
+    }, (to) => {
+        if (exec()) {
+            m.pc = to - 1;
+        }
     });
 }
-addJMP('jc', 'di');
-addJMP('jnc', 'a');
-addJMP('jmp', 'ram');
+addJMP('jc', 'di', () => false);
+addJMP('jnc', 'a', () => false);
+addJMP('jmp', 'ram', () => true);
 // function addJMP(name, condition, inverseCondition) {
 // 	jmpOPS[condition] = name
 //

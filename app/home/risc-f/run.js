@@ -1,7 +1,7 @@
 import { setCurrentLine, getCurrentLine, assertLine } from './assert.js';
-import { execSet } from './instSet/instSet.js';
+import { execSet } from './compiler/instSet/instSet.js';
 import { printState } from './print.js';
-import { NUM_TO_REG } from './parse.js';
+import { NUM_TO_REG } from './compiler/parser.js';
 const state = {
     eeprom: [],
     ram: [],
@@ -13,7 +13,6 @@ const state = {
 export function readValue(location, empty) {
     const i = Number(location);
     if (Number.isNaN(i)) {
-        // @ts-ignore
         assertLine(NUM_TO_REG.includes(location), 'Invalid memory access');
         const value = state.registers[location];
         assertLine(value || empty, 'Invalid memory access');
@@ -26,11 +25,11 @@ export function readValue(location, empty) {
 }
 export const memory = new Proxy([], {
     get(_from, index) {
-        console.log('Getting', index, readValue(index, false).value);
+        // console.log('Getting', index, readValue(index, false).value)
         return readValue(index, false).value;
     },
     set(_to, location, value) {
-        console.log('Setting', location, value);
+        // console.log('Setting', location, value)
         state.currActions.push([location, readValue(location, true)]);
         const newValue = { value, creator: getCurrentLine() };
         const i = Number(location);
@@ -51,7 +50,7 @@ function runNext() {
     const resolver = execSet[line.inst];
     assertLine(resolver, 'Invalid instruction');
     resolver(...line.args.map(el => el.exec));
-    memory['pc'] = memory['pc'] + 1;
+    memory['pc']++;
     state.prevActions.push(state.currActions);
     state.currActions = [];
     printState();
@@ -62,7 +61,13 @@ function runBack() {
     const undoActions = state.prevActions.pop();
     while (undoActions.length) {
         const [index, value] = undoActions.pop();
-        state.registers[index] = value;
+        const i = Number(index);
+        if (Number.isNaN(i)) {
+            state.registers[index] = value;
+        }
+        else {
+            state.eeprom[i] = value;
+        }
     }
     state.currActions = [];
     printState();
@@ -93,7 +98,8 @@ window.addEventListener('keydown', (e) => {
         }
     }
 });
-export default function run(program) {
+export default function run(all) {
+    const program = all.filter(el => el.type == 'code');
     if (!program.length) {
         state.running = false;
         return;
@@ -103,10 +109,7 @@ export default function run(program) {
     state.ram = [];
     state.registers = { pc: { value: 0, creator: program[0] } };
     for (const line of program) {
-        if (line.opcode != null) {
-            state.eeprom[line.bytePos] = { value: line.opcode, creator: line, line };
-        }
+        state.eeprom[line.bytePos] = { value: line.opcode, creator: line, line };
     }
-    console.log(state.eeprom, program);
     printState();
 }

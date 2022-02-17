@@ -1,5 +1,5 @@
 import {assertRegisters, assertImmediate} from '../../assert.js'
-import {addOP, instSet} from '../instSet.js'
+import {addOP, instSet} from './instSet.js'
 import {memory as m} from '../../run.js'
 
 type binFun = (a: number, b: number) => number
@@ -23,6 +23,7 @@ function nilOP(name: string, opcode: number) {
 
 binOP('add', 0b0011000, (a, b) => a + b)
 binOP("sub", 0b1111000, (a, b) => a - b)
+binOP('and', 0b0011001, (a, b) => a & b)
 
 nilOP("HLT", 0b0010111)
 
@@ -46,3 +47,4 @@ addOP('adi', (d, a, val) => {
 })
 
 addOP('inc', (d) => instSet.adi(d, d, 1), (d) => m[d]++)
+addOP('dec', (d) => instSet.adi(d, d, -1), (d) => m[d]--)

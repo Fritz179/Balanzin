@@ -12,20 +12,20 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
-        ldi a, 0
-        ldi a, 1
-        ldi a, 0xf
-        ldi a, 0b101010
+        ldi a, vram     ; start of vram
 
-        ldi c, 0
-        start:
-        ldi b, 10
-        loop:
-        add b, a
-        jnc loop
-        inc c
-        jmp start
+        loop: ldi b, 0
 
+        sto a, b
+        inc a
+        inc b
+        sto a, b
+        inc a
+        dec b
+        sto a, b
+
+        jmp loop 
+        vram: dw 0xfe00
 
       </textarea>
       <br>

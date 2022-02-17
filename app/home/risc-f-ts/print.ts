@@ -1,60 +1,16 @@
-import {line} from './parse.js'
-
-function hex(num: number, len = 4) {
-  const base = num < 0 ? '-0x' : '0x'
-  return base + Math.abs(num).toString(16).padStart(len, '0')
-}
-
 const sep = `${'----------------------|-----------------|'.padEnd(80, '-')}\n`
 const header = `ADDRESS OPCODE  LINE  | op  a   b   d   |\n` + sep
-
-import {NUM_TO_REG} from './parse.js'
-function decode(opcode: number): string {
-  const a = NUM_TO_REG[(opcode >> 0) & 7].padStart(3, ' ')
-  const b = NUM_TO_REG[(opcode >> 3) & 7].padStart(3, ' ')
-  const d = NUM_TO_REG[(opcode >> 6) & 7].padStart(3, ' ')
-  const val = (opcode >> 9).toString(16).padEnd(2, ' ')
-
-  return `${val}  ${a} ${b} ${d}`
-}
-
-export default function print(parsed: line[]) {
-  let output = header
-
-  let prevLines = ''
-  parsed.forEach(line => {
-    let curr = ''
-
-    if (line.inst) {
-      const num = `${(line.lineNumber + 1).toString().padStart(4, '0')}`
-      curr += `${hex(line.bytePos)}: ${hex(line.opcode)}: ${num}: `
-      curr += `| ${decode(line.opcode)} |`
-    } else {
-      curr += '|                 |'.padStart(41, ' ')
-    }
-
-    if (!line.multiLine) curr += line.lineText
-    curr += '\n'
-    output += curr
-
-    line.printLine = curr
-    if (line.inst) {
-      line.prevLines = prevLines
-      prevLines = ''
-    } else {
-      prevLines += curr
-    }
-  })
-
-  return output
-}
+export {header}
 
 import {readValue} from './run.js'
 
+// while running
 export function printState() {
+
   function printReg(name: string) {
     const value = readValue(name, true)
     if (!value) return `${name}: 0x####`
+    
     return `${name}: 0x${value.value.toString(16).padStart(4, '0')}`
   }
 
@@ -64,7 +20,7 @@ export function printState() {
 
     const {value, line} = memory
     if (!line) {
-      return ['']
+      return ['NO_LINE']
     }
 
     if (value != line.opcode) console.log('Error');
@@ -81,13 +37,14 @@ export function printState() {
     return output.split('\n').slice(0, -1)
   }
 
-
+  // add registers
   let output = 'REGISTERS:\n'
   output += `${printReg('a')} | ${printReg('si')} | ${printReg('sp')}\n`
   output += `${printReg('b')} | ${printReg('di')} | ${printReg('pc')}\n`
   output += `${printReg('c')}\n`
   output += `\n${''.padStart(80, '#')}\n\n`
 
+  // add execution status
   const pc = readValue('pc', true).value
   const border = 5
   const start = pc - border
@@ -108,6 +65,25 @@ export function printState() {
   }
 
   output += lines.splice(middle - border - 3, border * 2 + 3).join('\n')
+
+  // add memory status as display
+  output += '\n\n\nDISPLAY:\n'
+  const width = 16
+  const height = 16
+
+  // start from
+  const charSet = ['  ', '[]']
+  const vram = 0xfe00
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = vram + y * width + x
+      const char = readValue(i, true)?.value ? 1 : 0
+
+      output += charSet[char]
+    }
+
+    output += '\n'
+  }
 
   document.getElementById('output')!.innerHTML = output
 }

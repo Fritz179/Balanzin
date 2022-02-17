@@ -1,6 +1,6 @@
 import { assertRegisters, assertImmediate } from '../../assert.js';
 import { addOP, instSet } from '../instSet.js';
-import { memory as m } from '../../run.js';
+import { memory as m } from '../../../run.js';
 function binOP(name, opcode, exec) {
     addOP(name, (d, a, b) => {
         if (!b)
@@ -17,6 +17,7 @@ function nilOP(name, opcode) {
 }
 binOP('add', 0b0011000, (a, b) => a + b);
 binOP("sub", 0b1111000, (a, b) => a - b);
+binOP('and', 0b0011001, (a, b) => a & b);
 nilOP("HLT", 0b0010111);
 addOP('adi', (d, a, val) => {
     if (typeof val == 'undefined') {
@@ -35,3 +36,4 @@ addOP('adi', (d, a, val) => {
     m[d] = (m[a] + val) & 65535;
 });
 addOP('inc', (d) => instSet.adi(d, d, 1), (d) => m[d]++);
+addOP('dec', (d) => instSet.adi(d, d, -1), (d) => m[d]--);

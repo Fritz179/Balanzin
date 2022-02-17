@@ -4,7 +4,6 @@ export function assert(cond, msg) {
 }
 // Used when assertion arises while compiling
 let line = null;
-let lastPass = false;
 export function setCurrentLine(currentLine) {
     line = currentLine;
 }
@@ -12,15 +11,12 @@ export function getCurrentLine() {
     assert(line != null, 'Line not yet setted');
     return line;
 }
-export function setLastPass(currentLastPass) {
-    lastPass = currentLastPass;
-}
 export function assertLine(cond, msg) {
     assert(line != null, 'Line not yet setted');
     const { lineNumber, lineText } = line;
     assert(cond, `Error: ${msg}\n\tat line: ${lineNumber}: "${lineText}"`);
 }
-import { REG_TO_NUM, NUM_TO_REG } from './parse.js';
+import { REG_TO_NUM, NUM_TO_REG } from './compiler/parser.js';
 function assertRegister(register) {
     assertLine(typeof register == 'string', 'Invaldi register');
     assertLine(NUM_TO_REG.includes(register), 'Missing operand');
@@ -37,7 +33,8 @@ const MIN_UIMM = 0;
 const MAX_UIMM = 127;
 export function assertImmediate(value) {
     assert(typeof value == 'number', 'Invalid operand');
-    if (value == Infinity && !lastPass)
+    // non defined constant / label is Infinity in first pass
+    if (value == Infinity)
         return Infinity;
     assertLine(value >= MIN_SIMM, `Immedaite value ${value} below ${MIN_SIMM}`);
     assertLine(value <= MAX_SIMM, `Immedaite value ${value} above ${MAX_SIMM}`);

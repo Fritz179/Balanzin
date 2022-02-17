@@ -12,20 +12,27 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
-        ldi a, 0
-        ldi a, 1
-        ldi a, 0xf
-        ldi a, 0b101010
+        ldi a, vram     ; *vram
+        lod a, a        ; vram
 
-        ldi c, 0
-        start:
-        ldi b, 10
-        loop:
-        add b, a
-        jnc loop
-        inc c
-        jmp start
+        ldi b, 0        ; x position
+        ldi c, 0        ; y position
 
+        col:
+        row:
+
+        ldi si, 1
+        add di, b, c    ; x + y
+        and di, si      ; check parity
+        sto a, di       ; store parity
+        inc a
+
+        inc b
+        jmp row
+
+        add b, di
+        jmp col
+        vram: dw 0xfe00
 
       </textarea>
       <br>

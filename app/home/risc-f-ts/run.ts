@@ -1,12 +1,12 @@
 import {setCurrentLine, getCurrentLine, assertLine, assert} from './assert.js'
-import {execSet} from './instSet/instSet.js'
+import {execSet} from './compiler/instSet/instSet.js'
 import {printState} from './print.js'
-import {line, NUM_TO_REG} from './parse.js'
+import {code, compiled, NUM_TO_REG} from './compiler/parser.js'
 
 export interface value {
   value: number,  // hardware value
-  creator: line   // who wrote this value, useful for debugging?
-  line?: line,    // used for simulation, has opcode resolver
+  creator: code   // who wrote this value, useful for debugging?
+  line?: code,    // used for simulation, has opcode resolver
 }
 
 interface register {
@@ -35,8 +35,7 @@ export function readValue(location: string | number, empty: boolean): value {
   const i = Number(location)
 
   if (Number.isNaN(i)) {
-    // @ts-ignore
-    assertLine(NUM_TO_REG.includes(location), 'Invalid memory access')
+    assertLine(NUM_TO_REG.includes(location as string), 'Invalid memory access')
     const value = state.registers[location]
     assertLine(value || empty, 'Invalid memory access')
 
@@ -55,14 +54,14 @@ interface memory {
 
 export const memory = new Proxy([], {
 	get(_from, index: string): number {
-    console.log('Getting', index, readValue(index, false).value)
+    // console.log('Getting', index, readValue(index, false).value)
     return readValue(index, false).value
 	},
 
 	set(_to, location: string, value: number) {
-    console.log('Setting', location, value)
+    // console.log('Setting', location, value)
     state.currActions.push([location, readValue(location, true)])
-    const newValue: value = {value, creator: getCurrentLine()}
+    const newValue: value = {value, creator: getCurrentLine() as code}
 
     const i = Number(location)
 
@@ -89,7 +88,7 @@ function runNext() {
   assertLine(resolver, 'Invalid instruction')
   resolver(...line.args.map(el => el.exec))
 
-  memory['pc'] = memory['pc'] + 1
+  memory['pc']++
 
   state.prevActions.push(state.currActions)
   state.currActions = []
@@ -102,7 +101,12 @@ function runBack() {
   const undoActions = state.prevActions.pop()!
   while (undoActions.length) {
     const [index, value] = undoActions.pop()!
-    state.registers[index] = value
+    const i = Number(index)
+    if (Number.isNaN(i)) {
+      state.registers[index] = value
+    } else {
+      state.eeprom[i] = value
+    }
   }
 
   state.currActions = []
@@ -130,11 +134,14 @@ window.addEventListener('keydown', (e) => {
   }
 })
 
-export default function run(program: line[]) {
+export default function run(all: compiled[]) {
+  const program = all.filter(el => el.type == 'code') as code[]
+
   if (!program.length) {
     state.running = false
     return
   }
+
   state.running = true
 
   state.eeprom = []
@@ -142,10 +149,8 @@ export default function run(program: line[]) {
   state.registers = {pc: {value: 0, creator: program[0]}}
 
   for (const line of program) {
-    if (line.opcode != null) {
-      state.eeprom[line.bytePos] = {value: line.opcode, creator: line, line}
-    }
+    state.eeprom[line.bytePos] = {value: line.opcode, creator: line, line}
   }
-  console.log(state.eeprom, program)
+
   printState()
 }

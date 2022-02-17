@@ -1,53 +1,50 @@
-type numberArg = {
-  type: 'number',
-  value: number
+export interface arg {
   original: string
-  exec: number
+  type: 'number' | 'string' | 'register' | 'const'
+  value: number | string
+  exec: number | string
 }
 
-type stringArg = {
-  type: 'string',
-  value: string
-  original: string
-  exec: number
-}
-
-type registerOp = {
-  type: 'register',
-  value: string
-  original: string
-  exec: string
-}
-
-type constArg = {
-  type: 'const',
-  value: string
-  original: string
-  exec: number
-}
-
-export type arg = numberArg | stringArg | registerOp | constArg
-
-export interface line {
-  inst: string,
-  args: arg[],
-  place: string,
-  comment: string,
+interface baseLine {
+  type: 'text' | 'code'
   lineText: string,
   lineNumber: number,
+  place: string,
+  comment: string,
+}
+
+interface textLine extends baseLine {
+  type: 'text'
+}
+
+interface assemblableLine extends baseLine {
+  type: 'code'
+  inst: string,
+  args: arg[],
+}
+
+interface assembledLine extends assemblableLine {
   bytePos: number,
   opcode: number,
   multiLine: boolean,
+}
+
+export interface printableLine {
   prevLines: string,
   printLine: string
 }
+
+export type parsed = assemblableLine | textLine
+export type assembled = assembledLine | textLine
+export type compiled = assembled & printableLine
+export type code = assembledLine & printableLine
 
 export const REG_TO_NUM: {[key: string]: number} = {}
 export const NUM_TO_REG = ['pc', 'sp', 'si', 'di', 'a', 'b', 'c', 'ram']
 NUM_TO_REG.forEach((el, i) => REG_TO_NUM[el] = i)
 
-export default function parse(source: string): line[] {
-  const parsed: line[] = []
+export default function parse(source: string): parsed[] {
+  const parsed: parsed[] = []
 
   source.split('\n').forEach((text, i) => {
     let trimmed = text.trim()
@@ -55,17 +52,17 @@ export default function parse(source: string): line[] {
     // remove comment
     const commentMatch = trimmed.match(/(?<=;).*/)
     if (commentMatch) trimmed = trimmed.slice(0, commentMatch.index! - 1).trim()
-    const comment = commentMatch ? commentMatch[0] : ''
+    const comment = commentMatch?.[0] || ''
 
     // remove place
     const placeMatch = trimmed.match(/.*(?=:)/)
     if (placeMatch) trimmed = trimmed.slice(placeMatch[0].length + 1).trim()
-    const place = placeMatch ? placeMatch[0] : ''
+    const place = placeMatch?.[0] || ''
 
     // separate inst
     const instMatch = trimmed.match(/[a-zA-Z0-9_-]+/)
     if (instMatch) trimmed = trimmed.slice(instMatch[0].length).trim()
-    const inst = instMatch ? instMatch[0] : ''
+    const inst = instMatch?.[0]
 
     // separate args
     const rest = trimmed.length ? trimmed.split(',').map(arg => arg.trim()) : []
@@ -121,19 +118,25 @@ export default function parse(source: string): line[] {
       }
     })
 
-    parsed.push({
-      inst,
-      args,
-      place,
-      comment,
-      lineText: text,
-      lineNumber: i,
-      bytePos: -1,
-      opcode: -1,
-      multiLine: false,
-      prevLines: '',
-      printLine: '',
-    })
+    if (inst) {
+      parsed.push({
+        type: 'code',
+        place,
+        inst,
+        args,
+        comment,
+        lineText: text,
+        lineNumber: i,
+      })
+    } else {
+      parsed.push({
+        type: 'text',
+        place,
+        comment,
+        lineText: text,
+        lineNumber: i,
+      })
+    }
   })
 
   return parsed
