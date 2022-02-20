@@ -2,7 +2,7 @@ const sep = `${'----------------------|-----------------|'.padEnd(80, '-')}\n`
 const header = `ADDRESS OPCODE  LINE  | op  a   b   d   |\n` + sep
 export {header}
 
-import {readValue} from './run.js'
+import {readValue, getFlag, flags, state} from './run.js'
 
 // while running
 export function printState() {
@@ -10,7 +10,7 @@ export function printState() {
   function printReg(name: string) {
     const value = readValue(name, true)
     if (!value) return `${name}: 0x####`
-    
+
     return `${name}: 0x${value.value.toString(16).padStart(4, '0')}`
   }
 
@@ -37,11 +37,22 @@ export function printState() {
     return output.split('\n').slice(0, -1)
   }
 
+  function printFlags(): string {
+    let output = ''
+    output += `CF = ${getFlag(flags.CF) ? 1 : 0}, `
+    output += `ZF = ${getFlag(flags.ZF) ? 1 : 0}, `
+    output += `NF = ${getFlag(flags.NF) ? 1 : 0}, `
+    return output
+  }
+
   // add registers
   let output = 'REGISTERS:\n'
-  output += `${printReg('a')} | ${printReg('si')} | ${printReg('sp')}\n`
-  output += `${printReg('b')} | ${printReg('di')} | ${printReg('pc')}\n`
-  output += `${printReg('c')}\n`
+  output += `${printReg('a')} | ${printReg('si')} | ${printReg('sp')}     |`
+  output += ` FLAGS: ${printFlags()}\n`
+  output += `${printReg('b')} | ${printReg('di')} | ${printReg('pc')}     |`
+  output += ` STEP: ${state.steps}\n`
+  output += `${printReg('c')}                               |`
+  output += '\n'
   output += `\n${''.padStart(80, '#')}\n\n`
 
   // add execution status

@@ -12,6 +12,9 @@
 
     <div class="main print">
       <textarea id="source" cols="80" rows="15">
+        ; checkerboard pattern
+        equ width 16
+
         ldi a, vram     ; *vram
         lod a, a        ; vram
 
@@ -19,6 +22,7 @@
         ldi c, 0        ; y position
 
         col:
+
         row:
 
         ldi si, 1
@@ -28,10 +32,18 @@
         inc a
 
         inc b
-        jmp row
+        ldi si, width
+        sub si, b
+        jnz row
 
-        add b, di
-        jmp col
+        ldi b, 0
+        inc c
+        ldi si, width
+        sub si, c
+        jnz col
+
+        HLT
+
         vram: dw 0xfe00
 
       </textarea>

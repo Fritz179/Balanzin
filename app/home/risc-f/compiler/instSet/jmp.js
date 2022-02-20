@@ -1,7 +1,7 @@
 import { assertRegisters, assertImmediate } from '../../assert.js';
 import { addOP } from './instSet.js';
 import { getConst } from '../assembler.js';
-import { memory as m } from '../../run.js';
+import { memory as m, getFlag, flags } from '../../run.js';
 function addJMP(name, cond, exec) {
     addOP(name, (to) => {
         const here = getConst('bytePos');
@@ -15,8 +15,10 @@ function addJMP(name, cond, exec) {
         }
     });
 }
-addJMP('jc', 'di', () => false);
-addJMP('jnc', 'a', () => false);
+addJMP('jz', 'si', () => !!getFlag(flags.ZF));
+addJMP('jnz', 'di', () => !getFlag(flags.ZF));
+addJMP('jc', 'a', () => !!getFlag(flags.CF));
+addJMP('jnc', 'b', () => !getFlag(flags.CF));
 addJMP('jmp', 'ram', () => true);
 // function addJMP(name, condition, inverseCondition) {
 // 	jmpOPS[condition] = name

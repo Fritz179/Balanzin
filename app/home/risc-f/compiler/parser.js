@@ -61,9 +61,10 @@ export default function parse(source) {
                 };
             }
             // probably const
+            const constExpr = arg.split(/\s/);
             return {
                 type: 'const',
-                value: arg,
+                value: constExpr,
                 original: arg,
                 exec: -1
             };

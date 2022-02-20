@@ -1,6 +1,6 @@
 import {assertRegisters, assertImmediate} from '../../assert.js'
 import {addOP, instSet} from './instSet.js'
-import {memory as m} from '../../run.js'
+import {memory as m, setFlags} from '../../run.js'
 
 type binFun = (a: number, b: number) => number
 function binOP(name: string, opcode: number, exec: binFun) {
@@ -10,7 +10,13 @@ function binOP(name: string, opcode: number, exec: binFun) {
 		const registers = assertRegisters(a, b, d)
 		return [(opcode << 9) + registers]
 	},
-		(d, a, b) => m[d] = exec(m[a], b ? m[b] : m[d])
+		(d, a, b) => {
+			const aBus = m[b ? a : d]
+			const bBus = m[b ? b : a]
+			const dBus = exec(aBus, bBus)
+
+			m[d] = setFlags(aBus, bBus, dBus)
+		}
 	)
 }
 
@@ -42,9 +48,12 @@ addOP('adi', (d, a, val) => {
 		a = d
 	}
 
-	// Carry flag??
-  m[d] = (m[a] + (val as number)) & 65535
+	const aBus = m[a]
+	const bBus = val as number
+	const dBus = aBus + bBus
+
+	m[d] = setFlags(aBus, bBus, dBus)
 })
 
-addOP('inc', (d) => instSet.adi(d, d, 1), (d) => m[d]++)
-addOP('dec', (d) => instSet.adi(d, d, -1), (d) => m[d]--)
+addOP('inc', (d) => instSet.adi(d, d, 1), (d) => setFlags(m[d], 0, m[d]++))
+addOP('dec', (d) => instSet.adi(d, d, -1), (d) => setFlags(m[d], 0, m[d]--))

@@ -1,4 +1,4 @@
-import {setCurrentLine, getCurrentLine, assertLine, assert} from './assert.js'
+import {setCurrentLine, getCurrentLine, assertLine} from './assert.js'
 import {execSet} from './compiler/instSet/instSet.js'
 import {printState} from './print.js'
 import {code, compiled, NUM_TO_REG} from './compiler/parser.js'
@@ -19,16 +19,52 @@ interface state {
   registers: register,
   currActions: [string, value][],
   prevActions: [string, value][][],
-  running: boolean
+  running: boolean,
+  flags: number,
+  steps: number
 }
 
-const state: state = {
+export const state: state = {
   eeprom: [],
   ram: [],
   registers: {},
   currActions: [],
   prevActions: [],
-  running: false
+  running: false,
+  flags: 0,
+  steps: 0,
+}
+
+let doDebug = false
+function debug(...msg: any[]) {
+  if (doDebug) console.log(...msg)
+}
+
+export enum flags {
+  CF, ZF, NF
+}
+
+export function setFlag(flag: flags, to: boolean): void {
+  if (to) {
+    state.flags |= 1 << flag
+  } else {
+    state.flags &= ~(1 << flag)
+  }
+}
+
+export function getFlag(flag: flags): number {
+  return state.flags & (1 << flag)
+}
+
+export function setFlags(a: number, b: number, d: number): number {
+	setFlag(flags.CF, d < 0 || d >= 65536)
+
+  if (d < 0) d += 65536
+  if (d >= 65536) d -= 65536
+
+  setFlag(flags.NF, d >= 32278)
+  setFlag(flags.ZF, d == 0)
+	return d
 }
 
 export function readValue(location: string | number, empty: boolean): value {
@@ -54,12 +90,14 @@ interface memory {
 
 export const memory = new Proxy([], {
 	get(_from, index: string): number {
-    // console.log('Getting', index, readValue(index, false).value)
+    debug('Getting', index, readValue(index, false).value)
     return readValue(index, false).value
 	},
 
 	set(_to, location: string, value: number) {
-    // console.log('Setting', location, value)
+    debug('Setting', location, value)
+    if (value > 65535 || value < 0) console.log('Invalid setting value')
+
     state.currActions.push([location, readValue(location, true)])
     const newValue: value = {value, creator: getCurrentLine() as code}
 
@@ -78,9 +116,10 @@ export const memory = new Proxy([], {
 	}
 }) as unknown as memory
 
-function runNext() {
+function runNext(show: boolean) {
   const line = readValue(state.registers.pc.value, false).line!
   assertLine(line, 'No instruction at pc!')
+  debug('Running: ' + line.inst)
 
   setCurrentLine(line)
   const resolver = execSet[line.inst]
@@ -92,7 +131,8 @@ function runNext() {
 
   state.prevActions.push(state.currActions)
   state.currActions = []
-  printState()
+  state.steps++
+  if (show) printState()
 }
 
 function runBack() {
@@ -110,7 +150,22 @@ function runBack() {
   }
 
   state.currActions = []
+  state.steps--
   printState()
+}
+
+function start() {
+  let i = 0
+  const start = Date.now()
+  while ((getCurrentLine() as code).inst != 'HLT') {
+    runNext(false)
+    assertLine(i < 10000, 'no HLT inst')
+    i++
+  }
+
+  printState()
+  const time = (Date.now() - start)
+  console.log(`${Math.round(state.steps / time)}kHz`)
 }
 
 window.addEventListener('keydown', (e) => {
@@ -118,9 +173,11 @@ window.addEventListener('keydown', (e) => {
 
   try {
     switch (e.key) {
-      case 'n': runNext(); break;
+      case 'n': runNext(true); break;
       case 'b': runBack(); break;
+      case 'd': doDebug = !doDebug; break;
       case 'i': console.log(state); break;
+      case 's': start(); break;
     }
   } catch (e) {
     console.error(e);
@@ -146,11 +203,16 @@ export default function run(all: compiled[]) {
 
   state.eeprom = []
   state.ram = []
-  state.registers = {pc: {value: 0, creator: program[0]}}
+  state.registers = {
+    pc: {value: 0, creator: program[0]},
+    sp: {value: 0, creator: program[0]}
+  }
 
   for (const line of program) {
     state.eeprom[line.bytePos] = {value: line.opcode, creator: line, line}
   }
 
+  console.log(program)
+  setCurrentLine(program[0])
   printState()
 }

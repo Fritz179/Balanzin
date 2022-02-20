@@ -1,9 +1,26 @@
-export interface arg {
+ interface baseArg {
   original: string
   type: 'number' | 'string' | 'register' | 'const'
-  value: number | string
+  value: number | string | string[]
   exec: number | string
 }
+
+interface numArg extends baseArg {
+  type: 'number'
+  value: number
+}
+
+interface strArg extends baseArg {
+  type: 'string' | 'register'
+  value: string
+}
+
+interface constArg extends baseArg {
+  type: 'const'
+  value: string[]
+}
+
+export type arg = numArg | strArg | constArg
 
 interface baseLine {
   type: 'text' | 'code'
@@ -110,9 +127,11 @@ export default function parse(source: string): parsed[] {
       }
 
       // probably const
+      const constExpr = arg.split(/\s/)
+
       return {
         type: 'const',
-        value: arg,
+        value: constExpr,
         original: arg,
         exec: -1
       }

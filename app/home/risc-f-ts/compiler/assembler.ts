@@ -8,13 +8,29 @@ interface consts {
 
 const consts: consts = {bytePos: 0}
 
-export function setConst(dest: consts, prop: string, val: number) {
-  assertLine(typeof dest[prop] == 'undefined', 'Already defined')
-  dest[prop] = val
+export function setConst(prop: string, val: number) {
+  consts[prop] = val
 }
 
 export function getConst(index: string): number {
   return consts[index]
+}
+
+function constEvaluator(expr: string[], solver: (i: string) => number): number {
+  if (expr.length == 1) {
+    return solver(expr[0])
+  }
+
+  if (expr.length == 3) {
+    switch (expr[1]) {
+      case '+': return solver(expr[0]) + solver(expr[2])
+      case '-': return solver(expr[0]) - solver(expr[2])
+      case '*': return solver(expr[0]) * solver(expr[2])
+    }
+  }
+
+  assertLine(expr.length == 2, 'Not implemented constant propagation')
+  return Infinity
 }
 
 function walk(source: parsed[], labels: consts, lastPass: boolean): [parsed, number[]][] {
@@ -25,17 +41,16 @@ function walk(source: parsed[], labels: consts, lastPass: boolean): [parsed, num
         case 'string': return arg.value
         case 'register': return arg.value
         case 'const': {
-          if (typeof consts[arg.value] == 'number') {
-            if (lastPass) arg.exec = consts[arg.value]
-            return consts[arg.value]
-          }
-          if (typeof labels[arg.value] == 'number') {
-            if (lastPass) arg.exec = labels[arg.value]
-            return labels[arg.value]
-          }
+          const value = constEvaluator(arg.value, str => {
+            if (typeof consts[str] == 'number') return consts[str]
+            if (typeof labels[str] == 'number') return labels[str]
 
-          assertLine(!lastPass, 'Unresolved symbol')
-          return Infinity
+            assertLine(!lastPass, 'Unresolved symbol')
+            return Infinity
+          })
+
+          if (lastPass) arg.exec = value
+          return value
         }
       }
     })
@@ -60,7 +75,7 @@ function walk(source: parsed[], labels: consts, lastPass: boolean): [parsed, num
     const resolver = instSet[inst]
     assertLine(resolver, 'Unknow instruction')
 
-    const solution = resolver(...resolveArgs(args))
+    const solution = inst != 'equ' ? resolver(...resolveArgs(args)) : resolver(...(args[0].value as string[]))
 
     consts.bytePos += solution.length
     output.push([line, solution])

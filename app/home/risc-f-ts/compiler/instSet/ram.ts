@@ -1,15 +1,27 @@
 import {assertRegisters, assertImmediate, assertLine} from '../../assert.js'
-import {addOP, instSet} from './instSet.js'
+import {addOP, instSet, execSet} from './instSet.js'
 import {memory as m} from '../../run.js'
+import {setConst} from '../assembler.js'
 
 addOP('ldi',
   (d, val) => instSet.adi(d, 'sp', val),
-  (d, val) => m[d] = val as number
+  (d, val) => execSet.adi(d, 'sp', val)
 )
 
 addOP('dw',
   (...args) => {
     return args as number[]
+  },
+  () => { assertLine(false, 'Reached not executable memory') }
+)
+
+addOP('equ',
+  (name, to) => {
+    const num = Number(to)
+    assertLine(typeof name == 'string', 'Invalid equ')
+    assertLine(!Number.isNaN(num), 'Invalid equ')
+    setConst(name as string, num)
+    return  []
   },
   () => { assertLine(false, 'Reached not executable memory') }
 )
