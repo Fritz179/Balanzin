@@ -1,39 +1,32 @@
 import {setCurrentLine, assertLine} from '../assert.js'
 import {instSet} from './instSet/instSet.js'
 import {parsed, assembled, arg} from './parser.js'
+import directives from './directives.js'
+import evaluetor from './evaluator.js'
 
 interface consts {
   [key: string]: number
 }
 
 const consts: consts = {bytePos: 0}
+let labels: consts = {}
+let lastPass = false
 
 export function setConst(prop: string, val: number) {
   consts[prop] = val
 }
 
 export function getConst(index: string): number {
-  return consts[index]
-}
+  if (!Number.isNaN(Number(index))) return Number(index)
 
-function constEvaluator(expr: string[], solver: (i: string) => number): number {
-  if (expr.length == 1) {
-    return solver(expr[0])
-  }
+  if (typeof consts[index] == 'number') return consts[index]
+  if (typeof labels[index] == 'number') return labels[index]
 
-  if (expr.length == 3) {
-    switch (expr[1]) {
-      case '+': return solver(expr[0]) + solver(expr[2])
-      case '-': return solver(expr[0]) - solver(expr[2])
-      case '*': return solver(expr[0]) * solver(expr[2])
-    }
-  }
-
-  assertLine(expr.length == 2, 'Not implemented constant propagation')
+  assertLine(!lastPass, 'Unresolved symbol')
   return Infinity
 }
 
-function walk(source: parsed[], labels: consts, lastPass: boolean): [parsed, number[]][] {
+function walk(source: parsed[]): [parsed, number[]][] {
   function resolveArgs(args: arg[]): (string | number)[] {
     return args.map(arg => {
       switch (arg.type) {
@@ -41,13 +34,7 @@ function walk(source: parsed[], labels: consts, lastPass: boolean): [parsed, num
         case 'string': return arg.value
         case 'register': return arg.value
         case 'const': {
-          const value = constEvaluator(arg.value, str => {
-            if (typeof consts[str] == 'number') return consts[str]
-            if (typeof labels[str] == 'number') return labels[str]
-
-            assertLine(!lastPass, 'Unresolved symbol')
-            return Infinity
-          })
+          const value = evaluetor(arg.value)
 
           if (lastPass) arg.exec = value
           return value
@@ -72,10 +59,18 @@ function walk(source: parsed[], labels: consts, lastPass: boolean): [parsed, num
 
     const {inst, args} = line
 
+    if (line.type == 'directive') {
+      const resolver = directives[inst]
+      assertLine(resolver, 'Invalid directive!')
+      resolver(...args)
+      output.push([line, []])
+      continue
+    }
+
     const resolver = instSet[inst]
     assertLine(resolver, 'Unknow instruction')
 
-    const solution = inst != 'equ' ? resolver(...resolveArgs(args)) : resolver(...(args[0].value as string[]))
+    const solution = resolver(...resolveArgs(args))
 
     consts.bytePos += solution.length
     output.push([line, solution])
@@ -85,22 +80,24 @@ function walk(source: parsed[], labels: consts, lastPass: boolean): [parsed, num
 }
 
 export default function assemble(source: parsed[]): assembled[] {
+  lastPass = false
 
   // first pass => resolve all consts and max program length
   consts.bytePos = 0
-  const firstLabels = {}
-  walk(source, firstLabels, false)
+  labels = {}
+  walk(source)
 
   // second pass => shorten insts with first pass symbol estimate
   consts.bytePos = 0
-  const secondLabels: consts = {}
-  walk(source, secondLabels, false)
+  labels = {}
+  walk(source)
 
   // Can a third pass shorten the opcodes even furhter? If it can, not by much
 
   // resolution pass => correct every opcode with exact symbol => fix-up list
+  lastPass = true
   consts.bytePos = 0
-  const walked = walk(source, secondLabels, true)
+  const walked = walk(source)
 
   const program: assembled[] = []
   let bytePos = 0

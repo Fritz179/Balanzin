@@ -15,8 +15,12 @@ export default function parse(source) {
         if (placeMatch)
             trimmed = trimmed.slice(placeMatch[0].length + 1).trim();
         const place = placeMatch?.[0] || '';
+        // check if it's a directive
+        const isDirective = trimmed[0] == '.';
+        if (isDirective)
+            trimmed = trimmed.slice(1);
         // separate inst
-        const instMatch = trimmed.match(/[a-zA-Z0-9_-]+/);
+        const instMatch = trimmed.match(/^[a-zA-Z0-9_-]+/);
         if (instMatch)
             trimmed = trimmed.slice(instMatch[0].length).trim();
         const inst = instMatch?.[0];
@@ -71,7 +75,7 @@ export default function parse(source) {
         });
         if (inst) {
             parsed.push({
-                type: 'code',
+                type: isDirective ? 'directive' : 'code',
                 place,
                 inst,
                 args,

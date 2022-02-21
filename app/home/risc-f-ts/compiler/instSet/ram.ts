@@ -15,17 +15,6 @@ addOP('dw',
   () => { assertLine(false, 'Reached not executable memory') }
 )
 
-addOP('equ',
-  (name, to) => {
-    const num = Number(to)
-    assertLine(typeof name == 'string', 'Invalid equ')
-    assertLine(!Number.isNaN(num), 'Invalid equ')
-    setConst(name as string, num)
-    return  []
-  },
-  () => { assertLine(false, 'Reached not executable memory') }
-)
-
 // insts['ldi'] = (inst, consts, d, val) => {
 // 	assertLine(d, inst, `Not enough parameters for ldi instruction!`)
 //

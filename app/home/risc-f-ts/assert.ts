@@ -1,6 +1,6 @@
 import {compiled, parsed} from './compiler/parser.js'
 
-export function assert(cond: any, msg: string) {
+export function assert(cond: any, msg: string): asserts cond {
   if (!cond) throw msg
 }
 
@@ -14,7 +14,7 @@ export function getCurrentLine(): parsed {
   return line as parsed
 }
 
-export function assertLine(cond: any, msg: string) {
+export function assertLine(cond: any, msg: string): asserts cond {
   assert(line != null, 'Line not yet setted')
   const {lineNumber, lineText} = line as parsed;
   assert(cond, `Error: ${msg}\n\tat line: ${lineNumber}: "${lineText}"`)

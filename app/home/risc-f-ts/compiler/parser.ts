@@ -23,7 +23,7 @@ interface constArg extends baseArg {
 export type arg = numArg | strArg | constArg
 
 interface baseLine {
-  type: 'text' | 'code'
+  type: 'text' | 'code' | 'directive'
   lineText: string,
   lineNumber: number,
   place: string,
@@ -35,12 +35,13 @@ interface textLine extends baseLine {
 }
 
 interface assemblableLine extends baseLine {
-  type: 'code'
+  type: 'code' | 'directive',
   inst: string,
   args: arg[],
 }
 
 interface assembledLine extends assemblableLine {
+  type: 'code',
   bytePos: number,
   opcode: number,
   multiLine: boolean,
@@ -48,7 +49,7 @@ interface assembledLine extends assemblableLine {
 
 export interface printableLine {
   prevLines: string,
-  printLine: string
+  printLine: string,
 }
 
 export type parsed = assemblableLine | textLine
@@ -76,8 +77,12 @@ export default function parse(source: string): parsed[] {
     if (placeMatch) trimmed = trimmed.slice(placeMatch[0].length + 1).trim()
     const place = placeMatch?.[0] || ''
 
+    // check if it's a directive
+    const isDirective = trimmed[0] == '.'
+    if (isDirective) trimmed = trimmed.slice(1)
+
     // separate inst
-    const instMatch = trimmed.match(/[a-zA-Z0-9_-]+/)
+    const instMatch = trimmed.match(/^[a-zA-Z0-9_-]+/)
     if (instMatch) trimmed = trimmed.slice(instMatch[0].length).trim()
     const inst = instMatch?.[0]
 
@@ -128,7 +133,6 @@ export default function parse(source: string): parsed[] {
 
       // probably const
       const constExpr = arg.split(/\s/)
-
       return {
         type: 'const',
         value: constExpr,
@@ -139,7 +143,7 @@ export default function parse(source: string): parsed[] {
 
     if (inst) {
       parsed.push({
-        type: 'code',
+        type: isDirective ? 'directive' : 'code',
         place,
         inst,
         args,

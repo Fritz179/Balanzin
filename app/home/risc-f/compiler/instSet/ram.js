@@ -1,17 +1,9 @@
 import { assertRegisters, assertImmediate, assertLine } from '../../assert.js';
 import { addOP, instSet, execSet } from './instSet.js';
 import { memory as m } from '../../run.js';
-import { setConst } from '../assembler.js';
 addOP('ldi', (d, val) => instSet.adi(d, 'sp', val), (d, val) => execSet.adi(d, 'sp', val));
 addOP('dw', (...args) => {
     return args;
-}, () => { assertLine(false, 'Reached not executable memory'); });
-addOP('equ', (name, to) => {
-    const num = Number(to);
-    assertLine(typeof name == 'string', 'Invalid equ');
-    assertLine(!Number.isNaN(num), 'Invalid equ');
-    setConst(name, num);
-    return [];
 }, () => { assertLine(false, 'Reached not executable memory'); });
 // insts['ldi'] = (inst, consts, d, val) => {
 // 	assertLine(d, inst, `Not enough parameters for ldi instruction!`)

@@ -2,10 +2,11 @@
 
 /*
   TODO:
+    - compiler directives
     - constant propagator
-    - llvm? tcc...
-    - better graphics => Canvas
     - remove all as and ignore
+    - better graphics => Canvas
+    - llvm? tcc...
 */
 
 import compile from './compiler/compiler.js'

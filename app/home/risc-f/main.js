@@ -1,10 +1,11 @@
 // npx tsc ./main.ts --outDir ../risc-f --module es2020 --target es2020 --strict --strictNullChecks --forceConsistentCasingInFileNames -w
 /*
   TODO:
+    - compiler directives
     - constant propagator
-    - llvm? tcc...
-    - better graphics => Canvas
     - remove all as and ignore
+    - better graphics => Canvas
+    - llvm? tcc...
 */
 import compile from './compiler/compiler.js';
 import run from './run.js';
