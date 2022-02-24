@@ -24,6 +24,11 @@
       "path": "risc-f"
     },
     {
+      "title": "PID simulator",
+      "p": "Simulate PID",
+      "path": "pid"
+    },
+    {
       "title": "Chess",
       "p": "Play Chess against another human, yourself or my artificial intelligence!",
       "extend": "chess"
