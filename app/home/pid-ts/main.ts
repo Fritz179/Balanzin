@@ -1,7 +1,7 @@
 interface state {
   realHeight: number,
   wantedHeight: number,
-  change: number,
+  setHeight: number,
   measured: number,
   error: number
 }
@@ -9,7 +9,7 @@ interface state {
 const colors = {
   realHeight: '#F00',
   measured: '#00F',
-  change: '#0F0',
+  setHeight: '#0F0',
   wantedHeight: '#000'
 } as const
 
@@ -50,7 +50,7 @@ window.addEventListener('load', () => {
       wantedHeight: 0.01,
       measured: 0,
       error: 0,
-      change: 0,
+      setHeight: 0,
     })
   }
 
@@ -77,42 +77,61 @@ window.addEventListener('load', () => {
     })
   }
 
-  function measure(): number {
-    return states[states.length - delay].realHeight
+  function measure(offset: number): number {
+    return states[states.length - delay - offset].realHeight
   }
 
+  const wanted = 0.5
   function pid(measured: number) {
-    const wanted = 0.5
     const err = wanted - measured
 
-    return err * P
+    const iSample = states.length - delay - (60 * 60)
+    let integral = 0
+    for (let i = 0; i < iSample; i++) {
+      integral += wanted - measure(i)
+    }
+    // integral /= iSample
+
+    const len = states.length
+    let derivate = states[len - 10].error - err
+
+    // console.log(err, integral, derivate)
+    console.log(err * P, integral * I, derivate * D)
+    return err * P + integral * I + derivate * D
   }
 
-  function absMax(value: number, max: number) {
+  function step(opennes: number) {
+    const real = states[states.length - 1].realHeight
+    const next = Math.min(opennes, real)
+    return next + offset
+  }
+
+  function absClamp(value: number, max: number) {
     if (value > 0) return Math.min(value, max)
     return Math.max(value, -max)
   }
 
   function update() {
-    const measured = measure()
-    const pidErr = pid(measured)
-    const err = absMax(pidErr, maxSpeed)
-    let real = states[states.length - 1].realHeight
+    const measured = measure(0)
 
-    real += err + offset
-    const change = (err + maxSpeed) / maxSpeed / 2
+    const pidErr = pid(measured)
+    const err = absClamp(pidErr, maxSpeed)
+    const opennes = (err + maxSpeed) / maxSpeed / 2
+
+    const real = step(opennes)
 
     states.push({
       realHeight: real,
       wantedHeight: 0.5,
       measured,
       error: err,
-      change: change
+      setHeight: opennes
     })
 
     draw()
   }
 
+  let save = states.length
   let id = setInterval(update, 1000 / 60)
   window.addEventListener('keydown', e => {
     if (e.key == ' ') {
@@ -122,6 +141,14 @@ window.addEventListener('load', () => {
       } else {
         id = setInterval(update, 1000 / 60)
       }
+    }
+
+    if (e.key == 's') {
+      save = states.length
+    }
+
+    if (e.key == 'd') {
+      states.splice(save)
     }
   })
 })
