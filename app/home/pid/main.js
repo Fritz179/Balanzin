@@ -72,12 +72,14 @@ window.addEventListener('load', () => {
         const len = states.length;
         let derivate = states[len - 10].error - err;
         // console.log(err, integral, derivate)
-        console.log(err * P, integral * I, derivate * D);
+        // console.log(err * P, integral * I, derivate * D)
         return err * P + integral * I + derivate * D;
     }
     function step(opennes) {
         const real = states[states.length - 1].realHeight;
-        const next = Math.min(opennes, real);
+        // console.log(opennes)
+        let next = real + (opennes - 0.5) * 0.01;
+        // if (real - next > 0.01) next = real - 0.01
         return next + offset;
     }
     function absClamp(value, max) {
