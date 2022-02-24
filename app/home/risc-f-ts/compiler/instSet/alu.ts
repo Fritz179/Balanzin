@@ -1,6 +1,6 @@
 import {assertRegisters, assertImmediate} from '../../assert.js'
 import {addOP, instSet} from './instSet.js'
-import {memory as m, setFlags} from '../../run.js'
+import {memory as m, setFlags} from '../../runner/runner.js'
 
 type binFun = (a: number, b: number) => number
 function binOP(name: string, opcode: number, exec: binFun) {

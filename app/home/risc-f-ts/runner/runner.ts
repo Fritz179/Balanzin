@@ -1,7 +1,8 @@
-import {setCurrentLine, getCurrentLine, assertLine} from './assert.js'
-import {execSet} from './compiler/instSet/instSet.js'
+import {setCurrentLine, getCurrentLine, assertLine} from '../assert.js'
+import {execSet} from '../compiler/instSet/instSet.js'
 import {printState} from './print.js'
-import {code, compiled, NUM_TO_REG} from './compiler/parser.js'
+import {code, compiled} from '../compiler/parser.js'
+import {isRegister} from '../assert.js'
 
 export interface value {
   value: number,  // hardware value
@@ -71,7 +72,8 @@ export function readValue(location: string | number, empty: boolean): value {
   const i = Number(location)
 
   if (Number.isNaN(i)) {
-    assertLine(NUM_TO_REG.includes(location as string), 'Invalid memory access')
+    assertLine(typeof location == 'string', 'What?')
+    assertLine(isRegister(location), 'Invalid memory access')
     const value = state.registers[location]
     assertLine(value || empty, 'Invalid memory access')
 
@@ -104,7 +106,7 @@ export const memory = new Proxy([], {
     const i = Number(location)
 
     if (Number.isNaN(i)) {
-      assertLine(NUM_TO_REG.includes(location), 'Invalid memory access')
+      assertLine(isRegister(location), 'Invalid memory access')
       state.registers[location] = newValue
 
       return true

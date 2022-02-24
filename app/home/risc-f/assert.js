@@ -16,16 +16,32 @@ export function assertLine(cond, msg) {
     const { lineNumber, lineText } = line;
     assert(cond, `Error: ${msg}\n\tat line: ${lineNumber}: "${lineText}"`);
 }
-import { REG_TO_NUM, NUM_TO_REG } from './compiler/parser.js';
+export var registers;
+(function (registers) {
+    registers[registers["pc"] = 0] = "pc";
+    registers[registers["sp"] = 1] = "sp";
+    registers[registers["si"] = 2] = "si";
+    registers[registers["di"] = 3] = "di";
+    registers[registers["a"] = 4] = "a";
+    registers[registers["b"] = 5] = "b";
+    registers[registers["c"] = 6] = "c";
+    registers[registers["ram"] = 7] = "ram";
+})(registers || (registers = {}));
+export function isRegister(register) {
+    // @ts-ignore
+    return registers[register] !== undefined;
+}
 function assertRegister(register) {
-    assertLine(typeof register == 'string', 'Invaldi register');
-    assertLine(NUM_TO_REG.includes(register), 'Missing operand');
+    assertLine(typeof register == 'string', 'Not a valid register');
+    assertLine(isRegister(register), 'Not a valid register');
+    // @ts-ignore
+    return registers[register];
 }
 export function assertRegisters(a, b, d) {
-    assertRegister(a);
-    assertRegister(b);
-    assertRegister(d);
-    return (REG_TO_NUM[a] << 0) + (REG_TO_NUM[b] << 3) + (REG_TO_NUM[d] << 6);
+    const regA = assertRegister(a);
+    const regB = assertRegister(b);
+    const regD = assertRegister(d);
+    return (regA << 0) + (regB << 3) + (regD << 6);
 }
 const MIN_SIMM = -64;
 const MAX_SIMM = +63;

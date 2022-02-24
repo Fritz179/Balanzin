@@ -1,7 +1,7 @@
-import { setCurrentLine, getCurrentLine, assertLine } from './assert.js';
-import { execSet } from './compiler/instSet/instSet.js';
+import { setCurrentLine, getCurrentLine, assertLine } from '../assert.js';
+import { execSet } from '../compiler/instSet/instSet.js';
 import { printState } from './print.js';
-import { isRegister } from './assert.js';
+import { isRegister } from '../assert.js';
 export const state = {
     eeprom: [],
     ram: [],

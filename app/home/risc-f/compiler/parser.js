@@ -1,6 +1,4 @@
-export const REG_TO_NUM = {};
-export const NUM_TO_REG = ['pc', 'sp', 'si', 'di', 'a', 'b', 'c', 'ram'];
-NUM_TO_REG.forEach((el, i) => REG_TO_NUM[el] = i);
+import { isRegister } from '../assert.js';
 export default function parse(source) {
     const parsed = [];
     source.split('\n').forEach((text, i) => {
@@ -55,8 +53,8 @@ export default function parse(source) {
                     exec: -1
                 };
             }
-            // keyword
-            if (NUM_TO_REG.includes(arg)) {
+            // @ts-ignore keyword
+            if (isRegister(arg)) {
                 return {
                     type: 'register',
                     value: arg,

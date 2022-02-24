@@ -1,6 +1,6 @@
 import { assertRegisters, assertImmediate, assertLine } from '../../assert.js';
 import { addOP, instSet, execSet } from './instSet.js';
-import { memory as m } from '../../run.js';
+import { memory as m } from '../../runner/runner.js';
 addOP('ldi', (d, val) => instSet.adi(d, 'sp', val), (d, val) => execSet.adi(d, 'sp', val));
 addOP('dw', (...args) => {
     return args;

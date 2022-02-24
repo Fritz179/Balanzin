@@ -1,6 +1,6 @@
 import {assertRegisters, assertImmediate, assertLine} from '../../assert.js'
 import {addOP, instSet, execSet} from './instSet.js'
-import {memory as m} from '../../run.js'
+import {memory as m} from '../../runner/runner.js'
 import {setConst} from '../assembler.js'
 
 addOP('ldi',

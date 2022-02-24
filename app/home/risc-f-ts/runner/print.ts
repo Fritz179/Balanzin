@@ -2,7 +2,7 @@ const sep = `${'----------------------|-----------------|'.padEnd(80, '-')}\n`
 const header = `ADDRESS OPCODE  LINE  | op  a   b   d   |\n` + sep
 export {header}
 
-import {readValue, getFlag, flags, state} from './run.js'
+import {readValue, getFlag, flags, state} from './runner.js'
 
 // while running
 export function printState() {

@@ -1,4 +1,4 @@
- interface baseArg {
+interface baseArg {
   original: string
   type: 'number' | 'string' | 'register' | 'const'
   value: number | string | string[]
@@ -57,9 +57,7 @@ export type assembled = assembledLine | textLine
 export type compiled = assembled & printableLine
 export type code = assembledLine & printableLine
 
-export const REG_TO_NUM: {[key: string]: number} = {}
-export const NUM_TO_REG = ['pc', 'sp', 'si', 'di', 'a', 'b', 'c', 'ram']
-NUM_TO_REG.forEach((el, i) => REG_TO_NUM[el] = i)
+import {isRegister} from '../assert.js'
 
 export default function parse(source: string): parsed[] {
   const parsed: parsed[] = []
@@ -121,8 +119,8 @@ export default function parse(source: string): parsed[] {
         }
       }
 
-      // keyword
-      if (NUM_TO_REG.includes(arg)) {
+      // @ts-ignore keyword
+      if (isRegister(arg)) {
         return {
           type: 'register',
           value: arg,

@@ -1,7 +1,7 @@
 import {assertRegisters, assertImmediate, assertLine} from '../../assert.js'
 import {addOP, instSet} from './instSet.js'
 import {getConst} from '../assembler.js'
-import {memory as m, getFlag, flags} from '../../run.js'
+import {memory as m, getFlag, flags} from '../../runner/runner.js'
 
 function addJMP(name: string, cond: string, exec: () => boolean) {
   addOP(name, (to) => {

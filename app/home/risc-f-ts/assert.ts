@@ -1,4 +1,4 @@
-import {compiled, parsed} from './compiler/parser.js'
+import {parsed} from './compiler/parser.js'
 
 export function assert(cond: any, msg: string): asserts cond {
   if (!cond) throw msg
@@ -9,31 +9,40 @@ let line: parsed | null = null
 export function setCurrentLine(currentLine: parsed): void {
   line = currentLine
 }
+
 export function getCurrentLine(): parsed {
   assert(line != null, 'Line not yet setted')
-  return line as parsed
+  return line
 }
 
 export function assertLine(cond: any, msg: string): asserts cond {
   assert(line != null, 'Line not yet setted')
-  const {lineNumber, lineText} = line as parsed;
+  const {lineNumber, lineText} = line;
   assert(cond, `Error: ${msg}\n\tat line: ${lineNumber}: "${lineText}"`)
 }
 
-import {REG_TO_NUM, NUM_TO_REG} from './compiler/parser.js'
+export enum registers { pc, sp, si, di, a, b, c, ram }
 
 type operand = string | number
-function assertRegister(register: operand) {
-  assertLine(typeof register == 'string', 'Invaldi register')
-  assertLine(NUM_TO_REG.includes(register as string), 'Missing operand')
+export function isRegister(register: string): boolean {
+  // @ts-ignore
+  return registers[register] !== undefined
 }
 
-export function assertRegisters(a: operand, b: operand, d: operand) {
-  assertRegister(a)
-  assertRegister(b)
-  assertRegister(d)
+function assertRegister(register: operand): registers {
+  assertLine(typeof register == 'string', 'Not a valid register')
+  assertLine(isRegister(register), 'Not a valid register')
+  // @ts-ignore
+  return registers[register]
+}
 
-	return (REG_TO_NUM[a] << 0) + (REG_TO_NUM[b] << 3) + (REG_TO_NUM[d] << 6)
+
+export function assertRegisters(a: operand, b: operand, d: operand) {
+  const regA = assertRegister(a)
+  const regB = assertRegister(b)
+  const regD = assertRegister(d)
+
+	return (regA << 0) + (regB << 3) + (regD << 6)
 }
 
 const MIN_SIMM = -64
@@ -50,6 +59,6 @@ export function assertImmediate(value: operand): number {
   assertLine(value >= MIN_SIMM, `Immedaite value ${value} below ${MIN_SIMM}`)
   assertLine(value <= MAX_SIMM, `Immedaite value ${value} above ${MAX_SIMM}`)
 
-  if (value < 0) return MAX_UIMM + (value as number) + 1
-  return value as number
+  if (value < 0) return MAX_UIMM + value + 1
+  return value
 }

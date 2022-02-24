@@ -1,6 +1,6 @@
 import { assertRegisters, assertImmediate } from '../../assert.js';
 import { addOP, instSet } from './instSet.js';
-import { memory as m, setFlags } from '../../run.js';
+import { memory as m, setFlags } from '../../runner/runner.js';
 function binOP(name, opcode, exec) {
     addOP(name, (d, a, b) => {
         if (!b)

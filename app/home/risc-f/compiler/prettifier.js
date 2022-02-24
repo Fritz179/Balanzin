@@ -1,9 +1,9 @@
-import { header } from '../print.js';
-import { NUM_TO_REG } from './parser.js';
+import { header } from '../runner/print.js';
+import { registers } from '../assert.js';
 function decode(opcode) {
-    const a = NUM_TO_REG[(opcode >> 0) & 7].padStart(3, ' ');
-    const b = NUM_TO_REG[(opcode >> 3) & 7].padStart(3, ' ');
-    const d = NUM_TO_REG[(opcode >> 6) & 7].padStart(3, ' ');
+    const a = registers[(opcode >> 0) & 7].padStart(3, ' ');
+    const b = registers[(opcode >> 3) & 7].padStart(3, ' ');
+    const d = registers[(opcode >> 6) & 7].padStart(3, ' ');
     const val = (opcode >> 9).toString(16).padEnd(2, ' ');
     return `${val}  ${a} ${b} ${d}`;
 }

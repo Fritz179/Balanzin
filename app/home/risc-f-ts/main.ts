@@ -2,15 +2,15 @@
 
 /*
   TODO:
-    - compiler directives
-    - constant propagator
+    - compiler directives => add more
+    - constant propagator => add solver function during arg parsing?
     - remove all as and ignore
     - better graphics => Canvas
     - llvm? tcc...
 */
 
 import compile from './compiler/compiler.js'
-import run from './run.js'
+import run from './runner/runner.js'
 import send from './send.js'
 
 window.addEventListener('load', () => {

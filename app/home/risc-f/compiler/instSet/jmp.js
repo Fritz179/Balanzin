@@ -1,7 +1,7 @@
 import { assertRegisters, assertImmediate } from '../../assert.js';
 import { addOP } from './instSet.js';
 import { getConst } from '../assembler.js';
-import { memory as m, getFlag, flags } from '../../run.js';
+import { memory as m, getFlag, flags } from '../../runner/runner.js';
 function addJMP(name, cond, exec) {
     addOP(name, (to) => {
         const here = getConst('bytePos');
