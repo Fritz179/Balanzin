@@ -11,7 +11,8 @@
     <link href="./style.css" rel="stylesheet"></link>
 
     <div class="container">
-      <canvas id="canvas"></canvas><br>
+      <canvas id="graph"></canvas><br>
+      <canvas id="drawing"></canvas><br>
 
       <input type="range" id="lenInput" value="10" min="1" max="60">
       <label for="lenInput">Secondi</label><br>
@@ -25,7 +26,7 @@
       <input type="range" id="dValue" value="0" min="0" max="0.1" step="0.0005">
       <label for="dValue">D</label><br>
 
-      <input type="range" id="offset" value="0.0006" min="0" max="0.003" step="0.00005">
+      <input type="range" id="offset" value="0.5" min="0" max="1" step="0.001">
       <label for="offset">Flusso in entrata</label><br>
 
       <script src="./main.js" type="module" charset="utf-8"></script>
