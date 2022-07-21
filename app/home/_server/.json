@@ -122,6 +122,9 @@
       "extend": "users"
     },
     {
+      "custom": "qp"
+    },
+    {
       "path": "shop"
     },
     {
