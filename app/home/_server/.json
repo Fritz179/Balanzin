@@ -19,9 +19,14 @@
       "path": "gen"
     },
     {
+      "title": "F Programmin language",
+      "p": "Compile FRITZ",
+      "path": "risc-f"
+    },
+    {
       "title": "16-Bit compiler",
       "p": "Compile FASM (Fritz-ASseMbly)",
-      "path": "risc-f"
+      "path": "risc-fasm"
     },
     {
       "title": "PID simulator",

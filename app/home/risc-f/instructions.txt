@@ -1,0 +1,1 @@
+npx tsc ./source/main.ts --outDir ./out --module es2020 --target es2020 --strict --strictNullChecks --forceConsistentCasingInFileNames -w

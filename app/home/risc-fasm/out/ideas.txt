@@ -1,0 +1,167 @@
+inst types:
+  R-Type: 00  3a 3b 3d 5f
+  B-Type: 01     3c   11s
+
+  I-Type: 10     3b 3d 8s
+  S-Type: 110 3a 3b    7u
+  L-Type: 111    3b 3d 7u
+
+```
+       |16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1
+R-Type | op2 | function5    | ra3    | rb3    | rd3
+I-Type | op2 | s| imm7:1             | rb3    | rd3
+L-Type | op3    | imm7:1             | ri3    | rd3
+S-Type | op3    | imm7:4    | ra3    | ri3    | imm3:1
+B-Type | op2 | s| imm7:4    | imm10:8| cond3  | imm3:1
+
+
+         |16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1
+R-Type R | op2 | function5    | ra3    | rb3    | rd3
+I-Type I | op3    | simm7:1            | rb3    | rd3
+L-Type I | op3    | simm7:1            | ri3    | rd3
+H-Type U | op3    | simm10:1                    | rd3
+J-Type U | op3    | simm10:1                    | rd3
+S-Type S | op3    | simm7:4   | ra3    | ri3    | imm3:1
+B-Type B | op3    | simm7:4   | imm10:8| cond3  | imm3:1
+
+      |16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1
+R-Type | op2| function5    | ra3    | rb3    | rd3
+I-Type | op3   | simm7:1            | rb3    | rd3
+U-Type | op3   | simm10:1                    | rd3
+S-Type | op3   | simm7:4   | ra3    | ri3    | imm3:1
+B-Type | op3   | simm7:1            | cond3  | imm10:8
+
+op3
+000 => ALU
+111 => ALU
+001 => Load
+010 => Store
+011 => Load upper
+100 => BNC
+101 => JAL
+110 => JMP
+
+fun3 = AND, OR, XOR, SHL, SHR, ADD, SUB, SWP
+SHL => L/0
+SHR => L/0
+ADD => 0/C
+SUB => 1/C
+
+AND, OR, XOR, ADC, ADD, SUB, SBB
+SHL, SHR, SRE, SWP, NOT, ROR, ROL
+
+
+function5 = fun3 + carrySel2
+cond3 = BEQ, BNE, BLT, BGE, BLTU, BGEU, JMP, JAL? JREG(memory mapped?)
+
+RV32E => https://github.com/llvm/llvm-project/commit/dab1f6fc4e025a0d6ceeaae48a5e569bb85e6696
+
+{ IDEA OF BNC & LUI & AUIPC & JAL
+R-Type | op2| function5    | ra3    | rb3    | rd3     | ALU
+I-Type | op3   | simm7:1            | rb3    | rd3     | LOD, ADI, JALR
+S-Type | op3   | simm7:4   | ra3    | rb3    | imm3:1  | STO
+U-Type | op3   | simm9:1                  |f | rd3     | LUI, AUIPC, BNC, JAL
+100 -300
+R 00 ALU
+I 010 LOD
+I 011 ADI => sa adi cun sp e miga sp le an ldi
+I 100 JALR
+S 101 STO
+U 110 JAL / BNC+JMP
+U 111 LUI / AUIPC
+
+FF S CC
+FF 0 XX SHL, SHR, ADD, SWP
+FF 1 XX AND, OR, XOR, SUB
+
+00 => 0, 01 => C, 10 => R, 11 => 1/R
+}
+
+SUB 0/1/Carry
+ADD 0/Carry
+SHL 0/L
+SHR 0/R/L
+
+
+A <  B = BLT A, B = A - B => C
+A <= B = BGE B, A = B - A => !C
+A >= B = BGE A, B = A - B => !C
+A >  B = BLT B, A = B - A => C
+
+BEQ, BNE => Z, !Z
+BLT, BGE => C, !C
+BLTU, BGEU => S^V, !S^V
+
+```
+
+memory mapped:
+  FLAGS
+  Interrupts
+  Clock Select
+  Bank Select
+  Hardware scrolling
+
+Modules:
+  8 Data
+  2 GND/VCC
+  2 R/W
+  1 INT
+  3 addr
+
+VGA:
+  640 x 480
+  80  x 60 = 8k
+  128 x 64 = 8k
+  hardware scrolling => offset
+
+memory layout:
+  16k EEPROM
+    8k TILE VRAM
+    8k PIXEL VRAM
+  32k RAM
+
+
+const map = []
+
+function swap(a) { return ((a & 255) << 8) + ((a & 65535) >> 8) }
+
+function addOne(a) { map[a & 65535] = [1, a] }
+function addAdd(a, b) { map[(a + b) & 65535] = [2, a, b] }
+function addSwap(a, b) { map[((swap(a) & 65535) + b) & 65535] = [3, a, b] }
+function addThree(a, b, c) { map[(swap(a) + b + c) & 65535] = [4, a, b, c] }
+
+for (let x = -128; x < 128; x++) {
+  for (let y = -128; y < 128; y++) {
+    addThree(x, x, y)
+  }
+}
+
+for (let x = -128; x < 128; x++) {
+  for (let y = -128; y < 128; y++) {
+    addSwap(x, y)
+  }
+}
+
+for (let x = -128; x < 128; x += 255) {
+  for (let y = -128; y < 128; y++) {
+    addAdd(x, y)
+  }
+}
+
+for (let x = -128; x < 128; x++) {
+  addOne(x)
+}
+
+let count = {}
+for (let i = 0; i < 65536; i++) {
+  if (!map[i]) {
+    console.log(i)
+    continue
+  }
+
+  const id = map[i][0]
+  if (!count[id]) count[id] = 0
+  count[id]++
+}
+
+Object.keys(map).length
