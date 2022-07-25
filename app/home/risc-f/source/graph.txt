@@ -1,0 +1,382 @@
+digraph main {subgraph cluster_node_4 {
+
+      subgraph cluster_node_6 {
+
+        rank = same; A_node_6 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_6 [label = "B"];
+        rank = same; C_node_6 [label = "C"];
+        rank = same; D_node_6 [label = "D"];
+        rank = same; E_node_6 [label = "E"];
+        rank = same; F_node_6 [label = "sadf"];
+
+        {
+          rank = same; A_node_6 -> B_node_6 -> C_node_6 -> D_node_6 -> E_node_6 -> F_node_6 [style = invis]
+        }
+
+        {
+          rank = same; A_node_6 B_node_6 C_node_6 D_node_6 E_node_6 F_node_6
+        }
+
+        A_node_4 -> A_node_6 [color = red]
+        B_node_4 -> B_node_6 [color = red]
+        C_node_4 -> C_node_6 [color = red]
+        D_node_4 -> D_node_6 [color = red]
+        E_node_4 -> E_node_6 [color = red]
+        F_node_4 -> F_node_6 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_8 {
+
+        rank = same; A_node_8 [label = "sadf"];
+        rank = same; B_node_8 [label = "B"];
+        rank = same; C_node_8 [label = "C"];
+        rank = same; D_node_8 [label = "D"];
+        rank = same; E_node_8 [label = "E"];
+        rank = same; F_node_8 [label = "sadf"];
+
+        {
+          rank = same; A_node_8 -> B_node_8 -> C_node_8 -> D_node_8 -> E_node_8 -> F_node_8 [style = invis]
+        }
+
+        {
+          rank = same; A_node_8 B_node_8 C_node_8 D_node_8 E_node_8 F_node_8
+        }
+
+        A_node_6 -> A_node_8 [color = red]
+        B_node_6 -> B_node_8 [color = red]
+        C_node_6 -> C_node_8 [color = red]
+        D_node_6 -> D_node_8 [color = red]
+        E_node_6 -> E_node_8 [color = red]
+        F_node_6 -> F_node_8 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_10 {
+
+        rank = same; A_node_10 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_10 [label = "B"];
+        rank = same; C_node_10 [label = "C"];
+        rank = same; D_node_10 [label = "D"];
+        rank = same; E_node_10 [label = "E"];
+        rank = same; F_node_10 [label = "sadf"];
+
+        {
+          rank = same; A_node_10 -> B_node_10 -> C_node_10 -> D_node_10 -> E_node_10 -> F_node_10 [style = invis]
+        }
+
+        {
+          rank = same; A_node_10 B_node_10 C_node_10 D_node_10 E_node_10 F_node_10
+        }
+
+        A_node_8 -> A_node_10 [color = red]
+        B_node_8 -> B_node_10 [color = red]
+        C_node_8 -> C_node_10 [color = red]
+        D_node_8 -> D_node_10 [color = red]
+        E_node_8 -> E_node_10 [color = red]
+        F_node_8 -> F_node_10 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_12 {
+
+        rank = same; A_node_12 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_12 [label = "B"];
+        rank = same; C_node_12 [label = "C"];
+        rank = same; D_node_12 [label = "D"];
+        rank = same; E_node_12 [label = "E"];
+        rank = same; F_node_12 [label = "sadf"];
+
+        {
+          rank = same; A_node_12 -> B_node_12 -> C_node_12 -> D_node_12 -> E_node_12 -> F_node_12 [style = invis]
+        }
+
+        {
+          rank = same; A_node_12 B_node_12 C_node_12 D_node_12 E_node_12 F_node_12
+        }
+
+        A_node_10 -> A_node_12 [color = red]
+        B_node_10 -> B_node_12 [color = red]
+        C_node_10 -> C_node_12 [color = red]
+        D_node_10 -> D_node_12 [color = red]
+        E_node_10 -> E_node_12 [color = red]
+        F_node_10 -> F_node_12 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_13 {
+
+        rank = same; A_node_13 [label = "sadf"];
+        rank = same; B_node_13 [label = "B"];
+        rank = same; C_node_13 [label = "C"];
+        rank = same; D_node_13 [label = "D"];
+        rank = same; E_node_13 [label = "E"];
+        rank = same; F_node_13 [label = "sadf"];
+
+        {
+          rank = same; A_node_13 -> B_node_13 -> C_node_13 -> D_node_13 -> E_node_13 -> F_node_13 [style = invis]
+        }
+
+        {
+          rank = same; A_node_13 B_node_13 C_node_13 D_node_13 E_node_13 F_node_13
+        }
+
+        A_node_12 -> A_node_13 [color = red]
+        B_node_12 -> B_node_13 [color = red]
+        C_node_12 -> C_node_13 [color = red]
+        D_node_12 -> D_node_13 [color = red]
+        E_node_12 -> E_node_13 [color = red]
+        F_node_12 -> F_node_13 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_14 {
+
+        rank = same; A_node_14 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_14 [label = "B"];
+        rank = same; C_node_14 [label = "C"];
+        rank = same; D_node_14 [label = "D"];
+        rank = same; E_node_14 [label = "E"];
+        rank = same; F_node_14 [label = "sadf"];
+
+        {
+          rank = same; A_node_14 -> B_node_14 -> C_node_14 -> D_node_14 -> E_node_14 -> F_node_14 [style = invis]
+        }
+
+        {
+          rank = same; A_node_14 B_node_14 C_node_14 D_node_14 E_node_14 F_node_14
+        }
+
+        A_node_13 -> A_node_14 [color = red]
+        B_node_13 -> B_node_14 [color = red]
+        C_node_13 -> C_node_14 [color = red]
+        D_node_13 -> D_node_14 [color = red]
+        E_node_13 -> E_node_14 [color = red]
+        F_node_13 -> F_node_14 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+subgraph cluster_node_15 {
+
+      subgraph cluster_node_16 {
+
+        rank = same; A_node_16 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_16 [label = "B"];
+        rank = same; C_node_16 [label = "C"];
+        rank = same; D_node_16 [label = "D"];
+        rank = same; E_node_16 [label = "E"];
+        rank = same; F_node_16 [label = "sadf"];
+
+        {
+          rank = same; A_node_16 -> B_node_16 -> C_node_16 -> D_node_16 -> E_node_16 -> F_node_16 [style = invis]
+        }
+
+        {
+          rank = same; A_node_16 B_node_16 C_node_16 D_node_16 E_node_16 F_node_16
+        }
+
+        A_node_15 -> A_node_16 [color = red]
+        B_node_15 -> B_node_16 [color = red]
+        C_node_15 -> C_node_16 [color = red]
+        D_node_15 -> D_node_16 [color = red]
+        E_node_15 -> E_node_16 [color = red]
+        F_node_15 -> F_node_16 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_17 {
+
+        rank = same; A_node_17 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_17 [label = "B"];
+        rank = same; C_node_17 [label = "C"];
+        rank = same; D_node_17 [label = "D"];
+        rank = same; E_node_17 [label = "E"];
+        rank = same; F_node_17 [label = "sadf"];
+
+        {
+          rank = same; A_node_17 -> B_node_17 -> C_node_17 -> D_node_17 -> E_node_17 -> F_node_17 [style = invis]
+        }
+
+        {
+          rank = same; A_node_17 B_node_17 C_node_17 D_node_17 E_node_17 F_node_17
+        }
+
+        A_node_16 -> A_node_17 [color = red]
+        B_node_16 -> B_node_17 [color = red]
+        C_node_16 -> C_node_17 [color = red]
+        D_node_16 -> D_node_17 [color = red]
+        E_node_16 -> E_node_17 [color = red]
+        F_node_16 -> F_node_17 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_18 {
+
+        rank = same; A_node_18 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_18 [label = "B"];
+        rank = same; C_node_18 [label = "C"];
+        rank = same; D_node_18 [label = "D"];
+        rank = same; E_node_18 [label = "E"];
+        rank = same; F_node_18 [label = "sadf"];
+
+        {
+          rank = same; A_node_18 -> B_node_18 -> C_node_18 -> D_node_18 -> E_node_18 -> F_node_18 [style = invis]
+        }
+
+        {
+          rank = same; A_node_18 B_node_18 C_node_18 D_node_18 E_node_18 F_node_18
+        }
+
+        A_node_17 -> A_node_18 [color = red]
+        B_node_17 -> B_node_18 [color = red]
+        C_node_17 -> C_node_18 [color = red]
+        D_node_17 -> D_node_18 [color = red]
+        E_node_17 -> E_node_18 [color = red]
+        F_node_17 -> F_node_18 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_19 {
+
+        rank = same; A_node_19 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_19 [label = "B"];
+        rank = same; C_node_19 [label = "C"];
+        rank = same; D_node_19 [label = "D"];
+        rank = same; E_node_19 [label = "E"];
+        rank = same; F_node_19 [label = "sadf"];
+
+        {
+          rank = same; A_node_19 -> B_node_19 -> C_node_19 -> D_node_19 -> E_node_19 -> F_node_19 [style = invis]
+        }
+
+        {
+          rank = same; A_node_19 B_node_19 C_node_19 D_node_19 E_node_19 F_node_19
+        }
+
+        A_node_18 -> A_node_19 [color = red]
+        B_node_18 -> B_node_19 [color = red]
+        C_node_18 -> C_node_19 [color = red]
+        D_node_18 -> D_node_19 [color = red]
+        E_node_18 -> E_node_19 [color = red]
+        F_node_18 -> F_node_19 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_21 {
+
+        rank = same; A_node_21 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_21 [label = "B"];
+        rank = same; C_node_21 [label = "C"];
+        rank = same; D_node_21 [label = "D"];
+        rank = same; E_node_21 [label = "E"];
+        rank = same; F_node_21 [label = "sadf"];
+
+        {
+          rank = same; A_node_21 -> B_node_21 -> C_node_21 -> D_node_21 -> E_node_21 -> F_node_21 [style = invis]
+        }
+
+        {
+          rank = same; A_node_21 B_node_21 C_node_21 D_node_21 E_node_21 F_node_21
+        }
+
+        A_node_19 -> A_node_21 [color = red]
+        B_node_19 -> B_node_21 [color = red]
+        C_node_19 -> C_node_21 [color = red]
+        D_node_19 -> D_node_21 [color = red]
+        E_node_19 -> E_node_21 [color = red]
+        F_node_19 -> F_node_21 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_22 {
+
+        rank = same; A_node_22 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_22 [label = "B"];
+        rank = same; C_node_22 [label = "C"];
+        rank = same; D_node_22 [label = "D"];
+        rank = same; E_node_22 [label = "E"];
+        rank = same; F_node_22 [label = "sadf"];
+
+        {
+          rank = same; A_node_22 -> B_node_22 -> C_node_22 -> D_node_22 -> E_node_22 -> F_node_22 [style = invis]
+        }
+
+        {
+          rank = same; A_node_22 B_node_22 C_node_22 D_node_22 E_node_22 F_node_22
+        }
+
+        A_node_21 -> A_node_22 [color = red]
+        B_node_21 -> B_node_22 [color = red]
+        C_node_21 -> C_node_22 [color = red]
+        D_node_21 -> D_node_22 [color = red]
+        E_node_21 -> E_node_22 [color = red]
+        F_node_21 -> F_node_22 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_23 {
+
+        rank = same; A_node_23 [label = "Hello kasdfsadjkasdf"];
+        rank = same; B_node_23 [label = "B"];
+        rank = same; C_node_23 [label = "C"];
+        rank = same; D_node_23 [label = "D"];
+        rank = same; E_node_23 [label = "E"];
+        rank = same; F_node_23 [label = "sadf"];
+
+        {
+          rank = same; A_node_23 -> B_node_23 -> C_node_23 -> D_node_23 -> E_node_23 -> F_node_23 [style = invis]
+        }
+
+        {
+          rank = same; A_node_23 B_node_23 C_node_23 D_node_23 E_node_23 F_node_23
+        }
+
+        A_node_22 -> A_node_23 [color = red]
+        B_node_22 -> B_node_23 [color = red]
+        C_node_22 -> C_node_23 [color = red]
+        D_node_22 -> D_node_23 [color = red]
+        E_node_22 -> E_node_23 [color = red]
+        F_node_22 -> F_node_23 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+
+      subgraph cluster_node_26 {
+
+        rank = same; A_node_26 [label = "sadf"];
+        rank = same; B_node_26 [label = "B"];
+        rank = same; C_node_26 [label = "C"];
+        rank = same; D_node_26 [label = "D"];
+        rank = same; E_node_26 [label = "E"];
+        rank = same; F_node_26 [label = "sadf"];
+
+        {
+          rank = same; A_node_26 -> B_node_26 -> C_node_26 -> D_node_26 -> E_node_26 -> F_node_26 [style = invis]
+        }
+
+        {
+          rank = same; A_node_26 B_node_26 C_node_26 D_node_26 E_node_26 F_node_26
+        }
+
+        A_node_23 -> A_node_26 [color = red]
+        B_node_23 -> B_node_26 [color = red]
+        C_node_23 -> C_node_26 [color = red]
+        D_node_23 -> D_node_26 [color = red]
+        E_node_23 -> E_node_26 [color = red]
+        F_node_23 -> F_node_26 [color = red]
+
+        edge[ dir = forw, weight = 1 ]
+      }
+}
+}

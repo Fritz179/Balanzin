@@ -1,5 +1,3 @@
-const registersIndex = ['r0', 'ra', 'rb', 'rc', 'rd', 're', 'rf', 'sp']
-
 type BaseToken = {
   type: string,
   span: Span,
@@ -27,10 +25,10 @@ type Span = {
 }
 
 const basicSpan: Span = {
-  fileName: '_basic',
+  fileName: '_base',
   line: 0,
   colum: 0,
-  print: '_basic:0:0'
+  print: '_base:0:0'
 }
 
 const operators = {
@@ -153,16 +151,23 @@ type Operand =  VariableOperand | NumberOperand | DerefOperand | ArrayOperand | 
 
 // Function
 
+type ContextVariable = {
+  breakID?: LabelName,
+  continueID?: LabelName,
+  return?: {
+    type: Type,
+    label: LabelName
+  }
+}
+
 type FunctionDefinition = {
-  type: 'functionDefinition',
-  args: VariableOperand[],
+  args: RegisterVariable[],
   name: string,
   dataType: Type,
-  beginLabel: Label,
-  endLabel: Label,
+  beginLabel: LabelName,
   returnAddress: RegisterVariable,
   context: Context,
-  span: Span
+  span: Span,
 }
 
 // Lexer, State, Context
@@ -171,7 +176,8 @@ type Lexer = {
   next: (...types: Token["type"][]) => Token,
   peek: (index?: number) => Token,
   nextIs: (...values: string[]) => Token,
-  unNext: (data: string, fileName: string) => void
+  unNext: (data: string, fileName: string) => void,
+  hasNext: () => number
 }
 
 type Memory = {
@@ -183,23 +189,36 @@ type Memory = {
 type Simulation = {
   alu: (a: Register, b: Register, d: Register, exec: (a: number, b:number) => number) => void
   readMemory: (index: number) => number
-  writeMemory: (index: number, value: number) => void
+  writeMemory: (index: number, value: number, rewind?: boolean) => void
   getRegister: (name: Register) => Memory
   setRegister: (name: Register, value: number) => number
+  currInst: Opcode,
+  history: ((silent: boolean) => void)[][],
+  state: State,
   flags: {
     n: boolean,
     z: boolean,
     c: boolean
   },
   interrupt: () => void
-  stepSimulation: (count: number, print?: boolean) => void,
-  memory: Memory[]
+  stepSimulation: null | ((count: number, print?: boolean) => void),
+  memory: (Memory | undefined)[]
   registers: {
     [key in Register]: Memory
   }
   vga: {
-
-  }
+    canvas: HTMLCanvasElement,
+    context: CanvasRenderingContext2D,
+    tileCanvas: HTMLCanvasElement,
+    tileContext: CanvasRenderingContext2D,
+    tileSet: {
+      canvas: HTMLCanvasElement,
+      context: CanvasRenderingContext2D
+    }[],
+    TRAMModification: {[key: number]: number},
+    PRAMModification: {[key: number]: number}
+  },
+  instCounter: number
 }
 
 type ExecOpcode = (s: Simulation) => void
@@ -266,18 +285,229 @@ type Info = {
   pc: number
 }
 
- const PRAM_BEGIN = 0b1000_0000_0000_0000
- const TRAM_BEGIN = 0b1010_0000_0000_0000
- const PROGRAM_ENTRY_POINT = 0b1100_0000_0000_0000
- const MEMORY_MAPPED = 0b1111_1111_1111_0000
+const types_f = `typedef word int_t
 
- const MM_KEYBOARD = 0b1111_1111_1111_0000
- const MM_INT_VEC = 0b1111_1111_1111_0001
- const MM_INT_EN = 0b1111_1111_1111_0010
+typedef int_t char_t
+typedef int_t pixel_t
+typedef int_t tile_t
+typedef int_t bool_t
+typedef int_t inst_t
+typedef inst_t* addr_t
+
+define bool_t true = 1
+define bool_t false = 0` as const
+
+const charset = [
+  [0x00, 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x00],   // U+0000 (nul)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0001 (cursor)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0002 (leftArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0003 (upArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0004 (rightArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0005 (downArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0006
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0007
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0008 (delete)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0009
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000A (\n)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000B
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000C
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000D
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000E
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000F
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0010
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0011
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0012
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0013
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0014
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0015
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0016
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0017
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0018
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0019
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001A
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001B
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001C
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001D
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001E
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001F
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0020 (space)
+  [0x18, 0x3C, 0x3C, 0x18, 0x18, 0x00, 0x18, 0x00],   // U+0021 (!)
+  [0x36, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0022 (")
+  [0x36, 0x36, 0x7F, 0x36, 0x7F, 0x36, 0x36, 0x00],   // U+0023 (#)
+  [0x0C, 0x3E, 0x03, 0x1E, 0x30, 0x1F, 0x0C, 0x00],   // U+0024 ($)
+  [0x00, 0x63, 0x33, 0x18, 0x0C, 0x66, 0x63, 0x00],   // U+0025 (%)
+  [0x1C, 0x36, 0x1C, 0x6E, 0x3B, 0x33, 0x6E, 0x00],   // U+0026 (&)
+  [0x06, 0x06, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0027 (')
+  [0x18, 0x0C, 0x06, 0x06, 0x06, 0x0C, 0x18, 0x00],   // U+0028 (()
+  [0x06, 0x0C, 0x18, 0x18, 0x18, 0x0C, 0x06, 0x00],   // U+0029 ())
+  [0x00, 0x66, 0x3C, 0xFF, 0x3C, 0x66, 0x00, 0x00],   // U+002A (*)
+  [0x00, 0x0C, 0x0C, 0x3F, 0x0C, 0x0C, 0x00, 0x00],   // U+002B (+)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C, 0x06],   // U+002C (,)
+  [0x00, 0x00, 0x00, 0x3F, 0x00, 0x00, 0x00, 0x00],   // U+002D (-)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C, 0x00],   // U+002E (.)
+  [0x60, 0x30, 0x18, 0x0C, 0x06, 0x03, 0x01, 0x00],   // U+002F (/)
+  [0x3E, 0x63, 0x73, 0x7B, 0x6F, 0x67, 0x3E, 0x00],   // U+0030 (0)
+  [0x0C, 0x0E, 0x0C, 0x0C, 0x0C, 0x0C, 0x3F, 0x00],   // U+0031 (1)
+  [0x1E, 0x33, 0x30, 0x1C, 0x06, 0x33, 0x3F, 0x00],   // U+0032 (2)
+  [0x1E, 0x33, 0x30, 0x1C, 0x30, 0x33, 0x1E, 0x00],   // U+0033 (3)
+  [0x38, 0x3C, 0x36, 0x33, 0x7F, 0x30, 0x78, 0x00],   // U+0034 (4)
+  [0x3F, 0x03, 0x1F, 0x30, 0x30, 0x33, 0x1E, 0x00],   // U+0035 (5)
+  [0x1C, 0x06, 0x03, 0x1F, 0x33, 0x33, 0x1E, 0x00],   // U+0036 (6)
+  [0x3F, 0x33, 0x30, 0x18, 0x0C, 0x0C, 0x0C, 0x00],   // U+0037 (7)
+  [0x1E, 0x33, 0x33, 0x1E, 0x33, 0x33, 0x1E, 0x00],   // U+0038 (8)
+  [0x1E, 0x33, 0x33, 0x3E, 0x30, 0x18, 0x0E, 0x00],   // U+0039 (9)
+  [0x00, 0x0C, 0x0C, 0x00, 0x00, 0x0C, 0x0C, 0x00],   // U+003A (:)
+  [0x00, 0x0C, 0x0C, 0x00, 0x00, 0x0C, 0x0C, 0x06],   // U+003B (;)
+  [0x18, 0x0C, 0x06, 0x03, 0x06, 0x0C, 0x18, 0x00],   // U+003C (<)
+  [0x00, 0x00, 0x3F, 0x00, 0x00, 0x3F, 0x00, 0x00],   // U+003D (=)
+  [0x06, 0x0C, 0x18, 0x30, 0x18, 0x0C, 0x06, 0x00],   // U+003E (>)
+  [0x1E, 0x33, 0x30, 0x18, 0x0C, 0x00, 0x0C, 0x00],   // U+003F (?)
+  [0x3E, 0x63, 0x7B, 0x7B, 0x7B, 0x03, 0x1E, 0x00],   // U+0040 (@)
+  [0x0C, 0x1E, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x00],   // U+0041 (A)
+  [0x3F, 0x66, 0x66, 0x3E, 0x66, 0x66, 0x3F, 0x00],   // U+0042 (B)
+  [0x3C, 0x66, 0x03, 0x03, 0x03, 0x66, 0x3C, 0x00],   // U+0043 (C)
+  [0x1F, 0x36, 0x66, 0x66, 0x66, 0x36, 0x1F, 0x00],   // U+0044 (D)
+  [0x7F, 0x46, 0x16, 0x1E, 0x16, 0x46, 0x7F, 0x00],   // U+0045 (E)
+  [0x7F, 0x46, 0x16, 0x1E, 0x16, 0x06, 0x0F, 0x00],   // U+0046 (F)
+  [0x3C, 0x66, 0x03, 0x03, 0x73, 0x66, 0x7C, 0x00],   // U+0047 (G)
+  [0x33, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x33, 0x00],   // U+0048 (H)
+  [0x1E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+0049 (I)
+  [0x78, 0x30, 0x30, 0x30, 0x33, 0x33, 0x1E, 0x00],   // U+004A (J)
+  [0x67, 0x66, 0x36, 0x1E, 0x36, 0x66, 0x67, 0x00],   // U+004B (K)
+  [0x0F, 0x06, 0x06, 0x06, 0x46, 0x66, 0x7F, 0x00],   // U+004C (L)
+  [0x63, 0x77, 0x7F, 0x7F, 0x6B, 0x63, 0x63, 0x00],   // U+004D (M)
+  [0x63, 0x67, 0x6F, 0x7B, 0x73, 0x63, 0x63, 0x00],   // U+004E (N)
+  [0x1C, 0x36, 0x63, 0x63, 0x63, 0x36, 0x1C, 0x00],   // U+004F (O)
+  [0x3F, 0x66, 0x66, 0x3E, 0x06, 0x06, 0x0F, 0x00],   // U+0050 (P)
+  [0x1E, 0x33, 0x33, 0x33, 0x3B, 0x1E, 0x38, 0x00],   // U+0051 (Q)
+  [0x3F, 0x66, 0x66, 0x3E, 0x36, 0x66, 0x67, 0x00],   // U+0052 (R)
+  [0x1E, 0x33, 0x07, 0x0E, 0x38, 0x33, 0x1E, 0x00],   // U+0053 (S)
+  [0x3F, 0x2D, 0x0C, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+0054 (T)
+  [0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x00],   // U+0055 (U)
+  [0x33, 0x33, 0x33, 0x33, 0x33, 0x1E, 0x0C, 0x00],   // U+0056 (V)
+  [0x63, 0x63, 0x63, 0x6B, 0x7F, 0x77, 0x63, 0x00],   // U+0057 (W)
+  [0x63, 0x63, 0x36, 0x1C, 0x1C, 0x36, 0x63, 0x00],   // U+0058 (X)
+  [0x33, 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x1E, 0x00],   // U+0059 (Y)
+  [0x7F, 0x63, 0x31, 0x18, 0x4C, 0x66, 0x7F, 0x00],   // U+005A (Z)
+  [0x1E, 0x06, 0x06, 0x06, 0x06, 0x06, 0x1E, 0x00],   // U+005B ([)
+  [0x03, 0x06, 0x0C, 0x18, 0x30, 0x60, 0x40, 0x00],   // U+005C (\)
+  [0x1E, 0x18, 0x18, 0x18, 0x18, 0x18, 0x1E, 0x00],   // U+005D (])
+  [0x08, 0x1C, 0x36, 0x63, 0x00, 0x00, 0x00, 0x00],   // U+005E (^)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF],   // U+005F (_)
+  [0x0C, 0x0C, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0060 (`)
+  [0x00, 0x00, 0x1E, 0x30, 0x3E, 0x33, 0x6E, 0x00],   // U+0061 (a)
+  [0x07, 0x06, 0x06, 0x3E, 0x66, 0x66, 0x3B, 0x00],   // U+0062 (b)
+  [0x00, 0x00, 0x1E, 0x33, 0x03, 0x33, 0x1E, 0x00],   // U+0063 (c)
+  [0x38, 0x30, 0x30, 0x3e, 0x33, 0x33, 0x6E, 0x00],   // U+0064 (d)
+  [0x00, 0x00, 0x1E, 0x33, 0x3f, 0x03, 0x1E, 0x00],   // U+0065 (e)
+  [0x1C, 0x36, 0x06, 0x0f, 0x06, 0x06, 0x0F, 0x00],   // U+0066 (f)
+  [0x00, 0x00, 0x6E, 0x33, 0x33, 0x3E, 0x30, 0x1F],   // U+0067 (g)
+  [0x07, 0x06, 0x36, 0x6E, 0x66, 0x66, 0x67, 0x00],   // U+0068 (h)
+  [0x0C, 0x00, 0x0E, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+0069 (i)
+  [0x30, 0x00, 0x30, 0x30, 0x30, 0x33, 0x33, 0x1E],   // U+006A (j)
+  [0x07, 0x06, 0x66, 0x36, 0x1E, 0x36, 0x67, 0x00],   // U+006B (k)
+  [0x0E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+006C (l)
+  [0x00, 0x00, 0x33, 0x7F, 0x7F, 0x6B, 0x63, 0x00],   // U+006D (m)
+  [0x00, 0x00, 0x1F, 0x33, 0x33, 0x33, 0x33, 0x00],   // U+006E (n)
+  [0x00, 0x00, 0x1E, 0x33, 0x33, 0x33, 0x1E, 0x00],   // U+006F (o)
+  [0x00, 0x00, 0x3B, 0x66, 0x66, 0x3E, 0x06, 0x0F],   // U+0070 (p)
+  [0x00, 0x00, 0x6E, 0x33, 0x33, 0x3E, 0x30, 0x78],   // U+0071 (q)
+  [0x00, 0x00, 0x3B, 0x6E, 0x66, 0x06, 0x0F, 0x00],   // U+0072 (r)
+  [0x00, 0x00, 0x3E, 0x03, 0x1E, 0x30, 0x1F, 0x00],   // U+0073 (s)
+  [0x08, 0x0C, 0x3E, 0x0C, 0x0C, 0x2C, 0x18, 0x00],   // U+0074 (t)
+  [0x00, 0x00, 0x33, 0x33, 0x33, 0x33, 0x6E, 0x00],   // U+0075 (u)
+  [0x00, 0x00, 0x33, 0x33, 0x33, 0x1E, 0x0C, 0x00],   // U+0076 (v)
+  [0x00, 0x00, 0x63, 0x6B, 0x7F, 0x7F, 0x36, 0x00],   // U+0077 (w)
+  [0x00, 0x00, 0x63, 0x36, 0x1C, 0x36, 0x63, 0x00],   // U+0078 (x)
+  [0x00, 0x00, 0x33, 0x33, 0x33, 0x3E, 0x30, 0x1F],   // U+0079 (y)
+  [0x00, 0x00, 0x3F, 0x19, 0x0C, 0x26, 0x3F, 0x00],   // U+007A (z)
+  [0x38, 0x0C, 0x0C, 0x07, 0x0C, 0x0C, 0x38, 0x00],   // U+007B ([)
+  [0x18, 0x18, 0x18, 0x00, 0x18, 0x18, 0x18, 0x00],   // U+007C (|)
+  [0x07, 0x0C, 0x0C, 0x38, 0x0C, 0x0C, 0x07, 0x00],   // U+007D (])
+  [0x6E, 0x3B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+007E (~)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]    // U+007F
+]
+
+function addChar(index: number, glyph: string) {
+  const lines = glyph.trim().split('\n')
+  if (lines.length > 8) console.error('to tall')
+
+  const out: number[] = []
+  lines.forEach(line => {
+    let num = 0
+    if (line.length > 8) console.error('to wide')
+    line.split('').forEach((e, i) => num += (e == '#' ? (1 << i) : 0))
+    out.push(num)
+  })
+
+  charset[index] = out
+}
+
+addChar(1, `
+.
+#
+#
+#
+#
+#
+#
+.
+`)
+
+
+const out: number[] = []
+charset.forEach(char => {
+  assert(char.length == 8, 'Invalid char')
+  for (let i = 0; i < 8; i += 2) {
+    const num = char[i]! + (char[i + 1]! << 8) ||0
+    out.push(num)
+  }
+})
+
+const charset_f = `
+const char_t* charset = [${out.join(', ')}]
+
+define char_t NULL_CHAR        = 0
+define char_t CURSOR_CHAR      = 1
+define char_t LEFT_ARROW_CHAR  = 2
+define char_t UP_ARROW_CHAR    = 3
+define char_t RIGHT_ARROW_CHAR = 4
+define char_t DOWN_ARROW_CHAR  = 5
+define char_t DEL_CHAR         = 8
+define char_t NEWLINE_CHAR     = 10
+
+define int_t COL_SIZE = 80
+define int_t ROW_SIZE = 60`
+
+const PRAM_BEGIN = 0b1000_0000_0000_0000
+const TRAM_BEGIN = 0b1010_0000_0000_0000
+const PROGRAM_ENTRY_POINT = 0b1100_0000_0000_0000
+const MEMORY_MAPPED = 0b1111_1111_1111_0000
+
+const MM_KEYBOARD = 0b1111_1111_1111_0000
+const MM_INT_VEC = 0b1111_1111_1111_0001
+const MM_INT_EN = 0b1111_1111_1111_0010
+
+const memoryMapped_f = `
+define char_t* MM_KEYBOARD = ${MM_KEYBOARD}
+define int_t* MM_INT_VEC = ${MM_INT_VEC}
+define int_t* MM_INT_EN = ${MM_INT_EN}
+
+define pixel_t* PRAM_BEGIN   = ${PRAM_BEGIN}
+define tile_t* TRAM_BEGIN    = ${TRAM_BEGIN}
+define int_t* PROGRAM_ENTRY_POINT = ${PROGRAM_ENTRY_POINT}
+define int_t* MEMORY_MAPPED = ${MEMORY_MAPPED}
+`
 
 // Assertions
 
-let sources: {[key: string]: string | undefined} = {}
+const baseSources = {
+  "types.f": types_f,
+  "charset.f": charset_f,
+  "memoryMapped.f": memoryMapped_f
+}
+
+let sources: {[key: string]: string | undefined} = baseSources
 
 function assert(assertion: any, message: string): asserts assertion {
   if (!assertion) {
@@ -309,7 +539,7 @@ function assertSpan(span: Span, condition: any, message: string): asserts condit
       .slice(-40)
       .join('\n')
 
-    assert(condition, `${cause}\n\n\nError at line: ${span}\n  ${message}`)
+    assert(condition, `${cause}\n\n\nError at line: ${span.print}\n  ${message}`)
   }
 }
 
@@ -435,7 +665,7 @@ function tokenize(source: string, fileName: string) {
     if (token.match(/[0-9]/)) {
 
       // consume until first space
-      while (lexer.peek() && lexer.peek().match(/[0-9a-zA-Z_]/)) {
+      while (lexer.peek() && lexer.peek()!.match(/[0-9a-zA-Z_]/)) {
         token += lexer.next()
       }
 
@@ -454,11 +684,11 @@ function tokenize(source: string, fileName: string) {
 
     // string
     if (token.match(/[a-zA-Z_]/)) {
-      while (lexer.peek() && lexer.peek().match(/[a-zA-Z0-9_]/)) {
+      while (lexer.peek() && lexer.peek()!.match(/[a-zA-Z0-9_]/)) {
         token += lexer.next()
       }
 
-      if (registersIndex.includes(token)) {
+      if (registers.includes(token as Register)) {
         tokens.push({
           token: token,
           span,
@@ -596,9 +826,10 @@ function tokenize(source: string, fileName: string) {
     if (checkOperator(token)) continue
 
     if (token == '"' || token == "'") {
-      token = ''
+      const closing = token
 
-      while (lexer.peek() && lexer.peek() != token) {
+      token = ''
+      while (lexer.peek() != closing) {
         token += lexer.next()
       }
 
@@ -618,15 +849,14 @@ function tokenize(source: string, fileName: string) {
       span,
       type: 'unknown'
     })
-    // assertUnreachable(`Unknown token: ${char}, at: }`)
-
-    tokens.push({
-      token: fileName,
-      span,
-      type: 'fileEnd'
-    })
-
+    // assertUnreachable(`Unknown token: ${char}, at:
   }
+
+  tokens.push({
+    token: fileName,
+    span: lexer.getCurrentSpan(),
+    type: 'fileEnd'
+  })
 
   return tokens
 }
@@ -692,16 +922,21 @@ function getTokenLexer(tokens: Token[]): Lexer {
   }
 
   function peek(index = 0) {
-    // peek returns an empty token
-    return tokens[index] || {}
+    const token = tokens[index]
+    assert(token, 'Unexpected end of input')
+    return token
   }
 
   function unNext(data: string, fileName: string) {
     const newTokens = tokenize(data, fileName)
-    tokens = newTokens.concat(...newTokens)
+    tokens = newTokens.concat(...tokens)
   }
 
-  return {next, peek, nextIs, unNext}
+  function hasNext() {
+    return tokens.length
+  }
+
+  return {next, peek, nextIs, unNext, hasNext}
 }
 
 /*
@@ -817,7 +1052,7 @@ function buildOperand(lexer: Lexer, state: State, context: Context): Operand {
         const arg = buildOperand(lexer, state, context)
 
         assertSpan(operand.span, fun.args.length >= currArg, 'To many args provided')
-        assertTypes(arg, fun.args[currArg])
+        assertTypes(arg, fun.args[currArg]!)
 
         currArg++
         if (lexer.peek().token != ',') break
@@ -1049,7 +1284,7 @@ function buildExpression(lexer: Lexer, state: State, context: Context): Operand 
   return operand
 }
 
-function buildFunction(lexer: Lexer, state: State, context: Context, retType: Type) {
+function buildFunction(lexer: Lexer, state: State, context: Context, returnType: Type) {
   // parsing already started in parseDeclaration
 
   lexer.nextIs('function')
@@ -1057,92 +1292,111 @@ function buildFunction(lexer: Lexer, state: State, context: Context, retType: Ty
   context.unresolve(funName.span, funName.token)
   lexer.nextIs('(')
 
+  const isMain = funName.token == 'main'
   // ID for entry and return statements
   const ID = nextInt()
-  const entryID = funName.token == 'main' ? '__MAIN__' : `_fun_entry_${ID}`
-  const retID = `_fun_ret_${ID}`
+  const entryID = (isMain ? '__MAIN__' : `_fun_entry_${ID}`) as LabelName
+  const exitID = `_fun_exit_${ID}` as LabelName
 
-  solveLabel(state, context, retType.span, entryID)
-  const bodyContext = createContext(context)
+  solveLabel(state, context, returnType.span, entryID)
+
+  const fork = context.fork(funName.span)
+  const bodyContext = fork.split(funName.span, {
+    return: {
+      label: exitID,
+      type: returnType
+    }
+  })
 
   // save the arguments required, signature
-  const args = []
+  const args: RegisterVariable[] = []
 
   while (lexer.peek().token != ')') {
     const type = buildType(lexer, state, context)
     const argName = lexer.next('string')
 
-    context.unresolve(argName.token, argName.span)
+    context.unresolve(argName.span, argName.token)
 
-    // only position and type must match, no named argument
-    const register = bodyContext.addRegister(type, argName.token)
+    const register = bodyContext.addRegister(argName.span, argName.token, type)
 
-    args.push({
-      type: 'argument',
-      name: argName,
-      dataType: type,
-      register,
-    })
+    args.push(register)
 
     if (lexer.peek().token != ',') break
     lexer.nextIs(',')
   }
 
-  lexer.nextIs(')')
-  const fromName = lexer.next('string')
-  const fromRegister = bodyContext.addRegister(addrType, fromName.token)
+  const fromStart = lexer.nextIs(')')
+
+  // reserve __retAddr, if it's main it will never be used
+  const returnAddress = bodyContext.addRegister(fromStart.span, '__retAddr', addrType)
 
   // consumes { }
-  bodyContext.locals.return = retType
   const body = parseBlock(lexer, state, bodyContext)
-  assertSpan(body.end.span, body.returned, 'Function never returned')
+  assertSpan(body.end, body.didReturn, 'Function never returned')
 
-  // TODO: check all registers have been saved
-  solveLabel(state, context, retType.span, retID)
+  // stack deallocation must happen even if there is a return
+  if (bodyContext.stack.size) {
 
-  const data = {
-    span: body.end.span,
-	rName: 'FUN_RET',
-	rType: addrType.print
+    const pre = state.program.instructions.pop()!
+    solveLabel(state, context, returnType.span, exitID, returnType)
+    state.program.instructions.push(pre)
+
+  } else {
+    solveLabel(state, context, returnType.span, exitID, returnType)
   }
-  solveJMPR(state, context, data, fromRegister.name, 0)
+
+  fork.join(bodyContext.end)
+  bodyContext.addRegister(fromStart.span, '__return', addrType)
+
+  if (!isMain) {
+    solveJALR(state, context, bodyContext.end, returnAddress.id, r0ID)
+    bodyContext.resolve(bodyContext.end, '__retAddr')
+  }
 
   state.functions[funName.token] = {
-    type: 'function',
-    args,
-    dataType: retType,
-    name: funName,
-    span: retType.span,
-    entryID,
-    bodyContext,
-    fromRegister
+    type: 'functionVariable',
+    span: funName.span,
+    dataType: returnType,
+    name: funName.token,
+    function: {
+      args,
+      dataType: returnType,
+      name: funName.token,
+      beginLabel: entryID,
+      context: bodyContext,
+      span: funName.span,
+      returnAddress
+    }
   }
 
   return true
 }
 
 // return
-function parseReturn(lexer: Lexer, state: State, context: Context) {
+function parseReturn(lexer: Lexer, state: State, context: Context): boolean {
   if (lexer.peek().token == 'return') {
     const start = lexer.nextIs('return')
-    const to = context.resolve('retAddr', start.span)
-    const ret = context.resolve('return', start.span)
 
-    if (to) {
-      const returnReg = context.addRegister(to.dataType, 'return')
+    const info = context.contextVariable.return
+    assertSpan(start.span, info, 'Cannot return in non function')
+
+    context.didReturn = true
+
+    if (info.type.type != 'void') {
+      const returnReg = context.addRegister(start.span, '__return', info.type)
 
       const expr = buildExpression(lexer, state, context)
       solveExpression(state, context, returnReg, expr)
-	    return returnReg
-
-	  if (lexer.peek().token != '}') assertUnexpected(lexer.next())
+	    return true
     }
     // else is void type
 
     if (lexer.peek().token != '}') assertUnexpected(lexer.next())
 
-    return 'returned'
+    return true
   }
+
+  return false
 }
 
 // definitions and declarations
@@ -1162,7 +1416,6 @@ function parseDeclaration(lexer: Lexer, state: State, context: Context): boolean
   const name = lexer.next('string')
   context.unresolve(name.span, name.token)
 
-
   // add to register scope
   if (!type.isStack) {
     const message = 'Varaibel with register can be declared only in non global scope'
@@ -1171,7 +1424,7 @@ function parseDeclaration(lexer: Lexer, state: State, context: Context): boolean
     lexer.nextIs('=')
 
     const expr = buildExpression(lexer, state, context)
-    const register = context.addRegister(type, name.token)
+    const register = context.addRegister(name.span, name.token, type)
 
     solveExpression(state, context, register, expr)
 
@@ -1218,6 +1471,7 @@ function parseDefine(lexer: Lexer, state: State, context: Context): Boolean {
   const start = lexer.peek()
 
   if (start.token == 'define') {
+    lexer.next()
 
     let type = parseType(lexer, state, context)
     if (!type) type = literalType
@@ -1231,13 +1485,6 @@ function parseDefine(lexer: Lexer, state: State, context: Context): Boolean {
     context.unresolve(name.span, name.token)
 
     state.defines[name.token] = {
-      type: 'number',
-      dataType: type,
-      value: expr.value,
-      span: start.span
-    }
-
-    const a = {
       type: 'number',
       dataType: type,
       value: expr.value,
@@ -1316,6 +1563,7 @@ function parseComment(lexer: Lexer, state: State, context: Context): Boolean {
   const comment = lexer.peek()
 
   if (comment.type == 'comment') {
+    lexer.next()
 
     if (state.defines.__PRINT_COMMENTS__?.value !== 0) {
       solveComment(state, context, comment.span, comment.token)
@@ -1464,7 +1712,7 @@ function parseAssignment(lexer: Lexer, state: State, context: Context): boolean 
   if (assign || access || deref) {
     const to = buildOperand(lexer, state, context)
 
-    const operator = lexer.nextIs('=')
+    lexer.nextIs('=')
     const expr = buildExpression(lexer, state, context)
 
     solveExpression(state, context, to, expr)
@@ -1482,7 +1730,7 @@ function parseVoidFunCall(lexer: Lexer, state: State, context: Context): boolean
     assertSpan(fun.span, fun.type == 'functionVariable', `Cannot call non function ${fun.type}`)
     assertSpan(fun.span, fun.dataType.type == 'void', `Function doesn't return void, '${fun.dataType.print}'`)
 
-    solveJAL(state, context, fun.span, fun.function.beginLabel.name, fun.function.returnAddress.id)
+    solveJAL(state, context, fun.span, fun.function.beginLabel, fun.function.returnAddress.id)
     return true
   }
 
@@ -1526,8 +1774,8 @@ function parseEval(lexer: Lexer, state: State, context: Context): boolean {
 // register interrogation
 function buildRegisterInterrogation(lexer: Lexer, state: State, context: Context) {
   if (lexer.peek().token == '?') {
-    const start = lexer.nextIs('?')
-    let ret = 'Register interrogation:\n\n'
+    // const start = lexer.nextIs('?')
+    // let ret = 'Register interrogation:\n\n'
 
     assertUnimplemented('Register interrogation')
 
@@ -1543,9 +1791,9 @@ function buildRegisterInterrogation(lexer: Lexer, state: State, context: Context
 }
 
 function solveRegisters(a: Register, b: Register, d: Register): number {
-  const aReg = registersIndex.indexOf(a)
-  const bReg = registersIndex.indexOf(b)
-  const dReg = registersIndex.indexOf(d)
+  const aReg = registers.indexOf(a)
+  const bReg = registers.indexOf(b)
+  const dReg = registers.indexOf(d)
   assert(aReg != -1 && bReg != -1 && dReg != -1, 'Invalid register names')
 
   return dReg + (bReg << 3) + (aReg << 6)
@@ -1653,7 +1901,7 @@ function solveADI(state: State, context: Context, to: RegisterID, lhs: RegisterI
         rType: dReg.type.print,
         rName: dReg.name,
         exec: s => s.alu('r0', b, d, (a, b) => b + imm),
-        print: `${hex(opcode, 4, false)}: I ADI ${hex(imm, 2)}    ${bReg.name} ${dReg.name}`
+        print: `${hex(opcode, 4, false)}: I ADI ${hex(imm, 2)}    ${bReg.register} ${dReg.register}`
       }]
     }
   })
@@ -1698,19 +1946,19 @@ function solveLDI(state: State, context: Context, to: RegisterID, imm: number) {
   state.program.push(info => {
     const dReg = info.getReg(to)
 
-    const opcodes = []
+    const opcodes: Opcode[] = []
 
     if (upper) {
       solveLUI(state, context, to, upper)
       const lui = state.program.instructions.pop()!(info)
-      opcodes.push(lui.opcodes[0])
+      opcodes.push(...lui.opcodes)
     }
 
     if (lower || !upper) {
       const from = upper ? to : r0ID
       solveADI(state, context, to, from, lower)
       const adi = state.program.instructions.pop()!(info)
-      opcodes.push(adi.opcodes[0])
+      opcodes.push(...adi.opcodes)
     }
 
     return {
@@ -1867,7 +2115,7 @@ function solveExpression(state: State, context: Context, to: Operand, expr: Oper
     if (expr.type == 'functionCall') {
       const fun = expr.function
 
-      solveJAL(state, context, fun.span, fun.beginLabel.name, fun.returnAddress.id)
+      solveJAL(state, context, fun.span, fun.beginLabel, fun.returnAddress.id)
       return
     }
   }
@@ -1919,7 +2167,7 @@ function solveExpression(state: State, context: Context, to: Operand, expr: Oper
 
   const lhs = getAssertTypesMessage(to)
   const rhs = getAssertTypesMessage(expr)
-  assertSpan(to.span, false, `Cannot assign '${lhs}' to '${lhs}'`)
+  assertSpan(to.span, false, `Cannot assign '${lhs}' to '${rhs}'`)
 }
 
 function solveJMP(state: State, context: Context, span: Span, to: LabelName) {
@@ -1940,9 +2188,8 @@ function solveJAL(state: State, context: Context, span: Span, to: LabelName, lin
       print: `JAL ${to}, ${d}`,
       opcodes: [{
         opcode,
-        exec: s => s.alu('r0', 'r0', d, (a, b) => {
-          const pc = s.pc
-          s.pc = imm
+        exec: s => s.alu('r0', 'pc', d, (a, pc) => {
+          s.registers.pc.value = imm
           return pc
         }),
         rName: dReg.name,
@@ -1971,8 +2218,8 @@ function solveJALR(state: State, context: Context, span: Span, to: RegisterID, l
       opcodes: [{
         opcode,
         exec: s => s.alu('r0', b, d, (a, dest) => {
-          const ret = s.pc
-          s.pc = dest
+          const ret = s.registers.pc.value
+          s.registers.pc.value = dest
           return ret
         }),
         rName: dReg.name,
@@ -2092,7 +2339,7 @@ function solveCondition(state: State, context: Context, condition: Operand, ifTr
 
     const type = branchName[operator]
 
-    solveCMP(state, context, condition.span, lhs, branchName[operator], rhs, ifTrue)
+    solveCMP(state, context, condition.span, lhs, type, rhs, ifTrue)
 
     if (ifFalse) solveJMP(state, context, condition.span, ifFalse)
   }
@@ -2117,11 +2364,12 @@ function solveCondition(state: State, context: Context, condition: Operand, ifTr
 }
 
 function parseAnonymousBlock(lexer: Lexer, state: State, context: Context): boolean {
-  if (lexer.peek().token == '{')  {
+  const start = lexer.peek()
+  if (start.token == '{')  {
 
-    const fork = context.fork()
-    const block = parseBlock(lexer, state, fork.split())
-    fork.join()
+    const fork = context.fork(start.span)
+    const block = parseBlock(lexer, state, fork.split(start.span, {}))
+    fork.join(block.end)
 
     return true
   }
@@ -2132,7 +2380,7 @@ function parseAnonymousBlock(lexer: Lexer, state: State, context: Context): bool
 function parseIf(lexer: Lexer, state: State, context: Context): boolean {
   if (lexer.peek().token == 'if') {
 
-    const begin = lexer.nextIs('if')
+    lexer.nextIs('if')
 
     const id = nextInt()
     const elseID = `_if_else_${id}` as LabelName
@@ -2144,14 +2392,15 @@ function parseIf(lexer: Lexer, state: State, context: Context): boolean {
     const condition = buildExpression(lexer, state, context)
     lexer.nextIs(')')
 
-    const fork = context.fork()
-    const trueContext = parseBlock(lexer, state, fork.split())
+    const trueStart = lexer.peek().span
+    const fork = context.fork(trueStart)
+    const trueContext = parseBlock(lexer, state, fork.split(trueStart, {}))
     const trueProgram = state.program.take()
 
     if (lexer.peek().token == 'else') {
       const elseToken = lexer.nextIs('else')
 
-      const falseContext = parseBlock(lexer, state, fork.split())
+      const falseContext = parseBlock(lexer, state, fork.split(elseToken.span, {}))
       const falseProgram = state.program.take()
 
       state.program.append(preProgram)
@@ -2164,7 +2413,7 @@ function parseIf(lexer: Lexer, state: State, context: Context): boolean {
       state.program.append(falseProgram)
       solveLabel(state, context, falseContext.end, endID)
 
-      fork.join()
+      fork.join(falseContext.end)
       return true
     }
 
@@ -2175,7 +2424,7 @@ function parseIf(lexer: Lexer, state: State, context: Context): boolean {
 
     solveLabel(state, context, trueContext.end, endID)
 
-    fork.join()
+    fork.join(trueContext.end)
     return true
   }
 
@@ -2212,15 +2461,16 @@ function parseFor(lexer: Lexer, state: State, context: Context): boolean {
 
     lexer.nextIs(')')
 
-    const fork = context.fork()
-    const block = parseBlock(lexer, state, fork.split())
+    const blocKStart = lexer.peek().span
+    const fork = context.fork(blocKStart)
+    const block = parseBlock(lexer, state, fork.split(blocKStart, {}))
     state.program.append(incrementProgram)
 
     solveJMP(state, context, block.begin, startID)
 
     solveLabel(state, context, block.end, endID)
 
-    fork.join()
+    fork.join(block.end)
     return true
   }
 
@@ -2241,10 +2491,10 @@ function solveExitDefinitions(lexer: Lexer, state: State, context: Context) {
 
 function parseASM(lexer: Lexer, state: State, context: Context): boolean {
   if (lexer.peek().token == 'asm') {
-    const start = lexer.nextIs('asm')
+    lexer.nextIs('asm')
     lexer.nextIs('{')
 
-    while (lexer.peek()) {
+    while (lexer.hasNext()) {
       const next = lexer.next()
       if (next.token == '}') break
 
@@ -2258,7 +2508,6 @@ function parseASM(lexer: Lexer, state: State, context: Context): boolean {
       if (next.token == 'jmp') {
         const label = lexer.next('string').token as LabelName
 
-        const to = lexer.next('string')
         solveJMP(state, context, next.span, label)
         continue
       }
@@ -2290,7 +2539,7 @@ function parseASM(lexer: Lexer, state: State, context: Context): boolean {
      in a DeclareNode but used before that
 */
 
-type BaseNode = { type: string, span: Span }
+type BaseNode = { type: string, span: Span, nodeID: string }
 type EntryNode = BaseNode & { type: 'entry', entries: RegisterID[], next: RegOrNullNode, prev: RegOrNullNode }
 type DeclareNode = BaseNode & { type: 'declare', id: RegisterID, value: RegisterVariable, isLast: boolean, next: RegOrNullNode, prev: RegOrNullNode }
 type UseNode = BaseNode & { type: 'use', id: RegisterID, value: RegisterVariable, isLast: boolean, next: RegOrNullNode, prev: RegOrNullNode }
@@ -2301,13 +2550,15 @@ type RegisterNode = EntryNode | DeclareNode | UseNode | SplitNode | JoinNode
 type RegOrNullNode = RegisterNode | null
 
 type Context = {
+  didReturn?: boolean
   resolve: (span: Span, name: string, noRegNode?: boolean) => VariableOperand | FunctionVariable
   unresolve: (span: Span, name: string, noRegNode?: boolean) => void
   addRegister: (span: Span, name: string, type: Type) => RegisterVariable
   entryNode: EntryNode,
   lastNode: RegisterNode,
+  contextVariable: ContextVariable,
   fork: (span: Span) => {
-    split: (span: Span) => Context,
+    split: (span: Span, statements: ContextVariable) => Context,
     join: (span: Span) => void
   }
   stack: {
@@ -2319,22 +2570,24 @@ type Context = {
   end: Span
 }
 
-function solveChain(node: RegOrNullNode, id: RegisterID): DeclareNode | UseNode | null {
+// return node or null if not found
+function chainLookup(node: RegOrNullNode, name: string): DeclareNode | UseNode | null {
   while (node) {
     switch (node.type) {
       case 'declare':
       case 'use':
-        if (node.id == id) return node
-        continue
+        if (node.value.name == name) return node
+        node = node.prev
+        break
 
       case 'join':
         node = node.splitNode
-        continue
+        break
 
       case 'entry':
       case 'split':
         node = node.prev
-        continue
+        break
 
       default:
         assertUnreachable(node)
@@ -2345,7 +2598,7 @@ function solveChain(node: RegOrNullNode, id: RegisterID): DeclareNode | UseNode 
 }
 
 function addToChain(context: Context, element: DeclareNode | UseNode | SplitNode) {
-  function walkBranch(node: RegOrNullNode) {
+  function walkBranch(node: RegOrNullNode, splitted: boolean) {
     assert(element.type != 'split', 'Impossible')
 
     while (node) {
@@ -2358,19 +2611,24 @@ function addToChain(context: Context, element: DeclareNode | UseNode | SplitNode
           }
 
           node = node.prev
-          continue
+          break
 
         case 'entry':
           node.entries.push(element.id)
           node = node.prev
-          continue
+          break
 
         case 'split':
+          if (splitted) {
+            return
+          }
+
+          node = node.prev
           break
 
         case 'join':
-          node.parents.forEach(parent => walkBranch(parent))
-          walkBranch(node.splitNode)
+          node.parents.forEach(parent => walkBranch(parent, true))
+          node = node.splitNode
           break
 
         default:
@@ -2379,6 +2637,10 @@ function addToChain(context: Context, element: DeclareNode | UseNode | SplitNode
     }
 
     assertSpan(element.value.span, false, 'Invalid node insertion')
+  }
+
+  if (element.type == 'use') {
+    walkBranch(context.lastNode, false)
   }
 
   const last = context.lastNode
@@ -2399,10 +2661,6 @@ function addToChain(context: Context, element: DeclareNode | UseNode | SplitNode
   }
 
   context.lastNode = element
-
-  if (element.type == 'use') {
-    walkBranch(context.lastNode)
-  }
 }
 
 function getToEnd(head: RegisterNode): RegisterNode {
@@ -2416,11 +2674,11 @@ function getToEnd(head: RegisterNode): RegisterNode {
       case 'use':
       case 'join':
         node = node.next
-        continue
+        break
 
       case 'split':
         node = node.joinNode
-        continue
+        break
 
       default:
         assertUnreachable(node)
@@ -2430,13 +2688,14 @@ function getToEnd(head: RegisterNode): RegisterNode {
   return lastNode
 }
 
-function createContext(parent: Context): Context {
+function createContext(parent: Context, contextVariable: ContextVariable): Context {
   const entryNode: EntryNode = {
     type: 'entry',
     entries: [],
     prev: parent.lastNode,
     next: null,
-    span: basicSpan
+    span: basicSpan,
+    nodeID: `node_${nextInt()}`
   }
 
   const context: Context = {
@@ -2449,10 +2708,14 @@ function createContext(parent: Context): Context {
     end: basicSpan,
     lastNode: entryNode,
     entryNode,
+    contextVariable,
     resolve: (span: Span, name: string, noRegNode?: boolean) => {
       if (!noRegNode) {
-        const node = solveChain(context.lastNode, name as RegisterID)
+
+        const node = chainLookup(context.lastNode, name)
+
         if (node) {
+
           addToChain(context, {
             type: 'use',
             id: node.id,
@@ -2460,8 +2723,10 @@ function createContext(parent: Context): Context {
             value: node.value,
             isLast: true,
             next: null,
-            span
+            span,
+            nodeID: `node_${nextInt()}`
           })
+
           return node.value
         }
       }
@@ -2476,8 +2741,8 @@ function createContext(parent: Context): Context {
       return ret
     },
     unresolve: (span: Span, name: string) => {
-      const node = solveChain(context.lastNode, name as RegisterID)!
-      assertSpan(span, !node, `Cannot redifine register '${node.value.name} defined at: ${node.value.span.print}`)
+      const node = chainLookup(context.lastNode, name)
+      assertSpan(span, !node, `Cannot redifine register '${name} defined at: ${span.print}`)
 
       const upper = context.resolve(span, name, true)
       if (!upper) return
@@ -2505,7 +2770,8 @@ function createContext(parent: Context): Context {
         value: node,
         isLast: true,
         next: null,
-        span
+        span,
+        nodeID: `node_${nextInt()}`
       })
 
       return node
@@ -2516,22 +2782,25 @@ function createContext(parent: Context): Context {
         prev: context.lastNode,
         joinNode: null,
         children: [],
-        span
+        span,
+        nodeID: `node_${nextInt()}`
       }
 
       addToChain(context, splitNode)
 
-      function split() {
+      function split(span: Span, statements: ContextVariable) {
         assert(context.lastNode == splitNode, 'Invalid split')
 
-        const child = createContext(context)
+        const child = createContext(context, statements)
         child.lastNode.span = span
 
         splitNode.children.push(child.entryNode)
+
         return child
       }
 
       function join(span: Span) {
+
         assert(context.lastNode == splitNode, 'Invalid split')
 
         const joinNode: JoinNode = {
@@ -2539,13 +2808,17 @@ function createContext(parent: Context): Context {
           parents: [],
           splitNode,
           next: null,
-          span
+          span,
+          nodeID: `node_${nextInt()}`
         }
 
         // go through each child to find the end
         splitNode.children.forEach(child => {
           const node = getToEnd(child)
 
+          assert(node.type != 'split', 'Split directly before join?')
+
+          node.next = joinNode
           joinNode.parents.push(node)
         })
 
@@ -2569,9 +2842,9 @@ function parseBlock(lexer: Lexer, state: State, context: Context): Context {
 
   context.begin = lexer.nextIs('{').span
 
-  while (lexer.peek().token && lexer.peek().token != '}') {
+  while (lexer.hasNext() && lexer.peek().token != '}' && !context.didReturn) {
 
-        // { }
+    // { }
     if (parseAnonymousBlock(lexer, state, context)) continue
 
     // indicate start & end of file
@@ -2601,7 +2874,7 @@ function parseBlock(lexer: Lexer, state: State, context: Context): Context {
     // single line or /* multiline */ comments
     if (parseComment(lexer, state, context)) continue
 
-    if(parseReturn(lexer, state, context)) break
+    if(parseReturn(lexer, state, context)) continue
 
     // ?, stop compiling and show which register are used and by whom
     buildRegisterInterrogation(lexer, state, context)
@@ -2629,10 +2902,12 @@ function buildGlobal(lexer: Lexer, state: State) {
   context.begin = basicSpan
   context.end = basicSpan
 
+  // Heap start is label because in known only in second pass
   solveLabel(state, context, basicSpan, '__HEAP_START__' as LabelName)
-  const heapStartLabel = state.program.take()
+  state.program.take()
 
-  while (lexer.peek().token) {
+  while (lexer.hasNext()) {
+
     // define MAX_COUNT = 69
     if (parseDefine(lexer, state, context)) continue
 
@@ -2660,7 +2935,6 @@ function buildGlobal(lexer: Lexer, state: State) {
     assertUnexpected(lexer.next())
   }
 
-
   const globalProgram = state.program.take()
 
   // set stack pointer to top of ram
@@ -2674,11 +2948,9 @@ function buildGlobal(lexer: Lexer, state: State) {
     solveComment(state, context, basicSpan, '// GLOBAL VARIABLES:')
   }
 
-  let heapSize = 0
   context.stack.positions.forEach(declaration => {
     assert(declaration.type == 'global', 'Impossible')
 
-    heapSize += declaration.dataType.size
     solveComment(state, context, basicSpan, `// ${declaration.dataType.print} ${declaration.name}`)
 
     // cannot check .defioned because it will be set in program
@@ -2758,7 +3030,7 @@ function build(tokens: Token[]) {
 
         return false
       }
-    } as Context)
+    } as Context, {})
   }
 
   console.log(state);
@@ -2820,21 +3092,13 @@ function hex(number: number, length: number, canBeNegative = true) {
   return ret
 }
 
-function registersOpcode(a: Register, b: Register, d: Register) {
-  const aReg = registersIndex.indexOf(a)
-  const bReg = registersIndex.indexOf(b)
-  const dReg = registersIndex.indexOf(d)
-  assert(aReg != -1 && bReg != -1 && dReg != -1, 'Invalid register names')
-
-  return dReg + (bReg << 3) + (aReg << 6)
-}
-
 // size is the int size, signed in msb
 
-function assemble(state: State) {
+type RegisterMap = {[key: RegisterID]: RegisterInfo | undefined}
+function assemble(state: State): RegisterMap {
   // solve register selection
 
-  const map: {[key: RegisterID]: RegisterInfo | undefined} = {}
+  const map: RegisterMap = {}
 
   function solveBranch(entry: EntryNode) {
     const available = [...availableRegs]
@@ -2866,7 +3130,9 @@ function assemble(state: State) {
             available.unshift(reg)
           }
 
-          continue
+          node = node.next
+
+          break
 
         case 'use':
           if (node.isLast) {
@@ -2875,7 +3141,9 @@ function assemble(state: State) {
             available.unshift(reg.register)
           }
 
-          continue
+          node = node.next
+
+          break
 
 
         case 'entry':
@@ -2885,15 +3153,18 @@ function assemble(state: State) {
           node.children.forEach(child => solveBranch(child))
           assert(node.joinNode, 'Impossible')
           node = node.joinNode.next
-          continue
+          break
 
         case 'join':
-          break
+          return
 
         default:
           assertUnreachable(node)
       }
     }
+
+    assert(!node, 'Impossible')
+    // le fini i node? le fini
   }
 
   solveBranch(state.functions.main!.function.context.entryNode)
@@ -2928,7 +3199,7 @@ function assemble(state: State) {
 
   let lastLabels, newLabels, i = 0
   do {
-    assert(i++ < 10, 'Compiling more than 10 passes?')
+    assert(i < 10, 'Compiling more than 10 passes?')
     lastLabels = newLabels
 
     const info: Info = {
@@ -2969,6 +3240,8 @@ function assemble(state: State) {
     })
 
     newLabels = JSON.stringify(state.labels)
+
+    i++
   } while (lastLabels != newLabels)
 
   // add opcodes to linear memory and convert all opcodes to executable
@@ -2984,6 +3257,8 @@ function assemble(state: State) {
   })
 
   state.program.result = resolvers.map(r => r.result!)
+
+  return map
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3028,7 +3303,7 @@ function printProgram(state: State) {
     const programLineNumber = programLine.span.line
     const sourceFile = sourceFiles[programLineFile]
 
-    if (!sourceFile) console.log(sourceFile, programLineFile);
+    assert(sourceFile, 'Missing source file')
 
     assert(!isNaN(programLineNumber), 'Invalid line!')
 
@@ -3036,7 +3311,7 @@ function printProgram(state: State) {
     while (sourceFile.sourceLineNumber < programLineNumber) {
       outProgram.push('')
       outOpcode.push('')
-      outSource.push(sourceFile.lines[sourceFile.sourceLineNumber - 1])
+      outSource.push(sourceFile.lines[sourceFile.sourceLineNumber - 1] || '')
       sourceFile.sourceLineNumber++
     }
 
@@ -3044,12 +3319,13 @@ function printProgram(state: State) {
 
     if (programLine.opcodes.length) {
       const opcode = programLine.opcodes[0]
+      assert(opcode, 'No start opcode')
 
       state.printable.addresses[opcode.pc!] = outOpcode.length
       outOpcode.push(`${hex(opcode.pc!, 4, false)}: ${opcode.print}`)
 
       for (let i = 1; i < programLine.opcodes.length; i++) {
-        const opcode = programLine.opcodes[i]
+        const opcode = programLine.opcodes[i]!
         state.printable.addresses[opcode.pc!] = outOpcode.length
         outOpcode.push(`${hex(opcode.pc!, 4, false)}: ${opcode.print}`)
         outProgram.push('')
@@ -3060,7 +3336,7 @@ function printProgram(state: State) {
 
     // if new source is required
     if (programLineNumber >= sourceFile.sourceLineNumber) {
-      outSource.push(sourceFile.lines[sourceFile.sourceLineNumber - 1])
+      outSource.push(sourceFile.lines[sourceFile.sourceLineNumber - 1] || '')
       sourceFile.sourceLineNumber++
     }
 
@@ -3084,15 +3360,158 @@ function printProgram(state: State) {
   assert(outOpcode.length == outProgram.length && outOpcode.length == outSource.length, 'Invalid length')
 
   state.printable.lines = outProgram.map((prog, line) => {
-    return `${outOpcode[line].padEnd(36)} | ${prog.padEnd(30)} | ${outSource[line]}`
+    return `${outOpcode[line]!.padEnd(36)} | ${prog.padEnd(30)} | ${outSource[line]}`
   })
 
   document.getElementById('pre')!.innerHTML = printHeader + state.printable.lines.join('\n')
 }
 
+function displayViz(state: State, map: RegisterMap) {
+  const vizDiv = document.getElementById('viz')!
+
+  // @ts-ignore
+  const viz = new Viz();
+
+  console.log(state, map)
+  let graph = 'digraph main {\n'
+
+  const connMap: {[key: string]: {name: string, first: boolean} | undefined} = {}
+
+  function addCon(con: string) {
+    if (connMap[con]) {
+      return con
+    }
+
+    return `${con} [color = red]`
+  }
+
+  function addBranch(entryNode: EntryNode, first?: boolean) {
+    graph += `subgraph cluster_${entryNode.nodeID} {\n`
+
+    if (first) {
+      graph += `
+        rank = same; ra_${entryNode.nodeID} [label = "A"];
+        rank = same; rb_${entryNode.nodeID} [label = "B"];
+        rank = same; rc_${entryNode.nodeID} [label = "C"];
+        rank = same; rd_${entryNode.nodeID} [label = "D"];
+        rank = same; re_${entryNode.nodeID} [label = "E"];
+        rank = same; rf_${entryNode.nodeID} [label = "F"];
+      `
+    }
+
+    let lastNode: RegisterNode = entryNode as RegisterNode
+    let node: RegisterNode | null = entryNode.next
+
+    function addDefinition(curr: string, reg: string, name: string) {
+      const def = `rank = same; ${reg}_${curr}`
+      const label = `[label = "${connMap[reg] ? connMap[reg]!.name : name}"]`
+      const invis = connMap[reg]?.first ? '[shape = box, color = red]' : ''
+      return `${def} ${label} ${invis};`
+    }
+
+    function addRegister(last: string, curr: string, name?: string) {
+      graph += `
+      subgraph cluster_${curr} {
+
+        ${addDefinition(curr, 'ra', 'A')}
+        ${addDefinition(curr, 'rb', 'B')}
+        ${addDefinition(curr, 'rc', 'C')}
+        ${addDefinition(curr, 'rd', 'E')}
+        ${addDefinition(curr, 're', 'D')}
+        ${addDefinition(curr, 'rf', 'F')}
+
+        {
+          rank = same; ra_${curr} -> rb_${curr} -> rc_${curr} -> rd_${curr} -> re_${curr} -> rf_${curr} [style = invis]
+        }
+
+        {
+          rank = same; ra_${curr} rb_${curr} rc_${curr} rd_${curr} re_${curr} rf_${curr}
+        }
+
+        ${['ra', 'rb', 'rc', 'rd', 're', 'rf'].map(reg => {
+          let conn = `${reg}_${last} -> ${reg}_${curr}`
+          if (!connMap[reg] || connMap[reg]!.first) return conn + ' [style = invis]'
+          return conn
+        }).join('\n')}
+
+        edge[ dir = forw, weight = 1 ]
+      }\n`
+    }
+
+    while (node) {
+      switch (node.type) {
+        case 'use':
+        case 'declare':
+          const reg = map[node.value.id]?.register
+          assert(reg, 'Impossible')
+          connMap[reg] = {
+            name: node.value.name,
+            first: !connMap[reg]
+          }
+
+          addRegister(lastNode.nodeID, node.nodeID)
+
+          connMap[reg]!.first = false
+
+          if (node.isLast) {
+            delete connMap[reg]
+          }
+
+          lastNode = node
+          node = node.next
+          break
+
+        case 'split':
+          addRegister(lastNode.nodeID, node.nodeID)
+
+          node.children.forEach(child => {
+            addRegister(node.nodeID, child.nodeID)
+            addBranch(child)
+          })
+
+          node = node.joinNode
+          assert(node, 'Impossible')
+
+          node.parents.forEach(parent => {
+            addRegister(parent.nodeID, node.nodeID)
+          })
+
+          lastNode = node
+          node = node.next
+
+          break
+
+        case 'entry':
+          assert(false, 'Impossible')
+
+        case 'join':
+          graph += '}\n'
+          return
+
+        default:
+          assertUnreachable(node)
+      }
+    }
+
+    graph += '}\n'
+  }
+
+  addBranch(state.functions.main!.function.context.entryNode, true)
+
+  graph += '}'
+  console.log(graph)
+
+  viz.renderSVGElement(graph).then((el: any) => {
+    vizDiv.appendChild(el);
+  }).catch((e: any) => {
+    console.log(e)
+  })
+}
+
 function compile(source: string, fileName: string): State | null {
+  // clear and load common libraries
   console.clear()
-  Object.keys(sources).forEach(file => delete sources[file])
+  sources = baseSources
 
   try {
 
@@ -3102,9 +3521,11 @@ function compile(source: string, fileName: string): State | null {
     // create a state rappresenting the source code
     const state = build(tokens)
 
-    assemble(state)
+    const map = assemble(state)
 
     printProgram(state)
+
+    displayViz(state, map)
 
     return state
   } catch (e: any) {
@@ -3133,8 +3554,11 @@ function getRGB(value: number) {
 
 const printHeader = 'ADDRESS OPCODE  TYPE   IMM  A  B  D  |\n-------------------------------------|\n'
 function printState(simulation: Simulation) {
-  const {addresses, lines} = simulation.program.printable
-  const middle = addresses[simulation.pc]
+  const {addresses, lines} = simulation.state.printable
+  const pc = simulation.registers.pc.value
+  const middle = addresses[pc]
+  assert(typeof middle == 'number', 'Invalid PC position')
+
   const emptyLine = '                                     |'
 
   let out = []
@@ -3160,17 +3584,27 @@ function printState(simulation: Simulation) {
   }
 
   out.push(`\n\n\nREGISTERS:`)
-  registersIndex.forEach(register => {
+  registers.forEach(register => {
     if (register == 'r0') {
       out.push(`0  = 0x0000`)
       return
     }
 
-    const regContent = state.registers[register]
+    if (register == 'pc') {
+      out.push(`0  = ${hex(simulation.registers[register].value, 4, false)}`)
+      return
+    }
 
-    if (regContent) {
+    const regContent = simulation.registers[register]
+
+    if (regContent.value != -1) {
+      assert(regContent.inst, 'Impossible')
+
       const value = hex(regContent.value, 4, false)
-      const line = lines[addresses[regContent.inst.pc]].split('|')
+      const address = addresses[regContent.inst.pc!]
+      assert(typeof address == 'number', 'Invalid address')
+
+      const line = lines[address]!.split('|')
       const printLine = line[line.length - 1]
 
       const {rName, rType} = regContent.inst
@@ -3183,76 +3617,87 @@ function printState(simulation: Simulation) {
     out.push(`${register.padEnd(2)} = 0x???? |`)
   })
 
-  document.getElementById('pre').innerHTML = printHeader + out.join('\n')
+  document.getElementById('pre')!.innerHTML = printHeader + out.join('\n')
 
-  const printMemory = state.program.defines.__PRINT_MEMORY__?.value !== 0
-  const printRam = state.program.defines.__PRINT_RAM__?.value !== 0
+  const printMemory = simulation.state.defines.__PRINT_MEMORY__?.value !== 0
+  const printRam = simulation.state.defines.__PRINT_RAM__?.value !== 0
 
-  let mem = `INST COUNT: ${state.instCount}\n\n\nRANDOM ACCESS MEMORY:\n`
+  let mem = `INST COUNT: ${simulation.instCounter}\n\n\nRANDOM ACCESS MEMORY:\n`
   let lastIndex = 0
-  state.memory.forEach((inst, i) => {
+  simulation.memory.forEach((inst, i) => {
     if (!printMemory && i >= PRAM_BEGIN && i < MEMORY_MAPPED) return
     if (lastIndex < PRAM_BEGIN && i >= PRAM_BEGIN && i < TRAM_BEGIN) mem += '\nPIXEL VIDEO RAM:\n'
     if (lastIndex < TRAM_BEGIN && i >= TRAM_BEGIN && i < PROGRAM_ENTRY_POINT) mem += '\nTILE VIDEO RAM:\n'
     if (lastIndex < PROGRAM_ENTRY_POINT && i >= PROGRAM_ENTRY_POINT && i < MEMORY_MAPPED) mem += '\nEEPROM SOURCECODE:\n'
     if (lastIndex < MEMORY_MAPPED && i >= MEMORY_MAPPED) mem += '\nMEMORY_MAPPED:\n'
 
+    assert(inst, 'Impossibel')
+
     const isPRAM = i >= PRAM_BEGIN && i < TRAM_BEGIN
     const equal = isPRAM ? '<span style="color:' + getRGB(inst.value) + ';">=</span>' : '='
 
-    const from = lines[addresses[inst.inst.pc]] || 'Unknown source? Che magia as fait?'
+    const address = addresses[inst.inst!.pc!]
+    assert(typeof address == 'number', 'Invalid address')
+    const from = lines[address] || 'Unknown source? Che magia as fait?'
     mem += `${hex(i, 4, false)} ${equal} ${hex(inst.value, 4, false)} | ${from}\n`
 
     lastIndex = i
   })
 
   if (printMemory || printRam) {
-    document.getElementById('memory').innerHTML = mem
+    document.getElementById('memory')!.innerHTML = mem
   }
 
   // render screen
 
-  const {vga: {tileSet, TRAMModification, PRAMModification, context, tileContext}} = state
-  const modifiedTiles = {}
+  const {vga: {TRAMModification, PRAMModification, context, tileContext}} = simulation
+  const modifiedTiles: {[key: number]: boolean} = {}
 
-  Object.keys(PRAMModification).forEach(originalIndex => {
+  Object.keys(PRAMModification).forEach(originalIndexString => {
+    const originalIndex = Number(originalIndexString)
     const index = originalIndex - PRAM_BEGIN
-    const value = PRAMModification[originalIndex]
+    const value = PRAMModification[originalIndex]!
 
     const pixel = index % 64
-    const tile = (index - pixel) / 64
-    const ctx = state.vga.tileSet[tile].context
+    const tileIndex = (index - pixel) / 64
+    const tile = simulation.vga.tileSet[tileIndex]
+    assert(tile, 'Invalid PRAM tile')
+
+    const ctx = tile.context
     const x = pixel % 8
     const y = (pixel - x) / 8
 
     ctx.fillStyle = getRGB(value);
     ctx.fillRect(x, y, 1, 1)
 
-    modifiedTiles[tile] = true
-    modifiedTiles[tile] = true
+    modifiedTiles[tileIndex] = true
+    modifiedTiles[tileIndex] = true
     delete PRAMModification[originalIndex]
   })
 
-  function drawTileAt(context, value, index) {
+  function drawTileAt(context: CanvasRenderingContext2D, value: number, index: number) {
     const x = index % 80
     const y = (index - x) / 80
 
-    const canvas = state.vga.tileSet[value].canvas
+    const tile = simulation.vga.tileSet[value]
+    assert(tile, 'Invalid Tile in TRAM')
+    const canvas = tile.canvas
     context.drawImage(canvas, x * 8, y * 8)
   }
 
 
   for (let i = 0; i < 4096; i++) {
-    const value = state.memory[TRAM_BEGIN + i]?.value
-    if (modifiedTiles[value]) {
+    const value = simulation.memory[TRAM_BEGIN + i]?.value
+    if (value && modifiedTiles[value]) {
 
       // draw on main screen
       drawTileAt(context, value, i)
     }
   }
 
-  Object.keys(modifiedTiles).forEach(index => {
-    const canvas = state.vga.tileSet[index].canvas
+  Object.keys(modifiedTiles).forEach(indexString => {
+    const index = Number(indexString)
+    const canvas = simulation.vga.tileSet[index]!.canvas
 
     const x = index % 64
     const y = (index - x) / 64
@@ -3261,9 +3706,10 @@ function printState(simulation: Simulation) {
 
   })
 
-  Object.keys(TRAMModification).forEach(originalIndex => {
+  Object.keys(TRAMModification).forEach(originalIndexString => {
+    const originalIndex = Number(originalIndexString)
     const index = originalIndex - TRAM_BEGIN
-    const value = TRAMModification[originalIndex]
+    const value = TRAMModification[originalIndex]!
 
     // draw on main screen
     drawTileAt(context, value, index)
@@ -3276,37 +3722,51 @@ const MAX_INT = 1 << 16
 function simulate(state: State) {
   assert(state, 'no state')
 
+  const canvas = document.getElementById('screen')! as HTMLCanvasElement
+  const tileCanvas = document.getElementById('tileMap')! as HTMLCanvasElement
+
+  let entryPoint = state.executable[PROGRAM_ENTRY_POINT]
+  assert(entryPoint, 'Invaldi entry point')
+
   const simulation: Simulation = state.simulation = {
     registers: {
       r0: { value: 0 },
-      ra: { value: 0 },
-      rb: { value: 0 },
-      rc: { value: 0 },
-      rd: { value: 0 },
-      re: { value: 0 },
-      rf: { value: 0 },
-      sp: { value: 0 },
-      pc: { value: 0 }
+      ra: { value: -1 },
+      rb: { value: -1 },
+      rc: { value: -1 },
+      rd: { value: -1 },
+      re: { value: -1 },
+      rf: { value: -1 },
+      sp: { value: -1 },
+      pc: { value: PROGRAM_ENTRY_POINT }
     },
-    history: [[]],
+    currInst: entryPoint,
+    history: [],
     getRegister: (name: Register): Memory => {
       if (name == 'r0') return {value: 0}
       if (name == 'pc') return simulation.registers.pc
 
-      assertInst(simulation.registers[name], `Invalid register access: '${name}'`)
+      assertInst(simulation.registers[name].value != -1, `Invalid register access: '${name}'`)
       return simulation.registers[name]
     },
     setRegister: (name: Register, value: number): number => {
       value = (value + MAX_INT) % MAX_INT
       if (name == 'r0') return value
+
+      const prev = simulation.registers[name]
+      simulation.history[simulation.history.length - 1]!.push(silent => {
+        simulation.registers[name] = prev
+      })
+
       if (name == 'pc') {
         simulation.registers.pc = {value}
         return value
       }
 
-      simulation.registers[name] = {inst: currInst, value}
+      simulation.registers[name] = {inst: simulation.currInst, value}
       return value
     },
+    state,
     flags: {
       c: false,
       z: false,
@@ -3331,16 +3791,24 @@ function simulate(state: State) {
       assertInst(value, `Invalid memory read at '${index}'`)
       return value.value
     },
-    writeMemory: (index: number, value: number) => {
+    writeMemory: (index: number, value: number, rewind?: boolean) => {
       const under = index >= 0 && index < PROGRAM_ENTRY_POINT
       const above = index >= MEMORY_MAPPED && index < (1 << 16)
 
       assertInst(under || above, `Invalid memory write at '${index}' with ${value}`)
 
+      const prev = simulation.memory[index]?.value
+
+      if (typeof prev == 'number' && !rewind) {
+        simulation.history[simulation.history.length - 1]!.push(silent => {
+          simulation.writeMemory(index, prev, true)
+        })
+      }
+
       value = (value + MAX_INT) % MAX_INT
       simulation.memory[index] = {
         value,
-        inst: currInst
+        inst: simulation.currInst
       }
 
       if (index >= MEMORY_MAPPED) {
@@ -3359,28 +3827,34 @@ function simulate(state: State) {
 
       return
     },
-    pc: PROGRAM_ENTRY_POINT,
     memory: state.executable.map(el => ({value: el.opcode, inst: el, decoder: el.exec})),
     vga: {
+      canvas,
+      context: canvas.getContext('2d')!,
+      tileCanvas,
+      tileContext: tileCanvas.getContext('2d')!,
       tileSet: [],
       TRAMModification: {},
       PRAMModification: {}
     },
-    instCount: 0,
-    printState
+    instCounter: 0,
+    stepSimulation: null,
+    interrupt: () => {
+      if (simulation.memory[MM_INT_EN]?.value) {
+        const vector = simulation.memory[MM_INT_VEC]?.value
+        assertInst(vector, 'Interrupt vector table not available')
+        simulation.registers.pc.value = vector
+      }
+    }
   }
 
   // vga standard 640 * 480
-  simulation.vga.canvas = document.getElementById('screen')
-  simulation.vga.context = simulation.vga.canvas.getContext('2d')
-  simulation.vga.canvas.width = 80 * 8
-  simulation.vga.canvas.height = 60 * 8
+  canvas.width = 80 * 8
+  canvas.height = 60 * 8
 
   const size = 64 * 8 + 65
-  simulation.vga.tileCanvas = document.getElementById('tileMap')
-  simulation.vga.tileContext = simulation.vga.tileCanvas.getContext('2d')
-  simulation.vga.tileCanvas.width = size
-  simulation.vga.tileCanvas.height = size
+  tileCanvas.width = size
+  tileCanvas.height = size
 
   const ctx = simulation.vga.tileContext
   ctx.fillStyle = '#0FF';
@@ -3394,19 +3868,16 @@ function simulate(state: State) {
 
   for (let i = 0; i < 4096; i++) {
     const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
+    const context = canvas.getContext('2d')!
     canvas.width = 8
     canvas.height = 8
 
-    state.vga.tileSet.push({canvas, context})
+    simulation.vga.tileSet.push({canvas, context})
   }
 
-  let currInst = state.memory[state.pc].decoder
-  assert(currInst, 'Invaldi entry point')
-
-  function assertInst(condition, message) {
+  function assertInst(condition: any, message: string): asserts condition {
     if (!condition) {
-      console.log(currInst)
+      console.log(simulation.currInst)
       console.log(message);
       throw message
     }
@@ -3414,24 +3885,50 @@ function simulate(state: State) {
 
   function step(silent: boolean) {
     const nextInst = simulation.memory[simulation.registers.pc.value]
-    const error = `Next inst not executable at '${simulation.registers.pc.value}'\nLast inst:${currInst.inst.print}`
-    assertInst(nextInst && nextInst.decoder, error)
-    currInst = nextInst.decoder
+    const error = `Next inst not executable at '${simulation.registers.pc.value}'\nLast inst:${simulation.currInst.inst!.print}`
 
-    const {inst: {print}, exec} = nextInst.decoder
+    const prev = simulation.currInst
+    assertInst(nextInst && nextInst.decoder && nextInst.inst, error)
+    simulation.currInst = nextInst.inst
+
+    const {decoder, inst} = nextInst
 
     if (!silent) {
-      console.log(`Executing: ${print}`)
+      console.log(`Executing: ${inst.print}`)
     }
 
-    assertInst(exec, 'No exec')
+    assertInst(decoder, 'No exec')
 
-    simulation.instCount++
-    simulation.pc++
-    exec(simulation)
+    simulation.instCounter++
+    simulation.registers.pc.value++
+
+    simulation.history.push([(silent) => {
+      if (!silent) {
+        console.log(`Rewinding: ${inst.print}`)
+      }
+
+      simulation.instCounter--
+      simulation.registers.pc.value--
+      simulation.currInst = prev
+    }])
+
+    decoder(simulation)
   }
 
-  program.stepSimulation = (count, silent) => {
+  function rewind(silent: boolean) {
+    if (!simulation.history.length) return
+
+    const actions = simulation.history.pop()!
+    actions.forEach(action => {
+      action(silent)
+    })
+  }
+
+  simulation.stepSimulation = (count, silent = false) => {
+    for (let i = 0; i < -count; i++) {
+      rewind(silent)
+    }
+
     for (let i = 0; i < count; i++) {
       try {
         step(silent)
@@ -3439,9 +3936,9 @@ function simulate(state: State) {
         console.log(e1);
 
         try {
-          assertSpan(currInst.inst.span, false, e1)
+          assertSpan(simulation.currInst.inst!.span, false, e1)
         } catch(e2: any) {
-          state.program.stepSimulation = null
+          simulation.stepSimulation = null
           document.getElementById('pre')!.innerHTML = e2
         }
 
@@ -3449,18 +3946,10 @@ function simulate(state: State) {
       }
     }
 
-    printState(state)
+    printState(simulation)
   }
 
-  program.interrupt = () => {
-    if (state.memory[MM_INT_EN]?.value) {
-      const vector = state.memory[MM_INT_VEC]?.value
-      assertInst(vector, 'Interrupt vector table not available')
-      state.pc = vector
-    }
-  }
-
-  printState(state)
+  printState(simulation)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3487,7 +3976,7 @@ window.addEventListener('load', () => {
   let continuous = false
   let focus = false
 
-  compileButton.onclick = () => {
+  function compileButtonHandler() {
     compiling = !compiling
     memory.style.display = 'none'
     tileMap.style.display = 'none'
@@ -3511,8 +4000,10 @@ window.addEventListener('load', () => {
     pre.style.display = 'none'
   }
 
-  runButton.onclick = () => {
-    if (!state) compileButton.onclick()
+  compileButton.onclick = compileButtonHandler
+
+  function runButtonHandler() {
+    if (!state) compileButtonHandler()
 
     // if failed to compile
     if (state) {
@@ -3526,8 +4017,11 @@ window.addEventListener('load', () => {
     console.log('Compilation failed')
   }
 
+  runButton.onclick = runButtonHandler
+
+
   continuousButton.onclick = () => {
-    if (!state) runButton.onclick()
+    if (!state) runButtonHandler()
 
     // if failed to compile
     if (state) {
@@ -3537,7 +4031,7 @@ window.addEventListener('load', () => {
   }
 
   focusButton.onclick = () => {
-    if (!state) runButton.onclick()
+    if (!state) runButtonHandler()
 
     // if failed to compile
     if (state) {
@@ -3548,7 +4042,7 @@ window.addEventListener('load', () => {
 
 
   window.setInterval(() => {
-    if (state && state.simulation && continuous) {
+    if (state?.simulation?.stepSimulation && continuous) {
       state.simulation.interrupt()
       state.simulation.stepSimulation(1000, true)
     }
@@ -3559,6 +4053,7 @@ window.addEventListener('load', () => {
 
     if (state && state.simulation) {
       const simulation = state.simulation
+      if (!simulation.stepSimulation) return
 
       if (focus) {
         if (e.key.length == 1) {
@@ -3579,8 +4074,10 @@ window.addEventListener('load', () => {
           'Enter': 10,
         } as const
 
-        if (map[e.key]) {
-          simulation.writeMemory(MM_KEYBOARD, map[e.key])
+        type MappedKeys = keyof typeof map
+
+        if (map[e.key as MappedKeys]) {
+          simulation.writeMemory(MM_KEYBOARD, map[e.key as MappedKeys])
           simulation.stepSimulation(0)
         }
 
@@ -3591,8 +4088,12 @@ window.addEventListener('load', () => {
         return
       }
 
-      if (e.key == 'n') {
+      if (e.key == 'n' && simulation.stepSimulation) {
         simulation.stepSimulation(1)
+      }
+
+      if (e.key == 'b' && simulation.stepSimulation) {
+        simulation.stepSimulation(-1)
       }
 
       if (e.key == 'm') {
@@ -3604,21 +4105,21 @@ window.addEventListener('load', () => {
       }
 
       if (e.key == 'c') {
-        compileButton.onclick()
-        compileButton.onclick()
+        compileButtonHandler()
+        compileButtonHandler()
       }
 
       if (e.key == 'ArrowUp') {
-        if (simulation.memory[simulation.pc - 1]) {
-          simulation.pc--
+        if (simulation.memory[simulation.registers.pc.value - 1]) {
+          simulation.registers.pc.value--
           simulation.stepSimulation(0)
         }
         e.preventDefault()
       }
 
       if (e.key == 'ArrowDown') {
-        if (simulation.memory[simulation.pc + 1]) {
-          simulation.pc++
+        if (simulation.memory[simulation.registers.pc.value + 1]) {
+          simulation.registers.pc.value++
           simulation.stepSimulation(0)
         }
         e.preventDefault()
@@ -3627,16 +4128,17 @@ window.addEventListener('load', () => {
 
     if (compiling) {
       if (e.key == 'r') {
-        runButton.onclick()
+        runButtonHandler()
       }
 
       if (e.key == 'e') {
-        compileButton.onclick()
+        compileButtonHandler()
       }
     }
   })
 
-  runButton.onclick()
+  runButtonHandler()
+
   if (state) {
     // state.stepSimulation(100000, true)
     // continuousButton.onclick()
@@ -3647,4 +4149,5 @@ window.addEventListener('load', () => {
   window.setTimeout(() => {
     window.scrollTo(0, 0)
   }, 50)
+
 })

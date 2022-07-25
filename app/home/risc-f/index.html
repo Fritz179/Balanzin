@@ -1,1 +1,102 @@
-<p>asdf</p>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>RISC-F 0.2.2</title>
+  </head>
+  <body>
+
+  <textarea id="source" rows="50" cols="120" spellcheck="false">
+include "types.f"
+include "charset.f"
+include "memoryMapped.f"
+
+define __PRINT_MEMORY__ = false
+define __PRINT_RAM__ = true 
+
+void function main() {
+  :int_t stack = 0
+
+  int_t num1 = 9
+  int_t num2 = 8
+
+  if (num1 > num2) {
+    num1 = 10
+  }
+
+  int_t num3 = num1 + num2
+
+  :int_t stack2 = num1
+  stack = num3
+  return
+}
+
+
+
+/*
+  TODO:
+  - ++, +=
+  - remove preSpace
+  - blinking => timer
+  - better console => caret
+  - bigger console => MM_PRAM
+  - typechecking?
+  - stack => pasa in gio, el plen o vöit?
+
+  TYPECHECKER
+  - stack type & register type & heap type?
+  - contracts?
+
+  AUTOREG
+  - al reg al ven assegnu cura la variabile la va fora scope
+  - lesist an graph / AST dal flow
+  - cura la ven declarada al crea an nodo cuma ültim
+  - cura la ven duperada la torna indrö e la tö via tüc i ultim
+  - first pass => register infiniti => name, register
+*/
+
+</textArea>
+
+  <pre id="pre"></pre>
+  <button id="compile">Compile!</button>
+  <button id="run">Run!</button>
+  <button id="continuous">Start!</button>
+  <button id="focus">Focus!</button>
+  <br>
+  <canvas id="screen"></canvas>
+  <pre id="memory"></pre>
+  <canvas id="tileMap" width="577" height="577"></canvas>
+
+  <div id="viz"></div>
+
+  <style>
+    canvas {
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    #screen {
+      transform: scale(2.5);
+      transform-origin: left top;
+      margin-top: 1rem;
+    }
+
+    #tileMap {
+      transform: scale(2.5);
+      transform-origin: left top;
+    }
+
+    #viz {
+      margin-top: 60rem
+    }
+  </style>
+
+  <script src="./out/main.js" charset="utf-8"></script>
+
+  <script src="/viz/viz.js"></script>
+  <script src="/viz/lite.render.js"></script>
+
+</body>
+</html>
