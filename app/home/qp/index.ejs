@@ -8,8 +8,14 @@
     <link rel="stylesheet" href="./style.css">
 
     <div class='wrapper'>
+      <h1> <%= title %> </h1>
+
+      <a href=<%= `https://www.snapchat.com/add/${snapchat}` %>>
+        <img src="./snapchat.webp"></img>
+      </a>
+
       <a href=<%= `https://wa.me/${whatsapp}?text=${encodeURIComponent(title)}` %>>
-        <img src="./whatsapp.png"></img>
+        <img src="./whatsapp.webp"></img>
       </a>
 
       <a href=<%= `https://www.instagram.com/${instagram}` %>>

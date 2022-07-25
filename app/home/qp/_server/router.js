@@ -11,10 +11,18 @@ module.exports = ({router}) => {
   add('fc', {
     title: 'Fabrizio Cortesi',
     whatsapp: '41797502936',
-    instagram: 'Fritz_179'
+    instagram: 'Fritz_179',
+    snapchat: 'fritz_179'
   })
 
-  router.get('/', (req, res) => {
-    res.send('Salve!')
+  add('gr', {
+    title: 'Giorgio Rampa',
+    whatsapp: '41786526771',
+    instagram: 'rampa033',
+    snapchat: 'xrampela',
+  })
+
+  router.use('/', (req, res) => {
+    res.send('Salve! Quest link le niamo tacu a nient, scrivum sü whatsapp ca ta meti sü quel ca ta vos')
   })
 }
