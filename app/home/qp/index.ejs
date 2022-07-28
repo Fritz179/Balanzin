@@ -10,17 +10,24 @@
     <div class='wrapper'>
       <h1> <%= title %> </h1>
 
-      <a href=<%= `https://www.snapchat.com/add/${snapchat}` %>>
-        <img src="./snapchat.webp"></img>
-      </a>
+      <% if (locals.snapchat) { %>
+        <a href=<%= `https://www.snapchat.com/add/${snapchat}` %>>
+          <img src="./snapchat.webp"></img>
+        </a>
+      <% } %>
 
-      <a href=<%= `https://wa.me/${whatsapp}?text=${encodeURIComponent(title)}` %>>
-        <img src="./whatsapp.webp"></img>
-      </a>
+      <% if (locals.whatsapp) { %>
+        <a href=<%= `https://wa.me/${whatsapp}?text=${encodeURIComponent(title)}` %>>
+          <img src="./whatsapp.webp"></img>
+        </a>
+      <% } %>
 
-      <a href=<%= `https://www.instagram.com/${instagram}` %>>
-        <img src="./instagram.png"></img>
-      </a>
+      <% if (locals.instagram) { %>
+        <a href=<%= `https://www.instagram.com/${instagram}` %>>
+          <img src="./instagram.png"></img>
+        </a>
+      <% } %>
+
     </div>
   </body>
 </html>
