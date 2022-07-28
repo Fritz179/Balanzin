@@ -1,1 +1,4 @@
 npx tsc ./source/main.ts --outDir ./out --module es2021 --target es2021 --strict --strictNullChecks --forceConsistentCasingInFileNames -w
+
+
+https://www.typescriptlang.org/play?noUncheckedIndexedAccess=true&noUnusedLocals=true&target=8&jsx=0&exactOptionalPropertyTypes=true&noFallthroughCasesInSwitch=true&pretty=false&q=256#code/GYVwdgxgLglg9mABAWwIYzACgJSIN4CwAUMQL7HFoY5A

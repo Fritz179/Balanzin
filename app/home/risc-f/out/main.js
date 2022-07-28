@@ -2263,12 +2263,12 @@ function assemble(state) {
     // solve register selection
     const map = {};
     function solveBranch(entry) {
-        const available = [...availableRegs];
+        let available = [...availableRegs];
         // used in other branches
         entry.entries.forEach(entry => {
             const reg = map[entry];
             assert(reg, 'Impossible');
-            available.filter(el => el != reg.register);
+            available = available.filter(el => el != reg.register);
         });
         let node = entry.next;
         while (node) {
@@ -2311,7 +2311,9 @@ function assemble(state) {
         assert(!node, 'Impossible');
         // le fini i node? le fini
     }
-    solveBranch(state.functions.main.function.context.entryNode);
+    Object.keys(state.functions).forEach(funName => {
+        solveBranch(state.functions[funName].function.context.entryNode);
+    });
     // solve opcodes
     const r0Info = {
         register: 'r0',
@@ -2469,16 +2471,16 @@ function displayViz(state, map) {
     console.log(state, map);
     let graph = 'digraph main {\n';
     const connMap = {};
-    function addCon(con) {
-        if (connMap[con]) {
-            return con;
-        }
-        return `${con} [color = red]`;
-    }
-    function addBranch(entryNode, first) {
-        graph += `subgraph cluster_${entryNode.nodeID} {\n`;
-        if (first) {
+    function addBranch(entryNode, funName) {
+        graph += `
+      subgraph cluster_${entryNode.nodeID} {
+    `;
+        if (funName) {
             graph += `
+        label = "Function: ${funName}"
+        fontsize = "30pt"
+        fontcolor = "Red"
+
         rank = same; ra_${entryNode.nodeID} [label = "A"];
         rank = same; rb_${entryNode.nodeID} [label = "B"];
         rank = same; rc_${entryNode.nodeID} [label = "C"];
@@ -2492,12 +2494,14 @@ function displayViz(state, map) {
         function addDefinition(curr, reg, name) {
             const def = `rank = same; ${reg}_${curr}`;
             const label = `[label = "${connMap[reg] ? connMap[reg].name : name}"]`;
-            const invis = connMap[reg]?.first ? '[shape = box, color = red]' : '';
-            return `${def} ${label} ${invis};`;
+            const blue = connMap[reg]?.used ? '[shape = box, color = blue]' : '';
+            const invis = connMap[reg]?.first ? '[shape = trapezium, color = red]' : '';
+            return `${def} ${label} ${blue} ${invis};`;
         }
         function addRegister(last, curr, name) {
             graph += `
       subgraph cluster_${curr} {
+        label = ""
 
         ${addDefinition(curr, 'ra', 'A')}
         ${addDefinition(curr, 'rb', 'B')}
@@ -2532,10 +2536,12 @@ function displayViz(state, map) {
                     assert(reg, 'Impossible');
                     connMap[reg] = {
                         name: node.value.name,
-                        first: !connMap[reg]
+                        first: !connMap[reg],
+                        used: true
                     };
                     addRegister(lastNode.nodeID, node.nodeID);
                     connMap[reg].first = false;
+                    connMap[reg].used = false;
                     if (node.isLast) {
                         delete connMap[reg];
                     }
@@ -2545,12 +2551,14 @@ function displayViz(state, map) {
                 case 'split':
                     addRegister(lastNode.nodeID, node.nodeID);
                     node.children.forEach(child => {
+                        assert(node, 'Impossible');
                         addRegister(node.nodeID, child.nodeID);
                         addBranch(child);
                     });
                     node = node.joinNode;
                     assert(node, 'Impossible');
                     node.parents.forEach(parent => {
+                        assert(node, 'Impossible');
                         addRegister(parent.nodeID, node.nodeID);
                     });
                     lastNode = node;
@@ -2567,7 +2575,9 @@ function displayViz(state, map) {
         }
         graph += '}\n';
     }
-    addBranch(state.functions.main.function.context.entryNode, true);
+    Object.keys(state.functions).forEach(funName => {
+        addBranch(state.functions[funName].function.context.entryNode, funName);
+    });
     graph += '}';
     console.log(graph);
     viz.renderSVGElement(graph).then((el) => {
@@ -2587,7 +2597,9 @@ function compile(source, fileName) {
         const state = build(tokens);
         const map = assemble(state);
         printProgram(state);
-        displayViz(state, map);
+        if (state.defines.__OUTPUT_VIZ__?.value) {
+            displayViz(state, map);
+        }
         return state;
     }
     catch (e) {

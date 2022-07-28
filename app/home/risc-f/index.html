@@ -12,7 +12,13 @@ include "charset.f"
 include "memoryMapped.f"
 
 define __PRINT_MEMORY__ = false
-define __PRINT_RAM__ = true 
+define __PRINT_RAM__ = true
+define __OUTPUT_VIZ__ = true
+
+void function add() {
+  int_t asadfas = 9
+  return
+}
 
 void function main() {
   :int_t stack = 0
@@ -22,6 +28,11 @@ void function main() {
 
   if (num1 > num2) {
     num1 = 10
+  } else {
+    num1 = 55
+    int_t a = 9
+    int_t sadfasd = 99
+    a = num1
   }
 
   int_t num3 = num1 + num2
