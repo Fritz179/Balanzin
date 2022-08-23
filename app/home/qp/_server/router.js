@@ -8,11 +8,49 @@ module.exports = ({router}) => {
     })
   }
 
+  add('mc', {
+    title: 'Miryam Crameri',
+    whatsapp: '41787174633',
+    instagram: 'miryamcrameri'
+  })
+
+  add('ap', {
+    title: 'Ambra Paganini',
+    whatsapp: '41791711040',
+    instagram: 'ambra_paganini',
+    snapchat: 'ambra_paganini4'
+  })
+
+  add('ss', {
+    title: 'Sofia Sighinolfi',
+    whatsapp: '41786461359',
+    instagram: 'sofisighi',
+    snapchat: 'sofisugus'
+  })
+
+  add('jc', {
+    title: 'Jan Crameri',
+    instagram: 'jancrameri',
+    snapchat: 'jan_crameri'
+  })
+
+  add('oc', {
+    title: 'Sposato ma non troppo',
+    whatsapp: '41786119533'
+  })
+
   add('fc', {
     title: 'Fabrizio Cortesi',
     whatsapp: '41797502936',
     instagram: 'Fritz_179',
     snapchat: 'fritz_179'
+  })
+
+  add('sl', {
+    title: 'Silvio Lardi',
+    whatsapp: '41787224025',
+    instagram: 'silvio_lardi',
+    snapchat: 'silvio.lardi'
   })
 
   add('gr', {
