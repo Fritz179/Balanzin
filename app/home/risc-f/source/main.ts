@@ -121,9 +121,6 @@ const literalType: Type = {
 
 const registers = ['r0', 'ra', 'rb', 'rc', 'rd', 're', 'rf', 'sp', 'pc'] as const
 type Register = typeof registers[number]
-function isRegister(test: string): test is Register {
-  return registers.includes(test as Register)
-}
 
 type BaseOperand = {type: string, dataType: Type, span: Span }
 
@@ -134,7 +131,7 @@ type BaseVariable = BaseOperand & { name: string, span: Span }
 type StackVariable = BaseVariable & { type: 'stack', offset: number, info: {defined: boolean} }
 type GlobalVariable = BaseVariable & { type: 'global', offset: number, info: {defined: boolean}, expr?: Operand }
 type RegisterVariable = BaseVariable & { type: 'register', name: string, id: RegisterID }
-type FunctionVariable = BaseVariable & { type: 'functionVariable', name: string, function: FunctionDefinition}
+type FunctionVariable = BaseVariable & { type: 'functionVariable', name: string, function: FunctionContext}
 
 type VariableOperand = StackVariable | GlobalVariable | RegisterVariable | FunctionVariable
 type NumberOperand = BaseOperand & { type: 'number', value: number}
@@ -144,7 +141,7 @@ type StringOperand = BaseOperand & { type: 'string', string: string }
 type BinaryOperand = BaseOperand & { type: 'binary', lhs: Operand, rhs: Operand, operator: BaseBinaryType }
 type UnaryOperand = BaseOperand & { type: 'unary', lhs: Operand, rhs: Operand, operator: UnaryOperator }
 type ConditionalOperand = BaseOperand & { type: 'conditional', lhs: Operand, rhs: Operand, operator: ConditionalOperator }
-type CallOperand = BaseOperand & { type: 'functionCall', function: FunctionDefinition }
+type CallOperand = BaseOperand & { type: 'functionCall', function: FunctionContext }
 
 type Operand =  VariableOperand | NumberOperand | DerefOperand | ArrayOperand | StringOperand | BinaryOperand | CallOperand | Label | UnaryOperand | ConditionalOperand
 
@@ -160,14 +157,16 @@ type ContextVariable = {
   }
 }
 
-type FunctionDefinition = {
+type FunctionContext = {
   args: RegisterVariable[],
   name: string,
   dataType: Type,
   beginLabel: LabelName,
   returnAddress: RegisterVariable,
+  returnRegister?: AvailableRegs,
   context: Context,
   span: Span,
+  usedRegisters: AvailableRegs[]
 }
 
 // Lexer, State, Context
@@ -272,6 +271,7 @@ type StackOrGlobalVariable = StackVariable | GlobalVariable
 const availableRegs = ['ra', 'rb', 'rc', 'rd', 're', 'rf'] as const
 type AvailableRegs = typeof availableRegs[number]
 
+// Used only as getInfo
 type RegisterID = string & { __brand: 'regisreID' }
 type RegisterInfo = { register: AvailableRegs, name: string, type: Type, span: Span }
 
@@ -281,7 +281,8 @@ const raID = 'ra' as RegisterID
 
 type Info = {
   getReg: (reg: RegisterID) => RegisterInfo,
-  solveLabel: (label: LabelName) => number
+  getUsedRegisters: () => AvailableRegs[],
+  solveLabel: (label: LabelName) => number,
   pc: number
 }
 
@@ -578,14 +579,14 @@ function getAssertTypesMessage(expr: Operand): string {
       return `variable '${expr.name}' which has the type '${expr.dataType.print}'`
 
     case 'deref':
-      return `dereferce which results in ${expr.dataType.print}`
+      return `dereferce which results in '${expr.dataType.print}'`
 
     case 'array':
     case 'string':
-      return `${expr.type} ${expr.dataType.print}`
+      return `'${expr.type}' '${expr.dataType.print}'`
 
     case 'functionVariable':
-      return `funcion operand ${expr.name} which has the type ${expr.dataType.print}`
+      return `funcion operand '${expr.name}' which has the type '${expr.dataType.print}'`
   }
 }
 
@@ -1328,7 +1329,11 @@ function buildFunction(lexer: Lexer, state: State, context: Context, returnType:
   const fromStart = lexer.nextIs(')')
 
   // reserve __retAddr, if it's main it will never be used
-  const returnAddress = bodyContext.addRegister(fromStart.span, '__retAddr', addrType)
+  let returnAddress: RegisterVariable
+  console.log(funName.token)
+  if (!isMain) {
+    returnAddress = bodyContext.addRegister(fromStart.span, '__retAddr', addrType)
+  }
 
   // consumes { }
   const body = parseBlock(lexer, state, bodyContext)
@@ -1346,10 +1351,9 @@ function buildFunction(lexer: Lexer, state: State, context: Context, returnType:
   }
 
   fork.join(bodyContext.end)
-  bodyContext.addRegister(fromStart.span, '__return', addrType)
 
   if (!isMain) {
-    solveJALR(state, context, bodyContext.end, returnAddress.id, r0ID)
+    solveJALR(state, bodyContext, bodyContext.end, returnAddress!.id, r0ID)
     bodyContext.resolve(bodyContext.end, '__retAddr')
   }
 
@@ -1365,7 +1369,8 @@ function buildFunction(lexer: Lexer, state: State, context: Context, returnType:
       beginLabel: entryID,
       context: bodyContext,
       span: funName.span,
-      returnAddress
+      returnAddress: returnAddress!,
+      usedRegisters: []
     }
   }
 
@@ -1585,6 +1590,7 @@ function parseTypedef(lexer: Lexer, state: State, context: Context): boolean {
     context.unresolve(name.span, name.token)
     state.types[name.token] = {
       ...type,
+      name: type.name.replace(type.name, name.token),
       print: type.print.replace(type.name, name.token),
       span: start.span,
     }
@@ -1727,10 +1733,10 @@ function parseVoidFunCall(lexer: Lexer, state: State, context: Context): boolean
   if (lexer.peek().type == 'string' && lexer.peek(1).token == '(') {
     const fun = buildOperand(lexer, state, context)
 
-    assertSpan(fun.span, fun.type == 'functionVariable', `Cannot call non function ${fun.type}`)
+    assertSpan(fun.span, fun.type == 'functionCall', `Cannot call non function ${fun.type}`)
     assertSpan(fun.span, fun.dataType.type == 'void', `Function doesn't return void, '${fun.dataType.print}'`)
 
-    solveJAL(state, context, fun.span, fun.function.beginLabel, fun.function.returnAddress.id)
+    solveFunctionCall(state, context, fun)
     return true
   }
 
@@ -2113,12 +2119,18 @@ function solveExpression(state: State, context: Context, to: Operand, expr: Oper
     }
 
     if (expr.type == 'functionCall') {
-      const fun = expr.function
+      solveFunctionCall(state, context, expr, to)
 
-      solveJAL(state, context, fun.span, fun.beginLabel, fun.returnAddress.id)
+      return
+    }
+
+    if (expr.type == 'functionVariable') {
+      solveLDI_LABEL(state, context, to.id, expr.function.beginLabel)
+
       return
     }
   }
+
 
   if (to.type == 'deref') {
     if (expr.type == 'number') {
@@ -2167,7 +2179,8 @@ function solveExpression(state: State, context: Context, to: Operand, expr: Oper
 
   const lhs = getAssertTypesMessage(to)
   const rhs = getAssertTypesMessage(expr)
-  assertSpan(to.span, false, `Cannot assign '${lhs}' to '${rhs}'`)
+  console.log(to, expr)
+  assertSpan(to.span, false, `Cannot assign ${lhs} to ${rhs}`)
 }
 
 function solveJMP(state: State, context: Context, span: Span, to: LabelName) {
@@ -2201,13 +2214,12 @@ function solveJAL(state: State, context: Context, span: Span, to: LabelName, lin
 }
 
 function solveJALR(state: State, context: Context, span: Span, to: RegisterID, link: RegisterID) {
-
   state.program.push(info => {
-    const dReg = info.getReg(link)
     const bReg = info.getReg(to)
+    const dReg = info.getReg(link)
 
-    const d = dReg.register
     const b = bReg.register
+    const d = dReg.register
 
     let opcode = solveRegisters('r0', b, d)
     // const immCode = solveImmediate(imm, 9)
@@ -2226,6 +2238,61 @@ function solveJALR(state: State, context: Context, span: Span, to: RegisterID, l
         rType: dReg.type.print,
         print: `${hex(opcode, 4, false)}: J JALR        ${b} ${d}`
       }]
+    }
+  })
+}
+
+function solveFunctionCall(state: State, context: Context, fun: CallOperand, to?: RegisterVariable) {
+  state.program.push(info => {
+    const opcodes: Opcode[] = []
+
+    const callerUsed = info.getUsedRegisters()
+    debugger
+    const calleeUsed = fun.function.usedRegisters
+
+    const used = calleeUsed.filter(el => callerUsed.includes(el))
+
+    console.log(fun.function.name, callerUsed, calleeUsed, used)
+
+    if (used.length) {
+      solveADI(state, context, spID, spID, -callerUsed.length)
+      const adi = state.program.instructions.pop()!(info)
+      opcodes.push(...adi.opcodes)
+
+      used.forEach((reg, i) => {
+        solveSTO(state, context, spID, reg as RegisterID, i)
+        const sto = state.program.instructions.pop()!(info)
+        opcodes.push(...sto.opcodes)
+      })
+    }
+
+    solveJAL(state, context, fun.span, fun.function.beginLabel, fun.function.returnAddress.id)
+    const jal = state.program.instructions.pop()!(info)
+    opcodes.push(...jal.opcodes)
+
+    if (to) {
+      assertSpan(fun.span, fun.function.returnRegister, 'Impossible')
+      solveADI(state, context, to.id, fun.function.returnRegister as RegisterID, 0)
+      const adi = state.program.instructions.pop()!(info)
+      opcodes.push(...adi.opcodes)
+    }
+
+    if (used.length) {
+      used.forEach((reg, i) => {
+        solveLOD(state, context, reg as RegisterID, spID, i)
+        const lod = state.program.instructions.pop()!(info)
+        opcodes.push(...lod.opcodes)
+      })
+
+      solveADI(state, context, spID, spID, +callerUsed.length)
+      const adi = state.program.instructions.pop()!(info)
+      opcodes.push(...adi.opcodes)
+    }
+
+    return {
+      span: fun.span,
+      print: `CAL ${fun.function.name}`,
+      opcodes
     }
   })
 }
@@ -2332,6 +2399,25 @@ function solveCondition(state: State, context: Context, condition: Operand, ifTr
 
     // if the branch is taken only if the condition is false
     if (!ifTrue) return solve(lhs, inverter[operator], rhs, ifFalse, null)
+
+    // Convert string of length one to char as number
+    if (lhs.type == 'string' && lhs.string.length == 1) {
+      lhs = {
+        type: 'number',
+        value: lhs.string.charCodeAt(0),
+        span: lhs.span,
+        dataType: lhs.dataType
+      }
+    }
+
+    if (rhs.type == 'string' && rhs.string.length == 1) {
+      rhs = {
+        type: 'number',
+        value: rhs.string.charCodeAt(0),
+        span: rhs.span,
+        dataType: rhs.dataType
+      }
+    }
 
     assert(lhs.type != 'number' || rhs.type != 'number', 'Not implemented')
     assertSpan(lhs.span, lhs.type == 'register' || lhs.type == 'number', `expected 'number | register' but got ${lhs.type}`)
@@ -2567,7 +2653,8 @@ type Context = {
     positions: StackOrGlobalVariable[]
   }
   begin: Span,
-  end: Span
+  end: Span,
+  functionContext: FunctionContext,
 }
 
 // return node or null if not found
@@ -2688,6 +2775,38 @@ function getToEnd(head: RegisterNode): RegisterNode {
   return lastNode
 }
 
+class Stack {
+  size = 0
+  positions = []
+  names: {[key: string]: Type} = {}
+
+  add(name: string, value: Type) {
+    this.names[name] = value
+  }
+
+  get(span: Span, name: string): Type {
+    const value = this.names[name]
+
+    assertSpan(span, value, `Cannot resolve name: '${name}' in stack`)
+    return value
+  }
+}
+
+class ContextClass {
+  didReturn = false
+  stack = new Stack()
+
+  begin: Span
+  end: Span
+
+  construnctor(parent: Context, contextVariable: ContextVariable) {
+
+  }
+}
+
+const a = new ContextClass()
+let b = a.begin
+
 function createContext(parent: Context, contextVariable: ContextVariable): Context {
   const entryNode: EntryNode = {
     type: 'entry',
@@ -2716,18 +2835,23 @@ function createContext(parent: Context, contextVariable: ContextVariable): Conte
 
         if (node) {
 
+          const value: RegisterVariable = {
+            ...node.value,
+            id: `${node.id}_${nextInt()}` as RegisterID
+          }
+
           addToChain(context, {
             type: 'use',
             id: node.id,
             prev: context.lastNode,
-            value: node.value,
+            value: value,
             isLast: true,
             next: null,
             span,
             nodeID: `node_${nextInt()}`
           })
 
-          return node.value
+          return value
         }
       }
 
@@ -3093,14 +3217,19 @@ function hex(number: number, length: number, canBeNegative = true) {
 }
 
 // size is the int size, signed in msb
+type MapInfo = {
+  info: RegisterInfo,
+  node: DeclareNode | UseNode,
+  availableReg: AvailableRegs[]
+}
 
-type RegisterMap = {[key: RegisterID]: RegisterInfo | undefined}
+type RegisterMap = {[key: RegisterID]:  MapInfo| undefined}
 function assemble(state: State): RegisterMap {
   // solve register selection
 
   const map: RegisterMap = {}
 
-  function solveBranch(entry: EntryNode) {
+  function solveBranch(entry: EntryNode, fun: FunctionContext) {
     let available = [...availableRegs]
 
     // used in other branches
@@ -3108,7 +3237,7 @@ function assemble(state: State): RegisterMap {
       const reg = map[entry]
       assert(reg, 'Impossible')
 
-      available = available.filter(el => el != reg.register)
+      available = available.filter(el => el != reg.info.register)
     })
 
     let node: RegOrNullNode = entry.next
@@ -3116,14 +3245,34 @@ function assemble(state: State): RegisterMap {
     while (node) {
       switch (node.type) {
         case 'declare':
-          const reg = available.shift()
+          let reg: AvailableRegs
+
+          if (node.value.name == '__return') {
+            if (fun.returnRegister) {
+              reg = fun.returnRegister
+            } else {
+              reg = available.shift()!
+              fun.returnRegister = reg
+            }
+          } else {
+            reg = available.shift()!
+          }
+
           assertSpan(node.value.span, reg, 'No reg left!')
 
           map[node.id] = {
-            register: reg,
-            name: node.value.name,
-            type: node.value.dataType,
-            span: node.span
+            info:  {
+              register: reg,
+              name: node.value.name,
+              type: node.value.dataType,
+              span: node.span
+            },
+            node,
+            availableReg: [...available]
+          }
+
+          if (!fun.usedRegisters.includes(reg)) {
+            fun.usedRegisters.push(reg)
           }
 
           if (node.isLast) {
@@ -3135,10 +3284,17 @@ function assemble(state: State): RegisterMap {
           break
 
         case 'use':
+          const declaredReg = map[node.id]
+          assert(declaredReg, 'Impossible')
+
+          map[node.value.id] = {
+            info: declaredReg.info,
+            node,
+            availableReg: [...available]
+          }
+
           if (node.isLast) {
-            const reg = map[node.id]
-            assert(reg, 'Impossible')
-            available.unshift(reg.register)
+            available.unshift(declaredReg.info.register)
           }
 
           node = node.next
@@ -3150,7 +3306,7 @@ function assemble(state: State): RegisterMap {
           assert(false, 'Impossible')
 
         case 'split':
-          node.children.forEach(child => solveBranch(child))
+          node.children.forEach(child => solveBranch(child, fun))
           assert(node.joinNode, 'Impossible')
           node = node.joinNode.next
           break
@@ -3168,29 +3324,18 @@ function assemble(state: State): RegisterMap {
   }
 
   Object.keys(state.functions).forEach(funName => {
-    solveBranch(state.functions[funName]!.function.context.entryNode)
+    const fun = state.functions[funName]!.function
+    solveBranch(fun.context.entryNode, fun)
   })
 
   // solve opcodes
-  const r0Info: RegisterInfo = {
-    register: 'r0' as AvailableRegs,
-    name: 'r0',
-    type: wordType,
-    span: basicSpan
-  }
-
-  const spInfo: RegisterInfo = {
-    register: 'sp' as AvailableRegs,
-    name: 'sp',
-    type: wordType,
-    span: basicSpan
-  }
-
-  const raInfo: RegisterInfo = {
-    register: 'ra',
-    name: 'ra',
-    type: wordType,
-    span: basicSpan
+  function createInfo(reg: string) {
+    return {
+      register: reg as AvailableRegs,
+      name: reg,
+      type: wordType,
+      span: basicSpan
+    }
   }
 
   type Resolver = {
@@ -3201,19 +3346,33 @@ function assemble(state: State): RegisterMap {
 
   let lastLabels, newLabels, i = 0
   do {
+    let used: MapInfo[] = []
     assert(i < 10, 'Compiling more than 10 passes?')
     lastLabels = newLabels
 
     const info: Info = {
       pc: PROGRAM_ENTRY_POINT,
       getReg: name => {
-        if (name == 'r0') return r0Info
-        if (name == 'sp') return spInfo
-        if (name == 'ra') return raInfo
+        if (name == 'r0') return createInfo('r0')
+        if (name == 'sp') return createInfo('sp')
+        if (availableRegs.includes(name as AvailableRegs)) return createInfo(name)
 
         const reg = map[name]
         assert(reg, 'Impossible')
-        return reg
+
+
+        if (reg.node.type == 'declare') {
+          used.push(reg)
+        }
+
+        if (reg.node.isLast) {
+          used = used.filter(el => el.info.register != reg.info.register)
+        }
+
+        return reg.info
+      },
+      getUsedRegisters: () => {
+        return used.map(el => el.info.register)
       },
       solveLabel: labelName => {
         if (i == 0) {
@@ -3227,7 +3386,6 @@ function assemble(state: State): RegisterMap {
     }
 
     resolvers.forEach(inst => {
-
       // separat pc if resolver changes pc
       let prePc = info.pc
       const result = inst.resolver(info)
@@ -3385,23 +3543,25 @@ function displayViz(state: State, map: RegisterMap) {
 
   const connMap: {[key: string]:  ConnReg | undefined} = {}
 
-  function addBranch(entryNode: EntryNode, funName?: string) {
+  function addBranch(entryNode: EntryNode, fun?: FunctionContext) {
     graph += `
       subgraph cluster_${entryNode.nodeID} {
     `
 
-    if (funName) {
+    if (fun) {
+      const funName = fun.name
+
       graph += `
         label = "Function: ${funName}"
         fontsize = "30pt"
         fontcolor = "Red"
 
-        rank = same; ra_${entryNode.nodeID} [label = "A"];
-        rank = same; rb_${entryNode.nodeID} [label = "B"];
-        rank = same; rc_${entryNode.nodeID} [label = "C"];
-        rank = same; rd_${entryNode.nodeID} [label = "D"];
-        rank = same; re_${entryNode.nodeID} [label = "E"];
-        rank = same; rf_${entryNode.nodeID} [label = "F"];
+        rank = same; ra_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('ra') ? 'A' : 'X'}"];
+        rank = same; rb_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rb') ? 'B' : 'X'}"];
+        rank = same; rc_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rc') ? 'C' : 'X'}"];
+        rank = same; rd_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rd') ? 'D' : 'X'}"];
+        rank = same; re_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('re') ? 'E' : 'X'}"];
+        rank = same; rf_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rf') ? 'F' : 'X'}"];
       `
     }
 
@@ -3424,8 +3584,8 @@ function displayViz(state: State, map: RegisterMap) {
         ${addDefinition(curr, 'ra', 'A')}
         ${addDefinition(curr, 'rb', 'B')}
         ${addDefinition(curr, 'rc', 'C')}
-        ${addDefinition(curr, 'rd', 'E')}
-        ${addDefinition(curr, 're', 'D')}
+        ${addDefinition(curr, 'rd', 'D')}
+        ${addDefinition(curr, 're', 'E')}
         ${addDefinition(curr, 'rf', 'F')}
 
         {
@@ -3450,10 +3610,11 @@ function displayViz(state: State, map: RegisterMap) {
       switch (node.type) {
         case 'use':
         case 'declare':
-          const reg = map[node.value.id]?.register
+          const reg = map[node.value.id]?.info.register
           assert(reg, 'Impossible')
+
           connMap[reg] = {
-            name: node.value.name,
+            name: node.id,
             first: !connMap[reg],
             used: true
           }
@@ -3509,11 +3670,12 @@ function displayViz(state: State, map: RegisterMap) {
   }
 
   Object.keys(state.functions).forEach(funName => {
-    addBranch(state.functions[funName]!.function.context.entryNode, funName)
+    const fun = state.functions[funName]!.function
+    addBranch(fun.context.entryNode, fun)
   })
 
   graph += '}'
-  console.log(graph)
+
 
   viz.renderSVGElement(graph).then((el: any) => {
     vizDiv.appendChild(el);
@@ -3910,7 +4072,7 @@ function simulate(state: State) {
     const {decoder, inst} = nextInst
 
     if (!silent) {
-      console.log(`Executing: ${inst.print}`)
+      console.log(`Executing: ${inst.print.padEnd(32)}, ${inst.inst?.span.print}`)
     }
 
     assertInst(decoder, 'No exec')

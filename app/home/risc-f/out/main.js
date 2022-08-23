@@ -60,9 +60,6 @@ const literalType = {
     print: 'literalNumber',
 };
 const registers = ['r0', 'ra', 'rb', 'rc', 'rd', 're', 'rf', 'sp', 'pc'];
-function isRegister(test) {
-    return registers.includes(test);
-}
 // Type Context
 const availableRegs = ['ra', 'rb', 'rc', 'rd', 're', 'rf'];
 const r0ID = 'r0';
@@ -331,12 +328,12 @@ function getAssertTypesMessage(expr) {
         case 'global':
             return `variable '${expr.name}' which has the type '${expr.dataType.print}'`;
         case 'deref':
-            return `dereferce which results in ${expr.dataType.print}`;
+            return `dereferce which results in '${expr.dataType.print}'`;
         case 'array':
         case 'string':
-            return `${expr.type} ${expr.dataType.print}`;
+            return `'${expr.type}' '${expr.dataType.print}'`;
         case 'functionVariable':
-            return `funcion operand ${expr.name} which has the type ${expr.dataType.print}`;
+            return `funcion operand '${expr.name}' which has the type '${expr.dataType.print}'`;
     }
 }
 function assertTypes(lhs, rhs) {
@@ -902,7 +899,11 @@ function buildFunction(lexer, state, context, returnType) {
     }
     const fromStart = lexer.nextIs(')');
     // reserve __retAddr, if it's main it will never be used
-    const returnAddress = bodyContext.addRegister(fromStart.span, '__retAddr', addrType);
+    let returnAddress;
+    console.log(funName.token);
+    if (!isMain) {
+        returnAddress = bodyContext.addRegister(fromStart.span, '__retAddr', addrType);
+    }
     // consumes { }
     const body = parseBlock(lexer, state, bodyContext);
     assertSpan(body.end, body.didReturn, 'Function never returned');
@@ -916,9 +917,8 @@ function buildFunction(lexer, state, context, returnType) {
         solveLabel(state, context, returnType.span, exitID, returnType);
     }
     fork.join(bodyContext.end);
-    bodyContext.addRegister(fromStart.span, '__return', addrType);
     if (!isMain) {
-        solveJALR(state, context, bodyContext.end, returnAddress.id, r0ID);
+        solveJALR(state, bodyContext, bodyContext.end, returnAddress.id, r0ID);
         bodyContext.resolve(bodyContext.end, '__retAddr');
     }
     state.functions[funName.token] = {
@@ -933,7 +933,8 @@ function buildFunction(lexer, state, context, returnType) {
             beginLabel: entryID,
             context: bodyContext,
             span: funName.span,
-            returnAddress
+            returnAddress: returnAddress,
+            usedRegisters: []
         }
     };
     return true;
@@ -1093,6 +1094,7 @@ function parseTypedef(lexer, state, context) {
         context.unresolve(name.span, name.token);
         state.types[name.token] = {
             ...type,
+            name: type.name.replace(type.name, name.token),
             print: type.print.replace(type.name, name.token),
             span: start.span,
         };
@@ -1201,9 +1203,9 @@ function parseAssignment(lexer, state, context) {
 function parseVoidFunCall(lexer, state, context) {
     if (lexer.peek().type == 'string' && lexer.peek(1).token == '(') {
         const fun = buildOperand(lexer, state, context);
-        assertSpan(fun.span, fun.type == 'functionVariable', `Cannot call non function ${fun.type}`);
+        assertSpan(fun.span, fun.type == 'functionCall', `Cannot call non function ${fun.type}`);
         assertSpan(fun.span, fun.dataType.type == 'void', `Function doesn't return void, '${fun.dataType.print}'`);
-        solveJAL(state, context, fun.span, fun.function.beginLabel, fun.function.returnAddress.id);
+        solveFunctionCall(state, context, fun);
         return true;
     }
     return false;
@@ -1512,8 +1514,11 @@ function solveExpression(state, context, to, expr) {
             return;
         }
         if (expr.type == 'functionCall') {
-            const fun = expr.function;
-            solveJAL(state, context, fun.span, fun.beginLabel, fun.returnAddress.id);
+            solveFunctionCall(state, context, expr, to);
+            return;
+        }
+        if (expr.type == 'functionVariable') {
+            solveLDI_LABEL(state, context, to.id, expr.function.beginLabel);
             return;
         }
     }
@@ -1554,7 +1559,8 @@ function solveExpression(state, context, to, expr) {
     }
     const lhs = getAssertTypesMessage(to);
     const rhs = getAssertTypesMessage(expr);
-    assertSpan(to.span, false, `Cannot assign '${lhs}' to '${rhs}'`);
+    console.log(to, expr);
+    assertSpan(to.span, false, `Cannot assign ${lhs} to ${rhs}`);
 }
 function solveJMP(state, context, span, to) {
     solveJAL(state, context, span, to, r0ID);
@@ -1583,10 +1589,10 @@ function solveJAL(state, context, span, to, link) {
 }
 function solveJALR(state, context, span, to, link) {
     state.program.push(info => {
-        const dReg = info.getReg(link);
         const bReg = info.getReg(to);
-        const d = dReg.register;
+        const dReg = info.getReg(link);
         const b = bReg.register;
+        const d = dReg.register;
         let opcode = solveRegisters('r0', b, d);
         // const immCode = solveImmediate(imm, 9)
         return {
@@ -1603,6 +1609,50 @@ function solveJALR(state, context, span, to, link) {
                     rType: dReg.type.print,
                     print: `${hex(opcode, 4, false)}: J JALR        ${b} ${d}`
                 }]
+        };
+    });
+}
+function solveFunctionCall(state, context, fun, to) {
+    state.program.push(info => {
+        const opcodes = [];
+        const callerUsed = info.getUsedRegisters();
+        debugger;
+        const calleeUsed = fun.function.usedRegisters;
+        const used = calleeUsed.filter(el => callerUsed.includes(el));
+        console.log(fun.function.name, callerUsed, calleeUsed, used);
+        if (used.length) {
+            solveADI(state, context, spID, spID, -callerUsed.length);
+            const adi = state.program.instructions.pop()(info);
+            opcodes.push(...adi.opcodes);
+            used.forEach((reg, i) => {
+                solveSTO(state, context, spID, reg, i);
+                const sto = state.program.instructions.pop()(info);
+                opcodes.push(...sto.opcodes);
+            });
+        }
+        solveJAL(state, context, fun.span, fun.function.beginLabel, fun.function.returnAddress.id);
+        const jal = state.program.instructions.pop()(info);
+        opcodes.push(...jal.opcodes);
+        if (to) {
+            assertSpan(fun.span, fun.function.returnRegister, 'Impossible');
+            solveADI(state, context, to.id, fun.function.returnRegister, 0);
+            const adi = state.program.instructions.pop()(info);
+            opcodes.push(...adi.opcodes);
+        }
+        if (used.length) {
+            used.forEach((reg, i) => {
+                solveLOD(state, context, reg, spID, i);
+                const lod = state.program.instructions.pop()(info);
+                opcodes.push(...lod.opcodes);
+            });
+            solveADI(state, context, spID, spID, +callerUsed.length);
+            const adi = state.program.instructions.pop()(info);
+            opcodes.push(...adi.opcodes);
+        }
+        return {
+            span: fun.span,
+            print: `CAL ${fun.function.name}`,
+            opcodes
         };
     });
 }
@@ -1685,6 +1735,23 @@ function solveCondition(state, context, condition, ifTrue, ifFalse) {
         // if the branch is taken only if the condition is false
         if (!ifTrue)
             return solve(lhs, inverter[operator], rhs, ifFalse, null);
+        // Convert string of length one to char as number
+        if (lhs.type == 'string' && lhs.string.length == 1) {
+            lhs = {
+                type: 'number',
+                value: lhs.string.charCodeAt(0),
+                span: lhs.span,
+                dataType: lhs.dataType
+            };
+        }
+        if (rhs.type == 'string' && rhs.string.length == 1) {
+            rhs = {
+                type: 'number',
+                value: rhs.string.charCodeAt(0),
+                span: rhs.span,
+                dataType: rhs.dataType
+            };
+        }
         assert(lhs.type != 'number' || rhs.type != 'number', 'Not implemented');
         assertSpan(lhs.span, lhs.type == 'register' || lhs.type == 'number', `expected 'number | register' but got ${lhs.type}`);
         assertSpan(rhs.span, rhs.type == 'register' || rhs.type == 'number', `expected 'number | register' but got ${rhs.type}`);
@@ -1923,6 +1990,31 @@ function getToEnd(head) {
     }
     return lastNode;
 }
+class Stack {
+    constructor() {
+        this.size = 0;
+        this.positions = [];
+        this.names = {};
+    }
+    add(name, value) {
+        this.names[name] = value;
+    }
+    get(span, name) {
+        const value = this.names[name];
+        assertSpan(span, value, `Cannot resolve name: '${name}' in stack`);
+        return value;
+    }
+}
+class ContextClass {
+    constructor() {
+        this.didReturn = false;
+        this.stack = new Stack();
+    }
+    construnctor(parent, contextVariable) {
+    }
+}
+const a = new ContextClass();
+let b = a.begin;
 function createContext(parent, contextVariable) {
     const entryNode = {
         type: 'entry',
@@ -1947,17 +2039,21 @@ function createContext(parent, contextVariable) {
             if (!noRegNode) {
                 const node = chainLookup(context.lastNode, name);
                 if (node) {
+                    const value = {
+                        ...node.value,
+                        id: `${node.id}_${nextInt()}`
+                    };
                     addToChain(context, {
                         type: 'use',
                         id: node.id,
                         prev: context.lastNode,
-                        value: node.value,
+                        value: value,
                         isLast: true,
                         next: null,
                         span,
                         nodeID: `node_${nextInt()}`
                     });
-                    return node.value;
+                    return value;
                 }
             }
             const stack = context.stack.names[name];
@@ -2262,43 +2358,67 @@ function hex(number, length, canBeNegative = true) {
 function assemble(state) {
     // solve register selection
     const map = {};
-    function solveBranch(entry) {
+    function solveBranch(entry, fun) {
         let available = [...availableRegs];
         // used in other branches
         entry.entries.forEach(entry => {
             const reg = map[entry];
             assert(reg, 'Impossible');
-            available = available.filter(el => el != reg.register);
+            available = available.filter(el => el != reg.info.register);
         });
         let node = entry.next;
         while (node) {
             switch (node.type) {
                 case 'declare':
-                    const reg = available.shift();
+                    let reg;
+                    if (node.value.name == '__return') {
+                        if (fun.returnRegister) {
+                            reg = fun.returnRegister;
+                        }
+                        else {
+                            reg = available.shift();
+                            fun.returnRegister = reg;
+                        }
+                    }
+                    else {
+                        reg = available.shift();
+                    }
                     assertSpan(node.value.span, reg, 'No reg left!');
                     map[node.id] = {
-                        register: reg,
-                        name: node.value.name,
-                        type: node.value.dataType,
-                        span: node.span
+                        info: {
+                            register: reg,
+                            name: node.value.name,
+                            type: node.value.dataType,
+                            span: node.span
+                        },
+                        node,
+                        availableReg: [...available]
                     };
+                    if (!fun.usedRegisters.includes(reg)) {
+                        fun.usedRegisters.push(reg);
+                    }
                     if (node.isLast) {
                         available.unshift(reg);
                     }
                     node = node.next;
                     break;
                 case 'use':
+                    const declaredReg = map[node.id];
+                    assert(declaredReg, 'Impossible');
+                    map[node.value.id] = {
+                        info: declaredReg.info,
+                        node,
+                        availableReg: [...available]
+                    };
                     if (node.isLast) {
-                        const reg = map[node.id];
-                        assert(reg, 'Impossible');
-                        available.unshift(reg.register);
+                        available.unshift(declaredReg.info.register);
                     }
                     node = node.next;
                     break;
                 case 'entry':
                     assert(false, 'Impossible');
                 case 'split':
-                    node.children.forEach(child => solveBranch(child));
+                    node.children.forEach(child => solveBranch(child, fun));
                     assert(node.joinNode, 'Impossible');
                     node = node.joinNode.next;
                     break;
@@ -2312,44 +2432,45 @@ function assemble(state) {
         // le fini i node? le fini
     }
     Object.keys(state.functions).forEach(funName => {
-        solveBranch(state.functions[funName].function.context.entryNode);
+        const fun = state.functions[funName].function;
+        solveBranch(fun.context.entryNode, fun);
     });
     // solve opcodes
-    const r0Info = {
-        register: 'r0',
-        name: 'r0',
-        type: wordType,
-        span: basicSpan
-    };
-    const spInfo = {
-        register: 'sp',
-        name: 'sp',
-        type: wordType,
-        span: basicSpan
-    };
-    const raInfo = {
-        register: 'ra',
-        name: 'ra',
-        type: wordType,
-        span: basicSpan
-    };
+    function createInfo(reg) {
+        return {
+            register: reg,
+            name: reg,
+            type: wordType,
+            span: basicSpan
+        };
+    }
     const resolvers = state.program.instructions.map(r => ({ resolver: r, result: null }));
     let lastLabels, newLabels, i = 0;
     do {
+        let used = [];
         assert(i < 10, 'Compiling more than 10 passes?');
         lastLabels = newLabels;
         const info = {
             pc: PROGRAM_ENTRY_POINT,
             getReg: name => {
                 if (name == 'r0')
-                    return r0Info;
+                    return createInfo('r0');
                 if (name == 'sp')
-                    return spInfo;
-                if (name == 'ra')
-                    return raInfo;
+                    return createInfo('sp');
+                if (availableRegs.includes(name))
+                    return createInfo(name);
                 const reg = map[name];
                 assert(reg, 'Impossible');
-                return reg;
+                if (reg.node.type == 'declare') {
+                    used.push(reg);
+                }
+                if (reg.node.isLast) {
+                    used = used.filter(el => el.info.register != reg.info.register);
+                }
+                return reg.info;
+            },
+            getUsedRegisters: () => {
+                return used.map(el => el.info.register);
             },
             solveLabel: labelName => {
                 if (i == 0) {
@@ -2471,22 +2592,23 @@ function displayViz(state, map) {
     console.log(state, map);
     let graph = 'digraph main {\n';
     const connMap = {};
-    function addBranch(entryNode, funName) {
+    function addBranch(entryNode, fun) {
         graph += `
       subgraph cluster_${entryNode.nodeID} {
     `;
-        if (funName) {
+        if (fun) {
+            const funName = fun.name;
             graph += `
         label = "Function: ${funName}"
         fontsize = "30pt"
         fontcolor = "Red"
 
-        rank = same; ra_${entryNode.nodeID} [label = "A"];
-        rank = same; rb_${entryNode.nodeID} [label = "B"];
-        rank = same; rc_${entryNode.nodeID} [label = "C"];
-        rank = same; rd_${entryNode.nodeID} [label = "D"];
-        rank = same; re_${entryNode.nodeID} [label = "E"];
-        rank = same; rf_${entryNode.nodeID} [label = "F"];
+        rank = same; ra_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('ra') ? 'A' : 'X'}"];
+        rank = same; rb_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rb') ? 'B' : 'X'}"];
+        rank = same; rc_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rc') ? 'C' : 'X'}"];
+        rank = same; rd_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rd') ? 'D' : 'X'}"];
+        rank = same; re_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('re') ? 'E' : 'X'}"];
+        rank = same; rf_${entryNode.nodeID} [label = "${fun.usedRegisters.includes('rf') ? 'F' : 'X'}"];
       `;
         }
         let lastNode = entryNode;
@@ -2506,8 +2628,8 @@ function displayViz(state, map) {
         ${addDefinition(curr, 'ra', 'A')}
         ${addDefinition(curr, 'rb', 'B')}
         ${addDefinition(curr, 'rc', 'C')}
-        ${addDefinition(curr, 'rd', 'E')}
-        ${addDefinition(curr, 're', 'D')}
+        ${addDefinition(curr, 'rd', 'D')}
+        ${addDefinition(curr, 're', 'E')}
         ${addDefinition(curr, 'rf', 'F')}
 
         {
@@ -2532,10 +2654,10 @@ function displayViz(state, map) {
             switch (node.type) {
                 case 'use':
                 case 'declare':
-                    const reg = map[node.value.id]?.register;
+                    const reg = map[node.value.id]?.info.register;
                     assert(reg, 'Impossible');
                     connMap[reg] = {
-                        name: node.value.name,
+                        name: node.id,
                         first: !connMap[reg],
                         used: true
                     };
@@ -2576,10 +2698,10 @@ function displayViz(state, map) {
         graph += '}\n';
     }
     Object.keys(state.functions).forEach(funName => {
-        addBranch(state.functions[funName].function.context.entryNode, funName);
+        const fun = state.functions[funName].function;
+        addBranch(fun.context.entryNode, fun);
     });
     graph += '}';
-    console.log(graph);
     viz.renderSVGElement(graph).then((el) => {
         vizDiv.appendChild(el);
     }).catch((e) => {
@@ -2897,7 +3019,7 @@ function simulate(state) {
         simulation.currInst = nextInst.inst;
         const { decoder, inst } = nextInst;
         if (!silent) {
-            console.log(`Executing: ${inst.print}`);
+            console.log(`Executing: ${inst.print.padEnd(32)}, ${inst.inst?.span.print}`);
         }
         assertInst(decoder, 'No exec');
         simulation.instCounter++;

@@ -1,0 +1,3230 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>RISC-F 0.1.0</title>
+  </head>
+  <body>
+
+  <textarea id="source" rows="50" cols="120" spellcheck="false">
+
+typedef word int_t
+
+typedef int_t char_t
+typedef int_t pixel_t
+typedef int_t tile_t
+typedef int_t bool_t
+
+define bool_t true = 1
+define bool_t false = 0
+
+define __PRINT_COMMENTS__  = false
+define __PRINT_MEMORY__  = false
+define __PRINT_RAM__  = true
+define __PRINT_EVAL__ = false
+
+define int_t* INT_VECTOR = 0b0111_1111_1111_1111
+define pixel_t* PRAM_BEGIN   = 0b1000_0000_0000_0000
+define tile_t* TRAM_BEGIN    = 0b1010_0000_0000_0000
+define PROGRAM_ENTRY_POINT = 0b1100_0000_0000_0000
+
+define BLACK   = 0b_00000_000000_00000
+define RED     = 0b_00000_000000_11111
+define GREEN   = 0b_00000_111111_00000
+define BLUE    = 0b_11111_000000_00000
+
+define YELLOW  = RED | GREEN
+define MAGENTA = RED | BLUE
+define CYAN    = GREEN | BLUE
+define WHITE   = RED | GREEN | BLUE
+
+const pixel_t* black = BLACK
+const pixel_t* red = RED
+const pixel_t* green = GREEN
+const pixel_t* blue = BLUE
+
+const pixel_t* yellow = YELLOW
+const pixel_t* magenta = MAGENTA
+const pixel_t* cyan = CYAN
+const pixel_t* white = WHITE
+
+
+define char_t* keyboardPtr        = 0b1111_1111_1111_0000
+
+define char_t NULL_CHAR        = 0
+define char_t CURSOR_CHAR      = 1
+define char_t LEFT_ARROW_CHAR  = 2
+define char_t UP_ARROW_CHAR    = 3
+define char_t RIGHT_ARROW_CHAR = 4
+define char_t DOWN_ARROW_CHAR  = 5
+define char_t DEL_CHAR         = 8
+define char_t NEWLINE_CHAR     = 10
+
+define int_t COL_SIZE = 80
+define int_t ROW_SIZE = 60
+
+eval(
+const charSet = [
+  [0x00, 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x00],   // U+0000 (nul)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0001 (cursor)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0002 (leftArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0003 (upArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0004 (rightArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0005 (downArrow)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0006
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0007
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0008 (delete)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0009
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000A (\n)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000B
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000C
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000D
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000E
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+000F
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0010
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0011
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0012
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0013
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0014
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0015
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0016
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0017
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0018
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0019
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001A
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001B
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001C
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001D
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001E
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+001F
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0020 (space)
+  [0x18, 0x3C, 0x3C, 0x18, 0x18, 0x00, 0x18, 0x00],   // U+0021 (!)
+  [0x36, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0022 (")
+  [0x36, 0x36, 0x7F, 0x36, 0x7F, 0x36, 0x36, 0x00],   // U+0023 (#)
+  [0x0C, 0x3E, 0x03, 0x1E, 0x30, 0x1F, 0x0C, 0x00],   // U+0024 ($)
+  [0x00, 0x63, 0x33, 0x18, 0x0C, 0x66, 0x63, 0x00],   // U+0025 (%)
+  [0x1C, 0x36, 0x1C, 0x6E, 0x3B, 0x33, 0x6E, 0x00],   // U+0026 (&)
+  [0x06, 0x06, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0027 (')
+  [0x18, 0x0C, 0x06, 0x06, 0x06, 0x0C, 0x18, 0x00],   // U+0028 (()
+  [0x06, 0x0C, 0x18, 0x18, 0x18, 0x0C, 0x06, 0x00],   // U+0029 ())
+  [0x00, 0x66, 0x3C, 0xFF, 0x3C, 0x66, 0x00, 0x00],   // U+002A (*)
+  [0x00, 0x0C, 0x0C, 0x3F, 0x0C, 0x0C, 0x00, 0x00],   // U+002B (+)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C, 0x06],   // U+002C (,)
+  [0x00, 0x00, 0x00, 0x3F, 0x00, 0x00, 0x00, 0x00],   // U+002D (-)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C, 0x00],   // U+002E (.)
+  [0x60, 0x30, 0x18, 0x0C, 0x06, 0x03, 0x01, 0x00],   // U+002F (/)
+  [0x3E, 0x63, 0x73, 0x7B, 0x6F, 0x67, 0x3E, 0x00],   // U+0030 (0)
+  [0x0C, 0x0E, 0x0C, 0x0C, 0x0C, 0x0C, 0x3F, 0x00],   // U+0031 (1)
+  [0x1E, 0x33, 0x30, 0x1C, 0x06, 0x33, 0x3F, 0x00],   // U+0032 (2)
+  [0x1E, 0x33, 0x30, 0x1C, 0x30, 0x33, 0x1E, 0x00],   // U+0033 (3)
+  [0x38, 0x3C, 0x36, 0x33, 0x7F, 0x30, 0x78, 0x00],   // U+0034 (4)
+  [0x3F, 0x03, 0x1F, 0x30, 0x30, 0x33, 0x1E, 0x00],   // U+0035 (5)
+  [0x1C, 0x06, 0x03, 0x1F, 0x33, 0x33, 0x1E, 0x00],   // U+0036 (6)
+  [0x3F, 0x33, 0x30, 0x18, 0x0C, 0x0C, 0x0C, 0x00],   // U+0037 (7)
+  [0x1E, 0x33, 0x33, 0x1E, 0x33, 0x33, 0x1E, 0x00],   // U+0038 (8)
+  [0x1E, 0x33, 0x33, 0x3E, 0x30, 0x18, 0x0E, 0x00],   // U+0039 (9)
+  [0x00, 0x0C, 0x0C, 0x00, 0x00, 0x0C, 0x0C, 0x00],   // U+003A (:)
+  [0x00, 0x0C, 0x0C, 0x00, 0x00, 0x0C, 0x0C, 0x06],   // U+003B (;)
+  [0x18, 0x0C, 0x06, 0x03, 0x06, 0x0C, 0x18, 0x00],   // U+003C (<)
+  [0x00, 0x00, 0x3F, 0x00, 0x00, 0x3F, 0x00, 0x00],   // U+003D (=)
+  [0x06, 0x0C, 0x18, 0x30, 0x18, 0x0C, 0x06, 0x00],   // U+003E (>)
+  [0x1E, 0x33, 0x30, 0x18, 0x0C, 0x00, 0x0C, 0x00],   // U+003F (?)
+  [0x3E, 0x63, 0x7B, 0x7B, 0x7B, 0x03, 0x1E, 0x00],   // U+0040 (@)
+  [0x0C, 0x1E, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x00],   // U+0041 (A)
+  [0x3F, 0x66, 0x66, 0x3E, 0x66, 0x66, 0x3F, 0x00],   // U+0042 (B)
+  [0x3C, 0x66, 0x03, 0x03, 0x03, 0x66, 0x3C, 0x00],   // U+0043 (C)
+  [0x1F, 0x36, 0x66, 0x66, 0x66, 0x36, 0x1F, 0x00],   // U+0044 (D)
+  [0x7F, 0x46, 0x16, 0x1E, 0x16, 0x46, 0x7F, 0x00],   // U+0045 (E)
+  [0x7F, 0x46, 0x16, 0x1E, 0x16, 0x06, 0x0F, 0x00],   // U+0046 (F)
+  [0x3C, 0x66, 0x03, 0x03, 0x73, 0x66, 0x7C, 0x00],   // U+0047 (G)
+  [0x33, 0x33, 0x33, 0x3F, 0x33, 0x33, 0x33, 0x00],   // U+0048 (H)
+  [0x1E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+0049 (I)
+  [0x78, 0x30, 0x30, 0x30, 0x33, 0x33, 0x1E, 0x00],   // U+004A (J)
+  [0x67, 0x66, 0x36, 0x1E, 0x36, 0x66, 0x67, 0x00],   // U+004B (K)
+  [0x0F, 0x06, 0x06, 0x06, 0x46, 0x66, 0x7F, 0x00],   // U+004C (L)
+  [0x63, 0x77, 0x7F, 0x7F, 0x6B, 0x63, 0x63, 0x00],   // U+004D (M)
+  [0x63, 0x67, 0x6F, 0x7B, 0x73, 0x63, 0x63, 0x00],   // U+004E (N)
+  [0x1C, 0x36, 0x63, 0x63, 0x63, 0x36, 0x1C, 0x00],   // U+004F (O)
+  [0x3F, 0x66, 0x66, 0x3E, 0x06, 0x06, 0x0F, 0x00],   // U+0050 (P)
+  [0x1E, 0x33, 0x33, 0x33, 0x3B, 0x1E, 0x38, 0x00],   // U+0051 (Q)
+  [0x3F, 0x66, 0x66, 0x3E, 0x36, 0x66, 0x67, 0x00],   // U+0052 (R)
+  [0x1E, 0x33, 0x07, 0x0E, 0x38, 0x33, 0x1E, 0x00],   // U+0053 (S)
+  [0x3F, 0x2D, 0x0C, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+0054 (T)
+  [0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3F, 0x00],   // U+0055 (U)
+  [0x33, 0x33, 0x33, 0x33, 0x33, 0x1E, 0x0C, 0x00],   // U+0056 (V)
+  [0x63, 0x63, 0x63, 0x6B, 0x7F, 0x77, 0x63, 0x00],   // U+0057 (W)
+  [0x63, 0x63, 0x36, 0x1C, 0x1C, 0x36, 0x63, 0x00],   // U+0058 (X)
+  [0x33, 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x1E, 0x00],   // U+0059 (Y)
+  [0x7F, 0x63, 0x31, 0x18, 0x4C, 0x66, 0x7F, 0x00],   // U+005A (Z)
+  [0x1E, 0x06, 0x06, 0x06, 0x06, 0x06, 0x1E, 0x00],   // U+005B ([)
+  [0x03, 0x06, 0x0C, 0x18, 0x30, 0x60, 0x40, 0x00],   // U+005C (\)
+  [0x1E, 0x18, 0x18, 0x18, 0x18, 0x18, 0x1E, 0x00],   // U+005D (])
+  [0x08, 0x1C, 0x36, 0x63, 0x00, 0x00, 0x00, 0x00],   // U+005E (^)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF],   // U+005F (_)
+  [0x0C, 0x0C, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+0060 (`)
+  [0x00, 0x00, 0x1E, 0x30, 0x3E, 0x33, 0x6E, 0x00],   // U+0061 (a)
+  [0x07, 0x06, 0x06, 0x3E, 0x66, 0x66, 0x3B, 0x00],   // U+0062 (b)
+  [0x00, 0x00, 0x1E, 0x33, 0x03, 0x33, 0x1E, 0x00],   // U+0063 (c)
+  [0x38, 0x30, 0x30, 0x3e, 0x33, 0x33, 0x6E, 0x00],   // U+0064 (d)
+  [0x00, 0x00, 0x1E, 0x33, 0x3f, 0x03, 0x1E, 0x00],   // U+0065 (e)
+  [0x1C, 0x36, 0x06, 0x0f, 0x06, 0x06, 0x0F, 0x00],   // U+0066 (f)
+  [0x00, 0x00, 0x6E, 0x33, 0x33, 0x3E, 0x30, 0x1F],   // U+0067 (g)
+  [0x07, 0x06, 0x36, 0x6E, 0x66, 0x66, 0x67, 0x00],   // U+0068 (h)
+  [0x0C, 0x00, 0x0E, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+0069 (i)
+  [0x30, 0x00, 0x30, 0x30, 0x30, 0x33, 0x33, 0x1E],   // U+006A (j)
+  [0x07, 0x06, 0x66, 0x36, 0x1E, 0x36, 0x67, 0x00],   // U+006B (k)
+  [0x0E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C, 0x1E, 0x00],   // U+006C (l)
+  [0x00, 0x00, 0x33, 0x7F, 0x7F, 0x6B, 0x63, 0x00],   // U+006D (m)
+  [0x00, 0x00, 0x1F, 0x33, 0x33, 0x33, 0x33, 0x00],   // U+006E (n)
+  [0x00, 0x00, 0x1E, 0x33, 0x33, 0x33, 0x1E, 0x00],   // U+006F (o)
+  [0x00, 0x00, 0x3B, 0x66, 0x66, 0x3E, 0x06, 0x0F],   // U+0070 (p)
+  [0x00, 0x00, 0x6E, 0x33, 0x33, 0x3E, 0x30, 0x78],   // U+0071 (q)
+  [0x00, 0x00, 0x3B, 0x6E, 0x66, 0x06, 0x0F, 0x00],   // U+0072 (r)
+  [0x00, 0x00, 0x3E, 0x03, 0x1E, 0x30, 0x1F, 0x00],   // U+0073 (s)
+  [0x08, 0x0C, 0x3E, 0x0C, 0x0C, 0x2C, 0x18, 0x00],   // U+0074 (t)
+  [0x00, 0x00, 0x33, 0x33, 0x33, 0x33, 0x6E, 0x00],   // U+0075 (u)
+  [0x00, 0x00, 0x33, 0x33, 0x33, 0x1E, 0x0C, 0x00],   // U+0076 (v)
+  [0x00, 0x00, 0x63, 0x6B, 0x7F, 0x7F, 0x36, 0x00],   // U+0077 (w)
+  [0x00, 0x00, 0x63, 0x36, 0x1C, 0x36, 0x63, 0x00],   // U+0078 (x)
+  [0x00, 0x00, 0x33, 0x33, 0x33, 0x3E, 0x30, 0x1F],   // U+0079 (y)
+  [0x00, 0x00, 0x3F, 0x19, 0x0C, 0x26, 0x3F, 0x00],   // U+007A (z)
+  [0x38, 0x0C, 0x0C, 0x07, 0x0C, 0x0C, 0x38, 0x00],   // U+007B ([)
+  [0x18, 0x18, 0x18, 0x00, 0x18, 0x18, 0x18, 0x00],   // U+007C (|)
+  [0x07, 0x0C, 0x0C, 0x38, 0x0C, 0x0C, 0x07, 0x00],   // U+007D (])
+  [0x6E, 0x3B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],   // U+007E (~)
+  [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]    // U+007F
+]
+
+function addChar(index, glyph) {
+  const lines = glyph.trim().split('\n')
+  if (lines.length > 8) console.error('to tall')
+
+  const out = []
+  lines.forEach((line, i) => {
+    let num = 0
+    if (line.length > 8) console.error('to wide')
+    line.split('').forEach((e, i) => num += (e == '#' ? (1 << i) : 0))
+    out.push(num)
+  })
+
+  charSet[index] = out
+}
+
+addChar(1, `
+.
+#
+#
+#
+#
+#
+#
+.
+`)
+
+
+const out = []
+charSet.forEach(char => {
+  for (let i = 0; i < 8; i += 2) {
+    const num = char[i] + (char[i + 1] << 8) ||0
+    out.push(num)
+  }
+})
+
+return `const char_t* charset = [${out.join(', ')}]`
+
+)
+
+asm {
+  jmp skip
+  int_vec:
+  jmp loop
+  skip:
+}
+
+int_t* int_vector as f = INT_VECTOR
+int_t vector as d = (int_t)int_vec
+*int_vector = vector
+
+pixel_t* pixelDestination as a = PRAM_BEGIN
+char_t* endPtr as c = charset_end
+
+for (char_t* charPtr as b = charset; charPtr < endPtr; charPtr = charPtr + 1) {
+  char_t currChar as d = *charPtr
+
+  int_t mask as e = 1
+  asm { shift: }
+
+  pixel_t color as f = (pixel_t)currChar & (pixel_t)mask
+
+  if (color) {
+    color = WHITE
+  }
+  // else pixel is 0 therfore is already black
+
+  *pixelDestination = color
+
+  pixelDestination = pixelDestination + 1
+  mask = mask + mask
+
+  asm { bnc shift }
+}
+
+const char_t* msg = 'Hello there!'
+
+int_t len as a = 64
+tile_t* __endPtr as b = TRAM_BEGIN + 64
+
+for (tile_t* _tilePtr as a = TRAM_BEGIN; _tilePtr < __endPtr; _tilePtr = _tilePtr + 1) {
+  *_tilePtr = 0
+}
+
+char_t* _endPtr as b = msg_end
+tile_t* tilePtr as c = TRAM_BEGIN
+
+for (char_t* charPtr as a = msg; charPtr < _endPtr; charPtr = charPtr + 1) {
+  char_t currTile as d = *charPtr
+  *tilePtr = (tile_t)currTile
+
+  tilePtr = tilePtr + 1
+}
+
+
+char_t* keyboard as a = keyboardPtr
+tile_t* cursor as b = tilePtr
+tile_t caret as c = (tile_t)CURSOR_CHAR
+tile_t underCursor as e = 0
+
+*keyboard = 0
+
+asm {
+  loop:
+}
+
+char_t pressed as d = *keyboard
+*keyboard = 0
+
+*cursor = caret
+
+if (pressed >= ' ') {
+  *cursor = (tile_t)pressed
+  cursor = cursor + 1
+  underCursor = *cursor
+  asm { jmp loop }
+}
+
+if (pressed == DEL_CHAR) {
+  *cursor = 0
+  cursor = cursor - 1
+}
+
+if (pressed == LEFT_ARROW_CHAR) {
+  *cursor = underCursor
+  cursor = cursor - 1
+  underCursor = *cursor
+}
+
+if (pressed == RIGHT_ARROW_CHAR) {
+  *cursor = underCursor
+  cursor = cursor + 1
+  underCursor = *cursor
+}
+
+
+
+asm { jmp loop }
+
+</textArea>
+
+  <pre id="pre"></pre>
+  <button id="compile">Compile!</button>
+  <button id="run">Run!</button>
+  <button id="continuous">Start!</button>
+  <button id="focus">Focus!</button>
+  <br>
+  <canvas id="screen"></canvas>
+  <pre id="memory"></pre>
+  <canvas id="tileMap" width="577" height="577"></canvas>
+
+  <style>
+    canvas {
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    #screen {
+      transform: scale(2.5);
+      transform-origin: left top;
+      margin-top: 1rem;
+    }
+
+    #tileMap {
+      transform: scale(2.5);
+      transform-origin: left top;
+    }
+  </style>
+
+<script>
+'use strict';
+
+// various assertions
+function assert(condition, message) {
+  if (!condition) throw message
+}
+
+function assertUnreachable(message) {
+  console.trace()
+  assert(false, message || 'Unreachable')
+}
+
+function assertUnimplemented() {
+  console.trace()
+  assert(false, 'Unimplemented!!!')
+}
+
+let source
+function assertSpan(span, condition, message) {
+  if (!condition) {
+    const line = Number(span.split(':')[0])
+    const error = source.split('\n')
+      .splice(0, line)
+      .map((line, i) =>  `${`${i + 1}:`.padEnd(4)} ${line}`)
+      .slice(-40)
+      .join('\n')
+
+    console.trace()
+    assert(condition, `${error}\n\n\nError at line: ${span}\n  ${message}`)
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/*                         --- tokenizer ---                                  */
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+Qual el al svantac da buildIfAST?
+- Poc backtrace
+- divis
+- tant doppi
+
+Vantac da parseIfAST & builLOD
+- tant closure
+- tüt insema?
+- multiple pass
+- auto register in futuro?
+- program.push(buildLOD_RRI)
+
+*/
+
+// get a lexer for each char
+function getCharLexer(source) {
+  const chars = source.split('')
+
+  let currLine = 1
+  let currPosition = 0
+
+  function peek() {
+    return chars[0]
+  }
+
+  function next() {
+    const char = chars.shift()
+    currPosition++
+
+    if (char == '\n') {
+      currLine++
+      currPosition = 0
+    }
+
+    return char
+  }
+
+  function getCurrentSpan() {
+    return `${currLine}:${currPosition}`
+  }
+
+  return {next, getCurrentSpan, peek}
+}
+
+// split the source code into srings, numbers and symbols
+function tokenize(source) {
+  const lexer = getCharLexer(source)
+  const tokens = []
+
+  let preSpace = ''
+  let nextSpace = ''
+  while (lexer.peek()) {
+    const char = lexer.next()
+
+    // ignore whitespaces, newlines
+    if (char.match(/\s/)) {
+      nextSpace += char
+      continue
+    }
+
+    preSpace = nextSpace
+    nextSpace = ''
+
+    let nextToken = char
+    const startSpan = lexer.getCurrentSpan()
+
+    // start of a number
+    if (char.match(/[0-9]/)) {
+
+      // consume until first space
+      while (lexer.peek() && lexer.peek().match(/[0-9a-zA-Z_]/)) {
+        nextToken += lexer.next()
+      }
+
+      // check for valid number
+      const number = Number(nextToken.replaceAll('_', ''))
+      assertSpan(startSpan, !isNaN(number), 'Malformed number: ' + nextToken)
+
+      tokens.push({
+        token: nextToken,
+        span: startSpan,
+        value: number,
+        type: 'number',
+        preSpace
+      })
+      continue
+    }
+
+    // string
+    if (char.match(/[a-zA-Z_]/)) {
+      while (lexer.peek() && lexer.peek().match(/[a-zA-Z0-9_]/)) {
+        nextToken += lexer.next()
+      }
+
+      if (['a', 'b', 'c', 'd', 'e', 'f'].includes(nextToken)) {
+        tokens.push({
+          token: nextToken,
+          span: startSpan,
+          type: 'register',
+          preSpace
+        })
+        continue
+      }
+
+      if (nextToken == 'eval') {
+        const start = lexer.next()
+        assertSpan(startSpan, start == '(', 'Malformed eval')
+
+        let depth = 1
+        let body = ''
+
+        while (lexer.peek()) {
+          const next = lexer.next()
+          if (next == '(') depth++
+          if (next == ')') depth--
+
+          if (depth == 0) break
+          body += next
+        }
+
+        assertSpan(startSpan, depth == 0, 'Cannot find matching closing )')
+
+        tokens.push({
+          token: body,
+          span: startSpan,
+          type: 'eval',
+          preSpace
+        })
+        continue
+      }
+
+      tokens.push({
+        token: nextToken,
+        span: startSpan,
+        type: 'string',
+        preSpace
+      })
+      continue
+    }
+
+
+    // start of comment
+    if (char == '/') {
+
+      // single line
+      if (lexer.peek() == '/') {
+        while (lexer.peek() && lexer.peek() != '\n') {
+          nextToken += lexer.next()
+        }
+
+        tokens.push({
+          token: nextToken,
+          span: lexer.getCurrentSpan(),
+          type: 'comment',
+          preSpace
+        })
+        continue
+
+      }
+
+      if (lexer.peek() == '*') {
+        lexer.next()
+        nextToke = '//'
+
+        while (true) {
+          const next = lexer.next()
+
+          if (next == '*' && lexer.peek() == '/') break
+
+          if (next == '\n') {
+            tokens.push({
+             token: nextToken,
+             span: lexer.getCurrentSpan(),
+             type: 'comment',
+             preSpace
+            })
+
+            nextToken = '//'
+            continue
+          }
+
+          nextTokne += next
+        }
+
+        tokens.push({
+          token: nextToken,
+          span: lexer.getCurrentSpan(),
+          type: 'comment',
+          preSpace
+        })
+
+        continue
+      }
+    }
+
+    const symbols = ['(', ')', '{', '}', '[', ']', ':', ';', ',', '?']
+    if (symbols.includes(char)) {
+      tokens.push({
+        token: char,
+        span: startSpan,
+        type: 'symbol', preSpace
+      })
+      continue
+    }
+
+    const operators = {
+      unary: ['++', '--', '~'],
+      binary: ['+', '-', '&', '|', '^', '*', '/'],
+      conditional: ['<', '<=', '=', '>=', '>', '!=', '==']
+    }
+
+    // check for the the two character wide operators first
+    function checkOperator(operator) {
+      function check(type) {
+        if (operators[type].includes(operator)) {
+          tokens.push({
+            token: operator,
+            span: startSpan,
+            type: `${type}Operator`,
+            preSpace
+          })
+          return true
+        }
+      }
+
+      if (check('unary')) return true
+      if (check('binary')) return true
+      if (check('conditional')) return true
+    }
+
+    if (lexer.peek() && checkOperator(char + lexer.peek())) {
+      lexer.next()
+      continue
+    }
+
+    if (checkOperator(char)) continue
+
+    if (char == '"' || char == "'") {
+      let nextToken = ''
+      while (lexer.peek() && lexer.peek() != char) {
+        nextToken += lexer.next()
+      }
+
+      lexer.next()
+
+      tokens.push({
+        token: nextToken,
+        span: startSpan,
+        type: 'stringLiteral',
+        preSpace
+      })
+
+      continue
+    }
+
+    tokens.push({
+      token: char,
+      span: startSpan,
+      type: 'unknown',
+      preSpace
+    })
+    // assertUnreachable(`Unknown token: ${char}, at: ${startSpan}`)
+  }
+
+  return tokens
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/*                         --- Build AST ---                                  */
+////////////////////////////////////////////////////////////////////////////////
+
+
+// return the lexer for each token
+function getTokenLexer(tokens) {
+  function next(...types) {
+    const token = tokens.shift()
+    assert(token, 'Unexpected end of input')
+
+    if (types.length) {
+      assertSpan(token.span, types.includes(token.type), `Expecten token of type: '${types.join(' | ')}' but got: '${token.token}' which is of tpye: '${token.type}' instead.`)
+    }
+
+    return token
+  }
+
+  function nextIs(...values) {
+    const token = tokens.shift()
+    assert(token, 'Unexpected end of input')
+
+    if (values.length) {
+      assertSpan(token.span, values.includes(token.token), `Expected: '${values.join(' | ')}' but got: '${token.token}' instead.`)
+    }
+
+    return token
+  }
+
+  function peek(index = 0) {
+    // peek returns an empty token
+    return tokens[index] || {}
+  }
+
+  function unNext(data) {
+    if (typeof data == 'string') {
+      const newTokens = tokenize(data)
+      while (newTokens.length) tokens.unshift(newTokens.pop())
+
+      return true
+    }
+
+    console.log(data);
+    assertUnreachable()
+  }
+
+  return {next, peek, nextIs, unNext}
+}
+
+function addLabel(lexer, state, context, name, span, type) {
+  context.unresolve(name, span)
+
+  if (!type) type = wordPtrType
+
+  const node = {
+    type: 'label',
+    name,
+    span,
+    dataType: type,
+    value: Infinity,
+    print: `${name}:`
+  }
+
+  state.program.push(node)
+  state.labels[name] = node
+}
+
+function buildLabelAST(lexer, state, context) {
+  if (lexer.peek().type == 'string' && lexer.peek(1).token == ':') {
+    const label = lexer.next()
+    lexer.nextIs(':')
+    assertUnreachable
+
+    return true
+  }
+}
+
+const nextInt = (() => {
+  let lastValue = 1
+  return () => lastValue++
+})()
+
+const inverter = {'>': '<=', '>=': '<', '==': '!=', '<=': '>', '<': '>=', '!=': '=='}
+const branchName = {'>': 'bg', '>=': 'bge', '==': 'be', '<=': 'ble', '<': 'bl', '!=': 'bne'}
+function solveConditionAST(state, context, condition, ifTrue, ifFalse) {
+  function solve(lhs, operator, rhs, ifTrue, ifFalse) {
+    assert(ifTrue || ifFalse, 'Unreachable')
+
+    // if the branch is taken only if the condition is false
+    if (!ifTrue) return solve(lhs, inverter[operator], rhs, ifFalse)
+
+    assert(lhs.type != 'number' || rhs.type != 'number', 'Not implemented')
+    assertSpan(lhs.span, lhs.type == 'register' || lhs.type == 'number', `expected 'number | register' but got ${lhs.type}`)
+    assertSpan(rhs.span, rhs.type == 'register' || rhs.type == 'number', `expected 'number | register' but got ${rhs.type}`)
+
+    const type = branchName[operator]
+    const lhsToken = lhs.type == 'register' ? lhs.register.token : lhs.value
+    const rhsToken = rhs.type == 'register' ? rhs.register.token : rhs.value
+
+    state.program.push({
+      type,
+      lhs,
+      rhs,
+      to: ifTrue,
+      span: condition.span,
+      print: `${type} ${lhsToken}, ${rhsToken}, ${ifTrue}`
+    })
+
+    if (ifFalse) {
+      state.program.push({
+        type: 'jmp',
+        lhs,
+        rhs,
+        to: ifFalse,
+        span: condition.span,
+        print: `jmp ${ifFalse}`
+      })
+    }
+  }
+
+  if (condition.type == 'conditionalExpression') {
+    return solve(condition.lhs, condition.operator.token, condition.rhs, ifTrue, ifFalse)
+  }
+
+  if (condition.type == 'register') {
+    const rhs = {
+      type: 'number',
+      token: '',
+      value: 0,
+      span: condition.span
+    }
+
+    return solve(condition, '!=', rhs, ifTrue, ifFalse)
+  }
+
+  console.log(condition)
+  assertUnreachable()
+}
+
+function buildIfAST(lexer, state, context) {
+   if (lexer.peek().token == 'if') {
+
+     const id = nextInt()
+     const begin = lexer.nextIs('if')
+
+     const preProgram = state.program.take()
+
+     lexer.nextIs('(')
+     const condition = buildExpressionAST(lexer, state, context)
+     lexer.nextIs(')')
+
+     const trueContext = buildBlockAST(lexer, state, context)
+     const trueProgram = state.program.take()
+     const endID = 'if_end_' + id
+
+     if (lexer.peek().token == 'else') {
+       const elseToken = lexer.nextIs('else')
+       const elseID = 'if_else_' + id
+
+       const falseContext = buildBlockAST(lexer, state, context)
+       const falseProgram = state.program.take()
+
+       state.program.append(preProgram)
+       solveConditionAST(state, context, condition, null, elseID)
+       state.program.append(trueProgram)
+       state.program.push({
+         type: 'jmp',
+         to: endID,
+         span: elseToken.span,
+         print: `jmp ${endID}`
+       })
+
+       addLabel(lexer, state, context, elseID, elseToken.span)
+       state.program.append(falseProgram)
+       addLabel(lexer, state, context, endID, falseContext.end.span)
+
+       return true
+     }
+
+     // if without else
+     state.program.append(preProgram)
+     solveConditionAST(state, context, condition, null, endID)
+     state.program.append(trueProgram)
+
+     addLabel(lexer, state, context, endID, trueContext.end.span)
+
+     return true
+
+   }
+}
+
+function buildForAST(lexer, state, context) {
+  if (lexer.peek().token == 'for') {
+    const start = lexer.nextIs('for')
+    const ifID = nextInt()
+    const startID = 'for_start_' + ifID
+    const endID = 'for_end_' + ifID
+
+    lexer.nextIs('(')
+
+    const definition = buildDeclarationAST(lexer, state, context)
+    assertSpan(start.span, definition, 'Invalid definition')
+    assertSpan(definition.span, definition.type == 'register', 'Invalid definition')
+
+    lexer.nextIs(';')
+
+    addLabel(lexer, state, context, startID, definition.span)
+    const condition = buildExpressionAST(lexer, state, context)
+    assertSpan(condition.span, condition.type == 'conditionalExpression', 'Not a comparation')
+    solveConditionAST(state, context, condition, null, endID)
+
+    lexer.nextIs(';')
+
+    const preProgram = state.program.take()
+    const increment = buildAssignmentAST(lexer, state, context)
+    assertSpan(start.span, increment, 'Invalid increment')
+    const incrementProgram = state.program.take()
+    state.program.append(preProgram)
+
+    lexer.nextIs(')')
+
+    const block = buildBlockAST(lexer, state, context)
+    state.program.append(incrementProgram)
+
+    state.program.push({
+      type: 'jmp',
+      to: startID,
+      span: '0:0',
+      print: `jmp ${startID}`
+    })
+
+    addLabel(lexer, state, context, endID, block.end.span)
+
+    return true
+  }
+}
+
+const wordType = {
+  type: 'type',
+  dataType: 'basic',
+  name: 'word',
+  size: 1,
+  span: '0:0',
+  print: 'word',
+}
+
+const numberLiteralType = {
+  type: 'type',
+  dataType: 'numberLiteral',
+  name: 'numberLiteral',
+  size: 1,
+  span: '0:0',
+  print: 'numberLiteral',
+}
+
+const wordPtrType = {
+  type: 'type',
+  dataType: 'pointer',
+  to: wordType,
+  size: 1,
+  span: '0:0',
+  print: 'word*'
+}
+
+function buildDefineAST(lexer, state, context) {
+  if (lexer.peek().token == 'define') {
+    const start = lexer.nextIs('define')
+
+    let type = numberLiteralType
+    if (lexer.peek(1).token != '=') {
+      type = buildTypeAST(lexer, state, context)
+    }
+
+    const name = lexer.next('string')
+    lexer.nextIs('=')
+
+    const expr = buildExpressionAST(lexer, state, context)
+
+    assertSpan(start.span, expr.type == 'number', 'Definition must be constant')
+    context.unresolve(name.token, name.span)
+
+    state.defines[name.token] = {
+      type: 'number',
+      dataType: type,
+      name,
+      value: expr.value,
+      span: name.span
+    }
+
+    state.program.push({
+      type: 'comment',
+      span: start.span,
+      print: `${name.token} = ${expr.value}`
+    })
+
+    return true
+  }
+}
+
+function buildTypedefAST(lexer, state, context) {
+  if (lexer.peek().token == 'typedef') {
+    const start = lexer.nextIs('typedef')
+
+    const type = buildTypeAST(lexer, state, context)
+    const name = lexer.next('string')
+
+    context.unresolve(name.token, name.span)
+    state.types[name.token] = {
+      ...type,
+      name: name.token,
+      print: type.print.replace(type.name, name.token),
+      span: start.span,
+    }
+
+    return true
+  }
+}
+
+function completeType(lexer, state, context, base) {
+  if (lexer.peek().token == '*') {
+    const start = lexer.nextIs('*')
+
+    return {
+      type: 'type',
+      dataType: 'pointer',
+      to: completeType(lexer, state, context, base),
+      size: 1,
+      span: start.span,
+      print: `${base.print}*`
+    }
+  }
+
+  if (lexer.peek().token == '.') {
+    assertUnimplemented()
+  }
+
+  return base
+}
+
+function buildTypeAST(lexer, state, context) {
+  const start = lexer.next('string', 'number')
+
+  if (start.type == 'string') {
+    const type = state.types[start.token]
+    assertSpan(start.span, type, `Invalid type ${start.token}`)
+    const node = completeType(lexer, state, context, type)
+
+    return {...node, span: start.span}
+  }
+
+  assertUnreachable()
+}
+
+function buildOperandAST(lexer, state, context) {
+  const start = lexer.next('string', 'number', 'symbol', 'binaryOperator', 'stringLiteral', 'register')
+
+  if (start.type == 'symbol') {
+    if (start.token == '[') {
+      const array = []
+
+      while (true) {
+        const el = buildOperandAST(lexer, state, context)
+        array.push(el)
+
+        if (lexer.peek().token != ',') break
+        lexer.nextIs(',')
+      }
+
+      lexer.nextIs(']')
+
+      return {
+        type: 'arrayLiteral',
+        array,
+        span: start.span
+      }
+    }
+
+    assertSpan(start.span, start.token == '(', `Expected symbol '(' but got '${start.span}'`)
+    const type = buildTypeAST(lexer, state, context)
+    lexer.nextIs(')')
+
+    const expr = buildOperandAST(lexer, state, context)
+    return {
+      ...expr,
+      dataType: type,
+      span: start.span,
+    }
+  }
+
+  if (start.type == 'binaryOperator') {
+    assertSpan(start.type, start.token == '*', 'Invalid operand')
+
+    const expr = buildOperandAST(lexer, state, context)
+    assertSpan(expr.type, expr.dataType.dataType == 'pointer', `Cannot derefence ${expr.dataType.print} because it is not a pointer`)
+
+    return {
+      ...expr,
+      dataType: expr.dataType.to,
+      type: 'deref',
+      to: expr,
+      offset: 0,
+      span: start.span
+    }
+  }
+
+  if (start.type == 'number') {
+    return {
+      type: 'number',
+      dataType: numberLiteralType,
+      value: start.value,
+      span: start.span
+    }
+  }
+
+  if (start.type == 'string') {
+    const operand = context.resolve(start.token, start.span)
+
+    // declare has bool as fields, therfore no {...operand, span: start.span}
+    operand.span = start.span
+    return operand
+  }
+
+  if (start.type == 'stringLiteral') {
+    return start
+  }
+
+  if (start.type == 'register') {
+    return {...operand, type: 'registerLiteral'}
+  }
+
+  assertUnreachable()
+}
+
+function getAssertTypesMessage(expr) {
+  if (expr.type == 'number') {
+    return `immedate value '${expr.value}' with the type '${expr.dataType.print}'`
+  }
+
+  if (expr.type == 'label') {
+    return `the label '${expr.name}' with the type '${expr.dataType.print}'`
+  }
+
+  if (expr.type == 'binaryExpression') {
+    return `the binaryExpression resulting in the type '${expr.dataType.print}'`
+  }
+
+  return `the variable '${expr.name.token}' with the type '${expr.dataType.print}'`
+}
+
+function assertTypes(lhs, rhs) {
+  const assert = lhs.dataType.print == rhs.dataType.print
+  const lMessage = getAssertTypesMessage(lhs)
+  const rMessage = getAssertTypesMessage(rhs)
+  const message = `The ${lMessage} in not compatible with the ${rMessage}.`
+
+  assertSpan(lhs.span, assert, message)
+}
+
+function buildExpressionAST(lexer, state, context) {
+  const expr = buildOperandAST(lexer, state, context)
+
+  if (lexer.peek().type == 'binaryOperator' && !lexer.peek().preSpace.match('\n')) {
+    let lhs = expr
+
+    while (lexer.peek().type == 'binaryOperator' && !lexer.peek().preSpace.match('\n')) {
+      const operator = lexer.next('binaryOperator')
+
+      const rhs = buildOperandAST(lexer, state, context)
+
+      if (lhs.type == 'number' && rhs.type == 'number') {
+        const a = lhs.value
+        const b = rhs.value
+        let d = null
+
+        if (operator.token == '+') d = a + b
+        if (operator.token == '-') d = a - b
+        if (operator.token == '*') d = a * b
+        if (operator.token == '/') d = Math.floor(a / b)
+
+        if (operator.token == '&') d = a & b
+        if (operator.token == '|') d = a | b
+        if (operator.token == '^') d = a ^ b
+
+        assert(d !== null, `Unknown operator: ${operator.token}`)
+
+        lhs = {...lhs, value: d}
+        continue
+      }
+
+      const node = {
+        type: 'binaryExpression',
+        lhs,
+        rhs,
+        operator,
+        dataType: lhs.dataType,
+        span: expr.span
+      }
+
+      if (lhs.dataType.dataType == 'pointer' && rhs.dataType.dataType == 'numberLiteral') {
+        const assert = operator.token == '+' || operator.token == '-'
+        assertSpan(lhs.span, assert, 'Can combine pointers and int only with add')
+        return node
+      }
+
+      if (lhs.dataType.dataType == 'pointer' && rhs.dataType.dataType == 'basic') {
+        const assert = operator.token == '+' || operator.token == '-'
+        assertSpan(lhs.span, assert, 'Can combine pointers and int only with add')
+        return node
+      }
+
+      if (lhs.dataType.dataType == 'pointer' && rhs.dataType.dataType == 'pointer') {
+        assertSpan(lhs.span, operator.token == '-', 'Two pointers can only subtract')
+        node.dataType = state.types.word
+        return node
+      }
+
+      assertTypes(lhs, rhs)
+      return node
+    }
+
+    // evaluatet all constansts, return number
+    return lhs
+
+    assertUnimplemented()
+  }
+
+  if (lexer.peek().type == 'conditionalOperator') {
+    const operator = lexer.next('conditionalOperator')
+    const lhs = expr
+    let rhs = lexer.next('string', 'number', 'stringLiteral')
+    if (rhs.type == 'string') rhs = context.resolve(rhs.token, rhs.span)
+    if (rhs.type == 'stringLiteral') {
+      assertSpan(rhs.span, rhs.token.length == 1, 'Can only compare char')
+      rhs.type = 'number'
+      rhs.value = rhs.token.charCodeAt(0)
+    }
+
+    assertSpan(expr.span, lhs.type != 'number' || rhs.type != 'number', 'Both number in conditional')
+
+    return {type: 'conditionalExpression', lhs, rhs, operator, span: expr.span}
+  }
+
+  if (expr.type == 'number') {
+    if (!expr.dataType) expr.dataType = state.types.word
+    return expr
+  }
+
+  if (expr.type == 'register') return expr
+
+  if (expr.type == 'declareLocal') return expr
+
+  if (expr.type == 'label') return expr
+
+  if (expr.type == 'deref') return expr
+
+  if (expr.type == 'stringLiteral') return expr
+
+  if (expr.type == 'arrayLiteral') return expr
+
+  if (expr.type == 'global') return expr
+
+  console.log(expr);
+  assertUnreachable()
+}
+
+function buildDeclarationAST(lexer, state, context) {
+  if (lexer.peek().type == 'string' && state.types[lexer.peek().token]) {
+    const dataType = buildTypeAST(lexer, state, context)
+
+    const name = lexer.next('string')
+    context.unresolve(name.token, name.span)
+
+    // add to register scope
+    if (lexer.peek().token == 'as') {
+      lexer.nextIs('as')
+      const register = lexer.next('register')
+      lexer.nextIs('=')
+
+      const expr = buildExpressionAST(lexer, state, context)
+      const node = {
+        type: 'register',
+        register,
+        dataType,
+        name,
+        span: dataType.span
+      }
+
+      const pre = state.registers[register.token]
+      if (pre) delete state.registers.scope[pre.name.token]
+
+      state.registers.scope[name.token] = node
+      state.registers[register.token] = node
+
+      solveExpressionAST(lexer, state, context, node, expr)
+
+      return node
+      }
+
+
+    // no register => push on the stack or global
+    const node = {
+      type: state.globalContext == context ? 'global' : 'stack',
+      defined: lexer.peek().token == '=',
+      dataType,
+      name,
+      position: context.localSize,
+      span: dataType.span
+    }
+
+    context.locals[name.token] = node
+    context.positions.push(node)
+    context.localSize += dataType.size
+
+    if (lexer.peek().token == '=') {
+      lexer.nextIs('=')
+
+      node.expr = buildExpressionAST(lexer, state, context)
+    }
+
+    return node
+  }
+}
+
+function buildConstAST(lexer, state, context) {
+  if (lexer.peek().token == 'const') {
+    const start = lexer.nextIs('const')
+
+    let dataType = buildTypeAST(lexer, state, context)
+    assertSpan(start.span, dataType.dataType == 'pointer', 'dataType of const must be pointer')
+
+    const name = lexer.next('string')
+    lexer.nextIs('=')
+
+    // check if it was already defined, then define it
+    context.unresolve(name.token, name.span)
+    addLabel(lexer, state, context, name.token, name.span, dataType)
+    state.constProgram.push(state.program.instructions.pop())
+
+    function setLen(len) {
+      const lenName = `${name.token}_len`
+
+      context.unresolve(lenName)
+      state.defines[lenName] = {
+        type: 'number',
+        value: len,
+        dataType: state.types.word,
+        token: len.toString(),
+        span: name.token
+      }
+
+      const endName = `${name.token}_end`
+
+      context.unresolve(endName)
+      addLabel(lexer, state, context, endName, name.span, dataType)
+      state.constProgram.push(state.program.instructions.pop())
+
+      if (len > 1) {
+        state.constProgram.push({
+          type: 'comment',
+          span: start.span,
+          print: `// ${lenName} = ${len}`
+        })
+      }
+    }
+
+    const expr = buildExpressionAST(lexer, state, context)
+
+    if (expr.type == 'number') {
+      state.constProgram.push({
+        type: 'db',
+        value: expr.value,
+        span: start.span,
+        print: `db  ${expr.value}`
+      })
+      setLen(1)
+      return true
+    }
+
+    if (expr.type == 'stringLiteral') {
+      assertSpan(expr.span, dataType.print == 'char_t*', 'dataType must be char_t*')
+
+      const len = expr.token.length
+      expr.token.split('').forEach((char, i) => {
+        const pre = i == 0 ? '"' : ' '
+        const end = i == len - 1 ? '"' : ' '
+        const value = char.charCodeAt(0)
+        state.constProgram.push({
+          type: 'db',
+          value: value,
+          span: start.span,
+          print: `db ${pre}${char}${end}`
+        })
+      })
+
+      setLen(len)
+
+      return
+    }
+
+    if (expr.type == 'arrayLiteral') {
+      const array = expr.array
+      const arrayType = dataType.to
+
+      assertSpan(start.span, arrayType.dataType == 'basic', 'dataType of arrayLiteral mus be *basic')
+
+      const len = array.length
+      array.forEach((el, i) => {
+        assertSpan(el.span, el.type == 'number', `Invalid element in array literal ${el.token}`)
+
+        const pre = i == 0 ? '[' : ' '
+        const end = i == len - 1 ? ']' : ' '
+        state.constProgram.push({
+          type: 'db',
+          value: el.value,
+          span: el.span,
+          print: `db ${pre}${el.value}${end}`
+        })
+      })
+
+      setLen(len)
+      return true
+    }
+
+    assertSpan(expr.span, false, 'Cannot initialize const with non const expression')
+  }
+}
+
+function solveEntryDefinitionsAST(lexer, state, context) {
+  if (context.localSize) {
+    state.program.push({
+      type: 'sbi',
+      b: 'sp',
+      imm: context.localSize,
+      d: 'sp',
+      rType: wordPtrType,
+      rName: '__STACK_TOP__',
+      span: context.begin.span,
+      print: `sbi sp, ${context.localSize}`
+    })
+  }
+}
+
+function solveExitDefinitionsAST(lexer, state, context) {
+  if (context.localSize) {
+    state.program.push({
+      type: 'adi',
+      b: 'sp',
+      imm: context.localSize,
+      d: 'sp',
+      rType: wordPtrType,
+      rName: '__STACK_TOP__',
+      span: context.begin.span,
+      print: `adi sp, ${context.localSize}`
+    })
+  }
+}
+
+function buildStructAST(lexer, state, context) {
+  if (lexer.peek().token == 'struct') {
+
+    assertUnimplemented()
+    const begin = lexer.nextIs('struct')
+    const name = lexer.next('string')
+    lexer.nextIs('{')
+    const struct = {type: 'type', name: name.token, size: 0, offsets: {}, span: begin.span}
+    while (true) {
+      const typeName = lexer.next('string')
+      const name = lexer.next('string')
+      const type = state.types[typeName.token]
+      assertSpan(typeName.span, type, `Invalid data type: ${typeName.token}`)
+      struct.offsets[name.token] = {offset: struct.size, type}
+      struct.size += type.size
+
+      if (lexer.peek().token == '}') {
+        lexer.next()
+        break
+      }
+
+      lexer.nextIs(',')
+    }
+
+    state.types[name.token] = struct
+    return true
+  }
+}
+
+function solveExpressionAST(lexer, state, context, to, expr) {
+  if (expr.dataType.dataType == 'numberLiteral') {
+    assertSpan(to.span, to.dataType.dataType == 'basic', `Cannot set immediate to ${to.dataType.print}`)
+  } else {
+    assertTypes(to, expr)
+  }
+
+  if (to.type == 'register') {
+    if (expr.type == 'number') {
+      state.program.push({
+        type: 'ldi',
+        b: '0',
+        d: to.register.token,
+        imm: expr.value,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `ldi ${to.register.token}, ${expr.value}`
+      })
+      return
+    }
+
+    if (expr.type == 'deref') {
+      state.program.push({
+        type: 'lod',
+        b: expr.register.token,
+        imm: expr.offset,
+        d: to.register.token,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `lod ${to.register.token}, ${expr.register.token}[${expr.offset}]`
+      })
+      return
+    }
+
+    if (expr.type == 'label') {
+      state.program.push({
+        type: 'ldi_label',
+        b: '0',
+        d: to.register.token,
+        label: expr.name,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `ldi ${to.register.token}, ${expr.name}`
+      })
+      return
+    }
+
+    if (expr.type == 'binaryExpression') {
+      if (expr.lhs.type == 'register') {
+        if (expr.rhs.type == 'number') {
+          if (expr.operator.token == '-') {
+            state.program.push({
+              type: 'sbi',
+              b: expr.lhs.register.token,
+              imm: expr.rhs.value,
+              d: to.register.token,
+              rType: to.dataType,
+              rName: to.name.token,
+              span: to.span,
+              print: `sbi ${to.register.token}, ${expr.lhs.register.token}, ${expr.rhs.value}`
+            })
+            return
+          }
+
+          assertSpan(expr.rhs.span, expr.operator.token == '+', 'Immediate value valid only for adi or sbi')
+
+          state.program.push({
+            type: 'adi',
+            b: expr.lhs.register.token,
+            imm: expr.rhs.value,
+            d: to.register.token,
+            rType: to.dataType,
+            rName: to.name.token,
+            span: to.span,
+            print: `adi ${to.register.token}, ${expr.lhs.register.token}, ${expr.rhs.value}`
+          })
+          return
+        }
+
+        const opNames = {'+': 'add', '&': 'and'}
+        const name = opNames[expr.operator.token]
+        assertSpan(expr.operator.span, name, 'Invalid operator')
+
+        if (expr.rhs.type == 'register') {
+          state.program.push({
+            type: name,
+            a: expr.lhs.register.token,
+            b: expr.rhs.register.token,
+            d: to.register.token,
+            rType: to.dataType,
+            rName: to.name.token,
+            span: to.span,
+            print: `${name} ${expr.lhs.register.token}, ${expr.rhs.register.token}, ${to.register.token}`
+          })
+          return
+        }
+      }
+
+      console.log(expr)
+      assertUnimplemented()
+    }
+
+    if (expr.type == 'register') {
+      state.program.push({
+        type: 'mov',
+        b: expr.register.token,
+        imm: 0,
+        d: to.register.token,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `mov ${to.register.token}, ${expr.register.token}`
+      })
+      return
+    }
+
+    if (expr.type == 'global') {
+      assertSpan(expr.span, expr.defined, `The global variable '${expr.name.token}' is declared but not defined`)
+      console.log(expr);
+      state.program.push({
+        type: 'lod',
+        b: '0',
+        imm: expr.position,
+        d: to.register.token,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `lod ${to.register.token}, [${expr.offset}]`
+      })
+      return
+    }
+  }
+
+  if (to.type == 'deref') {
+    if (expr.type == 'number') {
+      assertSpan(expr.span, expr.value == 0, 'Can store only with register or 0')
+
+      state.program.push({
+        type: 'sto',
+        a: '0',
+        b: to.register.token,
+        imm: to.offset,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `sto ${to.register.token}[${to.offset}], 0`
+      })
+
+      return
+    }
+
+    assertSpan(expr.span, expr.type == 'register', 'Can store only with register or 0')
+
+    state.program.push({
+      type: 'sto',
+      a: expr.register.token,
+      b: to.register.token,
+      imm: to.offset,
+      rType: to.dataType,
+      rName: to.name.token,
+      span: to.span,
+      print: `sto ${to.register.token}[${to.offset}], ${expr.register.token}`
+    })
+
+    return
+  }
+
+  if (to.type == 'stack') {
+    assertUnimplemented()
+    console.log(to); // check rName
+    if (expr.type == 'register') {
+      state.program.push({
+        type: 'sto',
+        imm: to.position,
+        a: expr.register.token,
+        b: 'sp',
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `sto ${expr.register.token}, sp[${to.position}]`
+      })
+      return
+    }
+
+    if (expr.type == 'constExpression') {
+      assertSpan(expr.span, false, 'Cannot initiate immediate data on stack')
+    }
+  }
+
+  if (to.type == 'global') {
+    to.defined = true
+
+    if (expr.type == 'number') {
+      assertSpan(expr.span, expr.value == 0, 'Can store only with register or 0')
+
+      state.program.push({
+        type: 'sto',
+        a: '0',
+        b: '0',
+        imm: to.position,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `sto [${to.position}], 0`
+      })
+    }
+
+    if (expr.type == 'register') {
+      state.program.push({
+        type: 'sto',
+        a: expr.register.token,
+        b: '0',
+        imm: to.position,
+        rType: to.dataType,
+        rName: to.name.token,
+        span: to.span,
+        print: `sto [${to.position}], ${expr.register.token}`
+      })
+    }
+
+    return
+  }
+
+  console.log(to, expr);
+  assertUnreachable()
+}
+
+function buildAssignmentAST(lexer, state, context) {
+  const assign = lexer.peek().type == 'string' && lexer.peek(1).token == '='
+  const access = lexer.peek().type == 'string' && lexer.peek(1).token == '.'
+  const deref = lexer.peek().token == '*'
+
+  if (assign || access || deref) {
+    const to = buildOperandAST(lexer, state, context)
+
+    const operator = lexer.nextIs('=')
+    const expr = buildExpressionAST(lexer, state, context)
+
+    solveExpressionAST(lexer, state, context, to, expr)
+
+    return true
+  }
+}
+
+function buildEval(lexer, state, context) {
+  if (lexer.peek().type == 'eval') {
+    const body = lexer.next('eval')
+
+    let ret
+    try {
+      const fun = new Function('lexer', 'state', 'context', body.token)
+      ret = fun(lexer, state, context)
+    } catch (e) {
+      console.log(body);
+      console.log(ret);
+      console.log(e);
+      assertSpan(body.span, false, 'Cannot resolve eval! more details in the console')
+    }
+
+    assertSpan(body.span, typeof ret != 'undefined', 'Eval returned undefined')
+    lexer.unNext(ret.toString())
+
+    if (state.defines.__PRINT_EVAL__?.value !== 0) {
+      ret.split('\n').forEach(line => {
+        state.program.push({
+          type: 'comment',
+          span: body.span,
+          print: `// ${line}`
+        })
+      })
+    }
+
+    return true
+  }
+}
+
+function buildASMAST(lexer, state, context) {
+  if (lexer.peek().token == 'asm') {
+    const start = lexer.nextIs('asm')
+    lexer.nextIs('{')
+
+    while (lexer.peek()) {
+      const next = lexer.next()
+      if (next.token == '}') break
+
+      if (next.token == 'mov') {
+        const a = lexer.next('register')
+        lexer.nextIs(',')
+        const d = lexer.next('register')
+        state.program.push({
+          type: 'mov',
+          b: a.token,
+          d: d.token,
+          imm: 0,
+          rType: wordPtrType,
+          rName: '__ASM__',
+          span: next.span,
+          print: `mov ${a.token}, ${d.token}`
+        })
+
+        continue
+      }
+
+      if (next.token == 'lod') {
+        const d = lexer.next('register')
+        lexer.nextIs(',')
+        const b = lexer.next('register')
+        lexer.nextIs('[')
+        const imm = lexer.next('number')
+        lexer.nextIs(']')
+
+        state.program.push({
+          type: 'lod',
+          b: b.token,
+          imm: imm.value,
+          d: d.token,
+          rType: wordPtrType,
+          rName: '__ASM__',
+          span: next.span,
+          print: `lod ${d.token}, ${b.token}[${imm.value}]`
+        })
+
+        continue
+      }
+
+      if (next.token == 'sto') {
+        const b = lexer.next('register')
+        lexer.nextIs('[')
+        const imm = lexer.next('number')
+        lexer.nextIs(']')
+        lexer.nextIs(',')
+        const a = lexer.next('register')
+
+        state.program.push({
+          type: 'sto',
+          a: a.token,
+          b: b.token,
+          imm: imm.value,
+          rType: wordPtrType,
+          rName: '__ASM__',
+          span: next.span,
+          print: `sto ${b.token}[${imm.value}], ${a.token}`
+        })
+
+        continue
+      }
+
+      const baseBranches = ['jmp', 'bnz', 'bz', 'bnc', 'bc', 'bnn', 'bn']
+      if (baseBranches.includes(next.token)) {
+        const to = lexer.next('string')
+
+        state.program.push({
+          type: next.token,
+          to: to.token,
+          span: next.span,
+          print: `${next.token} ${to.token}`
+        })
+
+        continue
+      }
+
+      if (next.token == 'db') {
+        while (true) {
+          const value = lexer.next('number', 'stringLiteral')
+
+          if (value.type == 'number') {
+            state.program.push({
+              type: 'db',
+              value: value.value,
+              span: value.span,
+              print: `db  ${value.value}`
+            })
+          } else {
+            value.token.split('').forEach((char, i) => {
+              const start = i == 0                        ? '"' : ' '
+              const end   = i == (value.token.length - 1) ? '"' : ' '
+              state.program.push({
+                type: 'db',
+                value: char.charCodeAt(0),
+                span: value.span,
+                print: `db  ${start}${char}${end}`
+              })
+            })
+          }
+
+          if (lexer.peek().token != ',') break
+          lexer.nextIs(',')
+        }
+
+        continue
+      }
+
+      if (lexer.peek().token == ':') {
+        lexer.next()
+        addLabel(lexer, state, context, next.token, next.span)
+
+        continue
+      }
+
+      assertSpan(next.span, false, `Invalid ASM token: '${next.token}'`)
+    }
+
+    return true
+  }
+}
+
+function buildCommentsAST(lexer, state, context) {
+
+  // single line comments
+  if (lexer.peek().type == 'comment') {
+    const comment = lexer.next()
+
+    if (state.defines.__PRINT_COMMENTS__?.value !== 0) {
+      state.program.push(comment)
+    }
+
+    return true
+  }
+}
+
+function buildRegisterInterrogation(lexer, state, context) {
+  if (lexer.peek().token == '?') {
+    const start = lexer.nextIs('?')
+    let ret = 'Register interrogation:\n\n'
+
+    Object.keys(state.registers.scope).forEach(name => {
+      console.log(name);
+      ret += `${name}: ${state.registers.scope[name].register.token}\n`
+    })
+
+    assertSpan(start.span, false, ret)
+  }
+}
+
+function invalidAST(lexer) {
+  const start = lexer.next()
+  console.log('Invalid AST', start)
+  assertSpan(start.span, false, `Unexpected token: ${start.token}`)
+}
+
+function createContext(parent) {
+  const context = {
+    locals: {},
+    positions: [],
+    localSize: 0
+  }
+
+  context.resolve = (name, span) => {
+    if (context.locals[name]) return context.locals[name]
+    return parent.resolve(name, span)
+  }
+
+  context.unresolve = (name, span) => {
+    assertSpan(span, !context.locals[name], `Cannot redifine variable ${name}`)
+    return parent.unresolve(name, span)
+  }
+
+  return context
+}
+
+function buildGenericAST(lexer, state, context) {
+
+  // here:
+  if (buildLabelAST(lexer, state, context)) return true
+
+  // typedef int char
+  if (buildTypedefAST(lexer, state, context)) return true
+
+  // if (a > 5) {b = 9}
+  if (buildIfAST(lexer, state, context)) return true
+
+  // for (int i as a = 9; i < 10; i++) { b = i }
+  if (buildForAST(lexer, state, context)) return true
+
+  // assignment, a = b, a = 5
+  if (buildAssignmentAST(lexer, state, context)) return true
+
+  // declare context or register variable
+  if (buildDeclarationAST(lexer, state, context)) return true
+
+  // eval(Math.floor(Math.random() * 100))
+  if (buildEval(lexer, state, context)) return true
+
+  // asm { mov a, b }
+  if (buildASMAST(lexer, state, context)) return true
+
+  // single line or /* multiline */ comments
+  if (buildCommentsAST(lexer, state, context)) return true
+
+  // ?, stop compiling and show which register are used and by whom
+  buildRegisterInterrogation(lexer, state, context)
+}
+
+// A block is inside { and }
+function buildBlockAST(lexer, state, parentContext) {
+  const context = createContext(parentContext)
+  const preProgram = state.program.take()
+
+  context.begin = lexer.nextIs('{')
+  while (lexer.peek().token && lexer.peek().token != '}') {
+
+    if (buildGenericAST(lexer, state, context)) continue
+
+    invalidAST(lexer)
+  }
+
+  // add stack allocation and deallocation
+  const blockProgram = state.program.take()
+  state.program.append(preProgram)
+  solveEntryDefinitionsAST(lexer, state, context)
+  state.program.append(blockProgram)
+  solveExitDefinitionsAST(lexer, state, context)
+
+  context.end = lexer.nextIs('}')
+  return context
+}
+
+function buildGlobalAST(lexer, state) {
+  const context = createContext({
+    resolve: (name, span) => {
+      if (state.defines[name]) return state.defines[name]
+      if (state.types[name]) return state.types[name]
+      if (state.registers.scope[name]) return state.registers.scope[name]
+      if (state.labels[name]) return state.labels[name]
+
+      assertSpan(span, false, `Unable to resolve ${name}`)
+    },
+
+    unresolve: (name, span) => {
+      assertSpan(span, !state.defines[name], `Cannot redifine variable ${name}`)
+      assertSpan(span, !state.types[name], `Cannot redifine variable ${name}`)
+      assertSpan(span, !state.registers.scope[name], `Cannot redifine variable ${name}`)
+      assertSpan(span, !state.labels[name], `Cannot redifine variable ${name}`)
+    }
+  })
+
+  state.globalContext = context
+  context.begin = {span: '0:0'}
+
+  addLabel(lexer, state, context, '__HEAP_START__', '0:0')
+  const heapStartLabel = state.program.take()
+
+  while (lexer.peek().token) {
+    // define MAX_COUNT = 69
+    if (buildDefineAST(lexer, state, context)) continue
+
+    // struct name { int field1 }
+    if (buildStructAST(lexer, state, context)) continue
+
+    // const int salve = 9
+    if (buildConstAST(lexer, state, context)) continue
+
+    // all the others
+    if (buildGenericAST(lexer, state, context)) continue
+
+    invalidAST(lexer)
+  }
+
+
+  const globalProgram = state.program.take()
+
+  // int vector is at top of ram
+  // set stack pointer to top of ram
+  state.program.push({
+    type: 'ldi',
+    b: '0',
+    d: 'sp',
+    imm: 0b0111_1111_1111_1110,
+    rType: wordPtrType,
+    rName: '__STACK_TOP__',
+    span: '0:0',
+    print: `ldi a, ${0b0111_1111_1111_1110}`
+  })
+
+  // global context locals entry don't need stack allocation
+  // all global locals are in heap space, they can be defined
+  // at program initialization
+
+  if (context.positions.length) {
+    state.program.push({
+      type: 'comment',
+      span: '0:0',
+      print: `// GLOBAL VARIABLES:`
+    })
+  }
+
+  let heapSize = 0
+  context.positions.forEach(declaration => {
+    heapSize += declaration.dataType.size
+
+    state.program.push({
+      type: 'comment',
+      span: '0:0',
+      print: `// ${declaration.dataType.print} ${declaration.name.token}`
+    })
+
+    // cannot check .defioned because it will be set in program
+    if (declaration.expr) {
+      const expr = declaration.expr
+
+      // split number load into register load and store
+      if (expr.type == 'number' && expr.value != 0) {
+        const register = {
+          type: 'register',
+          dataType: declaration.dataType,
+          register: {
+            token: 'a'
+          },
+          name: {...declaration.name, span: '0:0'},
+          span: '0:0',
+        }
+
+        solveExpressionAST(lexer, state, context, register, declaration.expr)
+        solveExpressionAST(lexer, state, context, declaration, register)
+        return
+      }
+
+      solveExpressionAST(lexer, state, context, declaration, declaration.expr)
+    }
+  })
+
+  state.labels.__HEAP_START__.value = heapSize
+
+  state.program.append(globalProgram)
+  state.program.append(state.constProgram)
+
+  return state
+}
+
+function buildAST(tokens) {
+  const lexer = getTokenLexer(tokens)
+
+  const state = {
+    defines: {},
+    labels: {},
+    constProgram: [],
+    registers: {scope: {}},
+    program: {
+      instructions: [],
+      push: inst => state.program.instructions.push(inst),
+      take: () => state.program.instructions.splice(0),
+      append: (newInsts) => {
+        const insts = state.program.instructions
+        insts.splice(insts.length, 0,...newInsts)
+      }
+    },
+    types: { word: wordType }
+  }
+
+  console.log(state);
+  return buildGlobalAST(lexer, state)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/*                         --- Solve AST ---                                  */
+////////////////////////////////////////////////////////////////////////////////
+
+
+// const instInverter = {'>': '<', '<=': '>='}
+// function solveCondition(state, context, condition, ifTrue, ifFalse) {
+//
+//   function solve(lhs, operator, rhs, ifTrue, ifFalse) {
+//     assert(ifTrue || ifFalse, 'Unreachable')
+//
+//     // if the branch is taken only if the condition is false
+//     if (!ifTrue) return solve(lhs, inverter[operator], rhs, ifFalse)
+//
+//     // synthesize BGT and BLE from BLT and BGE, no need to?
+//     BGE = N, BLT = N || BGE => a >= b => a - b => miga la C flag.
+//     BLT = a < b = a - b = C flag. C, Z,
+//     Sa le numebr sa po cambia la costante a > 7 = a >= 8
+//     if (instInverter[operator]) return solve(rhs, instInverter[operator], lhs, ifTrue, ifFalse)
+//     const a = assertLookup(state, lhs).regName
+//     const b = assertLookup(state, rhs).regName
+//
+//     const type = bncType[operator]
+//     state.program.push({type, a, b, d: '0', span: condition.lhs.span, to: ifTrue})
+//   }
+//
+//   solve(condition.lhs, condition.operator.token, condition.rhs, ifTrue, ifFalse)
+// }
+
+////////////////////////////////////////////////////////////////////////////////
+/*                         --- Assemble ---                                   */
+////////////////////////////////////////////////////////////////////////////////
+
+// add d, a, b      | d = a + b
+// mov a, b         | a = b
+// mov [a + 5], b   | store b at address a + 5
+// mov b, [a + 5]   | load address a + 5 in b
+// jge a, b, label  | if a >= b goto label
+
+// Memory layout
+// restriction => EEPROM must be on the edge, VRAM is in the middle
+// end = hardware memory
+// start => fast access
+// sa ram le al inizzi ta gas an 'first page' da 64 bytes, fast non register variables?
+// RAM = 64 + 6 variables => auto register allocation?
+// EEPROM = fast constant access?
+// EEPROM sa po espanda cun la sd, ram le fis, eeprom le noma an bootloader
+
+function hex(number, length, canBeNegative = true) {
+  let ret = canBeNegative ? (number < 0 ? '-' : ' ') : ''
+
+  ret += '0x' + Math.abs(number).toString(16).padStart(length, '0').toUpperCase()
+  return ret
+}
+
+const PRAM_BEGIN = 0b1000_0000_0000_0000
+const TRAM_BEGIN = 0b1010_0000_0000_0000
+const PROGRAM_ENTRY_POINT = 0b1100_0000_0000_0000
+const MEMORY_MAPPED = 0b1111_1111_1111_0000
+const registersIndex = ['0', 'a', 'b', 'c', 'd', 'e', 'f', 'sp']
+
+function registersOpcode(a, b, d) {
+  const aReg = registersIndex.indexOf(a)
+  const bReg = registersIndex.indexOf(b)
+  const dReg = registersIndex.indexOf(d)
+  assert(aReg != -1 && bReg != -1 && dReg != -1, 'Invalid register names')
+
+  return dReg + (bReg << 3) + (aReg << 6)
+}
+
+// size is the int size, signed in msb
+function immediateOpcode(imm, size) {
+  const neg = imm < 0
+  const max = 2 ** (size - 1)
+  let ret = Math.abs(imm)
+
+  assert(imm >= -max && imm < max, 'Invalid immediate: ' + imm)
+  if (neg) {
+
+    ret = 64 - ret
+    // negative number start from -64 to -1
+
+    // sign bit
+    ret += 1 << (size - 1)
+  }
+
+  return ret
+}
+
+function assemble(state) {
+  state.executable = []
+
+  let pc = PROGRAM_ENTRY_POINT
+
+  // 2op 5fun 3a 3b 3d
+  function R(inst) {
+    const {a, b, d} = inst
+    let opcode = 0
+    opcode += registersOpcode(a, b, d)
+
+    inst.opcodes = [{
+      type: 'reg',
+      opcode,
+      pc,
+      inst,
+      exec: e => {
+        if (inst.type == 'add') return e.alu(a, b, d, (a, b) => a + b)
+        if (inst.type == 'and') return e.alu(a, b, d, (a, b) => a & b)
+      },
+      print: `${hex(opcode, 4, false)}: R ${inst.type}       ${a.padEnd(2)} ${b.padEnd(2)} ${d.padEnd(2)}`
+    }]
+
+    pc++
+  }
+
+  // 3op 1s 5:0 3b 3d
+  function I(inst) {
+    const {imm, b, d} = inst
+
+    let opcode = 0
+    opcode += registersOpcode('0', b, d)
+    opcode += immediateOpcode(imm, 7) << 6
+
+    inst.opcodes = [{
+      type: 'adi',
+      opcode,
+      pc,
+      inst,
+      exec: e => e.alu(0, b, d, (a, b) => b + imm),
+      print: `${hex(opcode, 4, false)}: I ${inst.type} ${hex(imm, 2)}    ${b.padEnd(2)} ${d.padEnd(2)}`
+    }]
+
+    pc++
+  }
+
+  // 3op 1s 5:3 3a 3b 2:0
+  function S(inst) {
+    const {imm, a, b} = inst
+
+    let opcode = 0
+    opcode += registersOpcode(a, b, '0')
+    const immOpcode = immediateOpcode(imm, 7)
+    opcode += (immOpcode & 0b0000111) << 0
+    opcode += (immOpcode & 0b1111000) << 6
+
+    inst.opcodes = [{
+      type: 'sto',
+      opcode,
+      pc,
+      inst,
+      exec: e => e.writeMemory(e.getRegister(b).value + imm, e.getRegister(a).value),
+      print: `${hex(opcode, 4, false)}: S sto ${hex(imm, 2)} ${a.padEnd(2)} ${b.padEnd(2)   }`
+    }]
+
+    pc++
+  }
+
+  function LOD(inst) {
+    const {imm, b, d} = inst
+
+    let opcode = 0
+    opcode += registersOpcode('0', b, d)
+    opcode += immediateOpcode(imm, 7) << 6
+
+    inst.opcodes = [{
+      type: 'lod',
+      opcode,
+      pc,
+      inst,
+      exec: e => e.alu(0, b, d, (a, index) => e.readMemory(index + imm).value),
+      print: `${hex(opcode, 4, false)}: I lod ${hex(imm, 2)}   ${b.padEnd(2)} ${d.padEnd(2)}`
+    }]
+
+    pc++
+  }
+
+  // 3op 1s 5:0 7:6 1fun 3d
+  function J(inst) {
+
+    // d is used by jal
+    const {to, d} = inst
+
+    function resolver() {
+      const opcode = 69
+      const offset = 69
+      pc++
+
+      return [{
+        type: 'jmp',
+        opcode,
+        pc: pc - 1,
+        inst,
+        exec: context => context.pc = state.labels[inst.to].value,
+        print: `${hex(opcode, 4, false)}: J jmp ${hex(offset, 2)}`
+      }]
+    }
+
+    inst.opcodes.push({type: 'resolver', resolver})
+
+    pc += 3
+  }
+
+  function baseBNC(inst) {
+    function takeJump(state) {
+      if (inst.type == 'bnz') return !state.flags.z
+      if (inst.type == 'bz')  return  state.flags.z
+      if (inst.type == 'bnc') return !state.flags.c
+      if (inst.type == 'bc')  return  state.flags.c
+      if (inst.type == 'bnn') return !state.flags.n
+      if (inst.type == 'bn')  return  state.flags.n
+
+      console.log(inst.type, inst);
+      assertUnreachable()
+    }
+
+    function resolver() {
+      const opcode = 69
+      const offset = 69
+      pc++
+
+      return [{
+        type: inst.type,
+        opcode,
+        pc: pc - 1,
+        inst,
+        exec: context => {
+          if (takeJump(context)) {
+            context.pc = state.labels[inst.to].value
+          }
+        },
+        print: `${hex(opcode, 4, false)}: B ${inst.type.padEnd(3)} ${hex(offset, 2)}`
+      }]
+    }
+
+    inst.opcodes = [{type: 'resolver', resolver}]
+  }
+
+  // BGE, BLT, BE, BNE
+  const synthesizer = {'bl': 'bg', 'ble': 'bge', 'bge': 'ble', 'bg': 'bl'}
+  function BNC(inst) {
+    function solveBNC(lhs, operator, rhs) {
+      if (lhs.type == 'number') return solveBNC(rhs, synthesizer[operator], lhs)
+
+      if (operator == 'ble' || operator == 'bg') {
+        if (rhs.type == 'register') return solveBNC(rhs, synthesizer[operator], lhs)
+
+        rhs.value++
+        rhs.token = rhs.value.toString()
+
+        return solveBNC(lhs, operator == 'bg' ? 'bge' : 'bl', rhs)
+      }
+
+      if (rhs.type == 'number') {
+        const imm = rhs.value
+        let opcode = 0
+        opcode += registersOpcode('0', lhs.register.token, '0')
+        opcode += immediateOpcode(-imm, 7) << 6
+
+        inst.opcodes.push({
+          type: 'adi',
+          opcode,
+          pc,
+          inst,
+          exec: e => e.alu(0, lhs.register.token, 0, (a, b) => b - imm),
+          print: `${hex(opcode, 4, false)}: I sbi ${hex(imm, 2)}    ${lhs.register.token.padEnd(2)}`
+        })
+      } else {
+        const lhsReg = lhs.register.token
+        const rhsReg = rhs.register.token
+        let opcode = 0
+        opcode += registersOpcode(lhsReg, rhsReg, '0')
+
+        inst.opcodes.push({
+          type: 'sub',
+          opcode,
+          pc,
+          inst,
+          exec: e => e.alu(lhsReg, rhsReg, 0, (a, b) => a - b),
+          print: `${hex(opcode, 4, false)}: R sub       ${lhsReg.padEnd(2)} ${rhsReg.padEnd(2)} 0`
+        })
+      }
+
+      const jmpName = {'bge': 'bnc', 'bl': 'bc', 'bne': 'bnz', 'be': 'bz'}
+      const resolver = {...inst, type: jmpName[operator]}
+      baseBNC(resolver)
+
+      inst.opcodes.push(resolver.opcodes[0])
+      pc += 3
+    }
+
+    solveBNC(inst.lhs, inst.type, inst.rhs)
+  }
+
+  // 3op 1s 15:8 1fun 3d
+  function U(inst) {
+    const {imm, d} = inst
+
+    let opcode = 0
+    opcode += registersOpcode('0', '0', d)
+
+    assert(imm < 0b1111_1111_1111_1111 && !(imm & 63), 'Invalid upper immediate: ' + imm)
+    opcode += imm >> 4
+
+    inst.opcodes = [{
+      type: 'lui',
+      opcode,
+      pc,
+      inst,
+      exec: e => e.setRegister(d, imm),
+      print: `${hex(opcode, 4, false)}: U ${inst.type} ${hex(imm, 4)}     ${d.padEnd(2)}`
+    }]
+
+    pc++
+  }
+
+  function LDI(inst) {
+    if (inst.imm >= -64 && inst.imm < 64) return I(inst)
+
+    let lower = inst.imm & 127
+    let upper = inst.imm - lower
+
+    if (lower > 63) {
+      upper += 128
+      lower -= 128
+    }
+
+    upper = upper % (1 << 16)
+
+    const upperInst = {...inst, imm: upper, type: 'lui'}
+    const lowerInst = {...inst, imm: lower, type: 'adi', b: inst.d}
+
+    if (upper) {
+      U(upperInst)
+      inst.opcodes.push(upperInst.opcodes[0])
+    } else {
+      lowerInst.b = '0'
+    }
+
+    if (lower || !upper) {
+      I(lowerInst)
+      inst.opcodes.push(lowerInst.opcodes[0])
+    }
+  }
+
+  function LDI_LABEL(inst) {
+    const {label, print} = inst
+
+    function resolver() {
+      const value = state.labels[label].value
+
+      const solution = {...inst, opcodes: [], imm: value}
+      LDI(solution)
+
+      inst.print = `${print} // ${value}`
+      return solution.opcodes
+    }
+
+    inst.opcodes = [{type: 'resolver', resolver}]
+  }
+
+  function DB(inst) {
+    const {value} = inst
+    inst.opcodes = [{
+      type: 'db',
+      pc,
+      opcode: value,
+      print: `${hex(value, 4, false)}`
+    }]
+
+    pc++
+  }
+
+  function LABEL(inst) {
+    state.labels[inst.name].value = pc
+
+    inst.opcodes.push({
+      type: 'resolver',
+      resolver: () => {
+        state.labels[inst.name].value = pc
+        return []
+      }
+    })
+  }
+
+  state.program.instructions.forEach(inst => {
+    // default to no opcodes
+    inst.opcodes = []
+
+    switch (inst.type) {
+      case 'comment':
+        return
+
+      case 'add':
+      case 'and':
+        return R(inst)
+
+      case 'ldi':
+        return LDI(inst)
+
+      case 'ldi_label':
+        return LDI_LABEL(inst)
+
+      case 'sbi':
+          inst.imm = -inst.imm
+      case 'adi':
+      case 'mov':
+        return I(inst)
+
+      case 'lod':
+        return LOD(inst)
+
+      case 'sto':
+        return S(inst)
+
+      case 'bnz':
+      case 'bz':
+      case 'bnc':
+      case 'bc':
+      case 'bnn':
+      case 'bn':
+        return baseBNC(inst)
+
+      case 'jmp':
+        inst.d = '0'
+      case 'jal':
+        return J(inst)
+
+      case 'bl':
+      case 'ble':
+      case 'be':
+      case 'bge':
+      case 'bg':
+      case 'bne':
+        return BNC(inst)
+
+      case 'db':
+        return DB(inst)
+
+      case 'label':
+        return LABEL(inst)
+      return
+    }
+
+    console.log(inst);
+    assertUnreachable()
+  })
+
+
+  let lastLabels, newLabels, i = 0
+  do {
+    i++
+    assert(i < 10)
+
+    lastLabels = newLabels
+    pc = PROGRAM_ENTRY_POINT
+    state.program.instructions.forEach(inst => {
+      inst.opcodes.forEach(opcode => {
+        if (opcode.type == 'resolver') {
+          opcode.result = opcode.resolver()
+          return
+        }
+
+        opcode.pc = pc
+        pc++
+      })
+    })
+
+    newLabels = JSON.stringify(state.labels)
+  } while (lastLabels != newLabels)
+
+  // add opcodes to linear memory and convert all opcodes back to normal
+  state.program.instructions.forEach(inst => {
+    const newOpcodes = []
+    inst.opcodes.forEach(opcode => {
+      if (opcode.type == 'resolver') {
+        opcode.result.forEach(res => {
+          assert(res.type && typeof res.opcode == 'number', 'False opcodes')
+          assert(!state.executable[res.pc], 'Invalid pc')
+          state.executable[res.pc] = res
+          newOpcodes.push(res)
+        })
+        return
+      }
+
+      assert(opcode.type && typeof opcode.opcode == 'number', 'False opcodes')
+      assert(!state.executable[opcode.pc], 'Invalid pc')
+      state.executable[opcode.pc] = opcode
+      newOpcodes.push(opcode)
+    })
+
+    inst.opcodes = newOpcodes
+  })
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/*                         --- simulate and display ----                      */
+////////////////////////////////////////////////////////////////////////////////
+const rMask = 0b00000_000000_11111
+const gMask = 0b00000_111111_00000
+const bMask = 0b11111_000000_00000
+
+function getRGB(value) {
+  const r = Math.floor(((value & rMask) >> 0 ) / 32 * 255)
+  const g = Math.floor(((value & gMask) >> 5 ) / 64 * 255)
+  const b = Math.floor(((value & bMask) >> 11) / 32 * 255)
+
+  return `rgb(${r}, ${g}, ${b})`
+}
+
+const printHeader = 'ADDRESS OPCODE  TYPE   IMM  A  B  D  |\n-------------------------------------|\n'
+function printState(state) {
+  const {addresses, lines} = state.program.printable
+  const middle = addresses[state.pc]
+  const emptyLine = '                                     |'
+
+  let out = []
+
+  for (let i = middle - 10; i < middle; i++) {
+    if (i < 0) {
+      out.push(emptyLine)
+      continue
+    }
+
+    out.push(lines[i])
+  }
+
+  out.push('<span style="color:green">' + `${lines[middle]}` + '</span>')
+
+  for (let i = middle + 1; i < middle + 11; i++) {
+    if (i >= lines.length) {
+      out.push(emptyLine)
+      continue
+    }
+
+    out.push(lines[i])
+  }
+
+  out.push(`\n\n\nREGISTERS:`)
+  registersIndex.forEach(register => {
+    if (register == '0') {
+      out.push(`0  = 0x0000`)
+      return
+    }
+
+    const regContent = state.registers[register]
+
+    if (regContent) {
+      const value = hex(regContent.value, 4, false)
+      const line = lines[addresses[regContent.inst.pc]].split('|')
+      const printLine = line[line.length - 1]
+
+      const {rName, rType} = regContent.inst.inst
+      const name = `${rType.print} ${rName}`.padEnd(26)
+
+      out.push(`${register.padEnd(2)} = ${value} | ${name} | ${printLine}`)
+      return
+    }
+
+    out.push(`${register.padEnd(2)} = 0x???? |`)
+  })
+
+  document.getElementById('pre').innerHTML = printHeader + out.join('\n')
+
+  const printMemory = state.program.defines.__PRINT_MEMORY__?.value !== 0
+  const printRam = state.program.defines.__PRINT_RAM__?.value !== 0
+
+  let mem = `INST COUNT: ${state.instCount}\n\n\nRANDOM ACCESS MEMORY:\n`
+  let lastIndex = 0
+  state.memory.forEach((inst, i) => {
+    if (!printMemory && i >= PRAM_BEGIN && i < MEMORY_MAPPED) return
+    if (lastIndex < PRAM_BEGIN && i >= PRAM_BEGIN && i < TRAM_BEGIN) mem += '\nPIXEL VIDEO RAM:\n'
+    if (lastIndex < TRAM_BEGIN && i >= TRAM_BEGIN && i < PROGRAM_ENTRY_POINT) mem += '\nTILE VIDEO RAM:\n'
+    if (lastIndex < PROGRAM_ENTRY_POINT && i >= PROGRAM_ENTRY_POINT && i < MEMORY_MAPPED) mem += '\nEEPROM SOURCECODE:\n'
+    if (lastIndex < MEMORY_MAPPED && i >= MEMORY_MAPPED) mem += '\nMEMORY_MAPPED:\n'
+
+    const isPRAM = i >= PRAM_BEGIN && i < TRAM_BEGIN
+    const equal = isPRAM ? '<span style="color:' + getRGB(inst.value) + ';">=</span>' : '='
+
+    const from = lines[addresses[inst.inst.pc]] || 'Unknown source? Che magia as fait?'
+    mem += `${hex(i, 4, false)} ${equal} ${hex(inst.value, 4, false)} | ${from}\n`
+
+    lastIndex = i
+  })
+
+  if (printMemory || printRam) {
+    document.getElementById('memory').innerHTML = mem
+  }
+
+  // render screen
+
+  const {vga: {tileSet, TRAMModification, PRAMModification, context, tileContext}} = state
+  const modifiedTiles = {}
+
+  Object.keys(PRAMModification).forEach(originalIndex => {
+    const index = originalIndex - PRAM_BEGIN
+    const value = PRAMModification[originalIndex]
+
+    const pixel = index % 64
+    const tile = (index - pixel) / 64
+    const ctx = state.vga.tileSet[tile].context
+    const x = pixel % 8
+    const y = (pixel - x) / 8
+
+    ctx.fillStyle = getRGB(value);
+    ctx.fillRect(x, y, 1, 1)
+
+    modifiedTiles[tile] = true
+    modifiedTiles[tile] = true
+    delete PRAMModification[originalIndex]
+  })
+
+  function drawTileAt(context, value, index) {
+    const x = index % 80
+    const y = (index - x) / 80
+
+    const canvas = state.vga.tileSet[value].canvas
+    context.drawImage(canvas, x * 8, y * 8)
+  }
+
+
+  for (let i = 0; i < 4096; i++) {
+    const value = state.memory[TRAM_BEGIN + i]?.value
+    if (modifiedTiles[value]) {
+
+      // draw on main screen
+      drawTileAt(context, value, i)
+    }
+  }
+
+  Object.keys(modifiedTiles).forEach(index => {
+    const canvas = state.vga.tileSet[index].canvas
+
+    const x = index % 64
+    const y = (index - x) / 64
+
+    tileContext.drawImage(canvas, x * 9 + 1, y * 9 + 1)
+
+  })
+
+  Object.keys(TRAMModification).forEach(originalIndex => {
+    const index = originalIndex - TRAM_BEGIN
+    const value = TRAMModification[originalIndex]
+
+    // draw on main screen
+    drawTileAt(context, value, index)
+
+    delete TRAMModification[originalIndex]
+  })
+}
+
+const MAX_INT = 1 << 16
+function simulate(program) {
+  assert(program, 'no state')
+
+  const state = program.executionContext = {
+    registers: {},
+    history: [[]],
+    getRegister: (name) => {
+      if (name == '0') return {value: 0}
+      assertInst(state.registers[name], 'Invalid register access')
+      return state.registers[name]
+    },
+    setRegister: (name, value) => {
+      value = (value + MAX_INT) % MAX_INT
+
+      if (name == '0') return value
+
+      state.registers[name] = {inst: currInst, value}
+      return value
+    },
+    flags: {},
+    alu: (a, b, d, exec) => {
+      const lhs = state.getRegister(a).value
+      const rhs = state.getRegister(b).value
+      const res = exec(lhs, rhs)
+
+
+
+      const clipped = state.setRegister(d, res)
+      state.flags = {
+        n: clipped & 1 << 15,
+        z: clipped == 0,
+        c: res < 0 || res >= (1 << 16)
+      }
+    },
+    readMemory: (index) => {
+      assertInst(state.memory[index], 'Invalid memory access')
+      return state.memory[index]
+    },
+    writeMemory: (index, value) => {
+      const under = index >= 0 && index < PROGRAM_ENTRY_POINT
+      const above = index >= MEMORY_MAPPED && index < (1 << 16)
+      assertInst(under | above, 'Invalid memory access')
+      value = (value + MAX_INT) % MAX_INT
+      state.memory[index] = {value, inst: currInst}
+
+      if (index >= TRAM_BEGIN) {
+        state.vga.TRAMModification[index] = value
+        return
+      }
+
+      if (index >= PRAM_BEGIN) {
+        state.vga.PRAMModification[index] = value
+        return
+      }
+    },
+    writeMapped: (index, value) => {
+      assertInst(index >= MEMORY_MAPPED && index < (1 << 16))
+
+      state.memory[index] = {value}
+    },
+    pc: PROGRAM_ENTRY_POINT,
+    memory: program.executable.map(el => ({value: el.opcode, inst: el, decoder: el})),
+    labels: program.labels,
+    program,
+    vga: {
+      tileSet: [],
+      TRAMModification: {},
+      PRAMModification: {}
+    },
+    instCount: 0,
+    printState
+  }
+
+  // vga standard 640 * 480
+  state.vga.canvas = document.getElementById('screen')
+  state.vga.context = state.vga.canvas.getContext('2d')
+  state.vga.canvas.width = 80 * 8
+  state.vga.canvas.height = 60 * 8
+
+  const size = 64 * 8 + 65
+  state.vga.tileCanvas = document.getElementById('tileMap')
+  state.vga.tileContext = state.vga.tileCanvas.getContext('2d')
+  state.vga.tileCanvas.width = size
+  state.vga.tileCanvas.height = size
+
+  const ctx = state.vga.tileContext
+  ctx.fillStyle = '#0FF';
+  ctx.fillRect(0, 0, size, size)
+
+  ctx.fillStyle = '#F0F';
+  for (let i = 0; i < size; i += 9) {
+    ctx.fillRect(i, 0, 1, size)
+    ctx.fillRect(0, i, size, 1)
+  }
+
+  for (let i = 0; i < 4096; i++) {
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    canvas.width = 8
+    canvas.height = 8
+
+    state.vga.tileSet.push({canvas, context})
+  }
+
+  let currInst = state.memory[state.pc].decoder
+  assert(currInst, 'Invaldi entry point')
+
+  function assertInst(condition, message) {
+    if (!condition) {
+      console.log(currInst)
+      console.log(message);
+      throw message
+    }
+  }
+
+  function step(silent) {
+    const nextInst = state.memory[state.pc]
+    assertInst(nextInst && nextInst.decoder, 'Invalid memory access')
+    currInst = nextInst.decoder
+
+    const {inst: {print}, exec, type} = nextInst.decoder
+
+    if (!silent) {
+      console.log(`${type} | ${print}`)
+    }
+
+    assertInst(exec, 'No exec')
+
+    state.instCount++
+    state.pc++
+    exec(state)
+  }
+
+  program.stepSimulation = (count, silent) => {
+    for (let i = 0; i < count; i++) {
+      step(silent)
+    }
+    printState(state)
+  }
+
+  program.interrupt = () => {
+    const vector = state.memory[0b0111_1111_1111_1111]?.value
+    assertInst(vector, 'Interrupt vector table not available')
+    state.pc = vector
+  }
+
+  printState(state)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/*                         --- compile and print ---                          */
+////////////////////////////////////////////////////////////////////////////////
+
+function print(message) {
+  console.log(message)
+  document.getElementById('pre').innerHTML = message
+}
+
+function printProgram(source, state) {
+  state.printable = {
+    addresses: {}
+  }
+
+  const sourceLines = source.split('\n').map((line, i) => {
+    return `${`${i + 1}:`.padEnd(4)} ${line}`
+  })
+
+  let output = 'Program compiled succesfully!!\n\n'
+  let sourceLineNumber = 1
+
+  const outSource = []
+  const outProgram = []
+  const outOpcode = []
+
+  state.program.instructions.forEach(programLine => {
+    assert(programLine.span && typeof programLine.print == 'string', 'Invalid line: ' + programLine.type)
+
+    const programLineNumber = Number(programLine.span.split(':')[0])
+    assert(!isNaN(programLineNumber), 'Invalid line!')
+
+    // if source is begind
+    while (sourceLineNumber < programLineNumber) {
+      outProgram.push('')
+      outOpcode.push('')
+      outSource.push(sourceLines.shift())
+      sourceLineNumber++
+    }
+
+    outProgram.push(programLine.print)
+
+    if (programLine.opcodes.length) {
+      const opcode = programLine.opcodes[0]
+
+      state.printable.addresses[opcode.pc] = outOpcode.length
+      outOpcode.push(`${hex(opcode.pc, 4, false)}: ${opcode.print}`)
+
+      for (let i = 1; i < programLine.opcodes.length; i++) {
+        const opcode = programLine.opcodes[i]
+        state.printable.addresses[opcode.pc] = outOpcode.length
+        outOpcode.push(`${hex(opcode.pc, 4, false)}: ${opcode.print}`)
+        outProgram.push('')
+      }
+    } else {
+      outOpcode.push('')
+    }
+
+    // if new source is required
+    if (programLineNumber >= sourceLineNumber) {
+      outSource.push(sourceLines.shift())
+      sourceLineNumber++
+    }
+
+    // if source is behind
+    while (outSource.length < outOpcode.length) {
+      outSource.push('')
+    }
+
+    // outSource.push('')
+    // outProgram.push('')
+    // outOpcode.push('')
+  })
+
+  sourceLines.forEach(line => {
+    outSource.push(line)
+    outProgram.push('')
+    outOpcode.push('')
+  })
+
+  assert(outOpcode.length == outProgram.length && outOpcode.length == outSource.length, 'Invalid length')
+
+  state.printable.lines = outProgram.map((prog, line) => {
+    return `${outOpcode[line].padEnd(36)} | ${prog.padEnd(30)} | ${outSource[line]}`
+  })
+
+  document.getElementById('pre').innerHTML = printHeader + state.printable.lines.join('\n')
+}
+
+function compile(source) {
+  console.clear()
+
+  try {
+
+    // split the source code in tokes and save the span
+    const tokens = tokenize(source)
+
+    // create an AST rappresenting the source code
+    const state = buildAST(tokens)
+
+    assemble(state)
+
+    printProgram(source, state)
+
+    return state
+  } catch (e) {
+    console.log('ERROR:', e);
+    print(e)
+  }
+}
+
+window.addEventListener('load', () => {
+
+  let compiling = false
+  const sourceElement = document.getElementById('source')
+  const compileButton = document.getElementById('compile')
+  const runButton = document.getElementById('run')
+  const continuousButton = document.getElementById('continuous')
+  const focusButton = document.getElementById('focus')
+  const pre = document.getElementById('pre')
+  const memory = document.getElementById('memory')
+  const tileMap = document.getElementById('tileMap')
+
+
+
+  let program = null
+  let continuous = false
+  let focus = false
+
+  compileButton.onclick = () => {
+    compiling = !compiling
+    memory.style.display = 'none'
+    tileMap.style.display = 'none'
+
+    if (compiling) {
+      source = sourceElement.value
+      program = compile(sourceElement.value)
+      compileButton.innerHTML = 'Edit!'
+      sourceElement.style.display = 'none'
+      pre.style.display = 'block'
+      return
+    }
+
+    program = null
+    continuous = false
+    focus = false
+    continuousButton.innerHTML = 'Stop!'
+    focusButton.innerHTML = 'Focus!'
+    compileButton.innerHTML = 'Compile!'
+    sourceElement.style.display = 'block'
+    pre.style.display = 'none'
+  }
+
+  runButton.onclick = () => {
+    if (!program) compileButton.onclick()
+
+    // if failed to compile
+    if (program) {
+      memory.style.display = 'block'
+      tileMap.style.display = 'block'
+      simulate(program)
+      return
+    }
+
+    console.log('Compilation failed')
+  }
+
+  continuousButton.onclick = () => {
+    if (!program) runButton.onclick()
+
+    // if failed to compile
+    if (program) {
+      continuous = !continuous
+      continuousButton.innerHTML = continuous ? 'Stop!' : 'Start'
+    }
+  }
+
+  focusButton.onclick = () => {
+    if (!program) runButton.onclick()
+
+    // if failed to compile
+    if (program) {
+      focus = !focus
+      focusButton.innerHTML = focus ? 'Exit!' : 'Focus!'
+    }
+  }
+
+
+  window.setInterval(() => {
+    if (program && program.stepSimulation && continuous) {
+      program.stepSimulation(1000, true)
+      program.interrupt()
+    }
+  }, 1000/60)
+
+  window.addEventListener('keydown', e => {
+    // console.log(e)
+
+    if (program && program.stepSimulation) {
+      const context = program.executionContext
+
+      if (focus) {
+        if (e.key.length == 1) {
+          let code = e.key.charCodeAt(0)
+
+          if (code >= 0 & code < 128) {
+            context.writeMemory(MEMORY_MAPPED, code)
+            program.stepSimulation(0)
+          }
+        }
+
+        // define char NULL_CHAR        = 0
+        // define char CURSOR_CHAR      = 1
+        // define char LEFT_ARROW_CHAR  = 2
+        // define char UP_ARROW_CHAR    = 3
+        // define char RIGHT_ARROW_CHAR = 4
+        // define char DOWN_ARROW_CHAR  = 5
+        // define char DEL_CHAR         = 8
+        // define char NEWLINE_CHAR     = 10
+
+        const map = {
+          'ArrowLeft': 2,
+          'ArrowUp': 3,
+          'ArrowRight': 4,
+          'ArrowDown': 5,
+          'Backspace': 8,
+          'Enter': 10,
+        }
+
+        if (map[e.key]) {
+          context.writeMemory(MEMORY_MAPPED, map[e.key])
+          program.stepSimulation(0)
+        }
+
+        if (!e.ctrlKey) {
+          e.preventDefault()
+        }
+
+        return
+      }
+
+      if (e.key == 'n') {
+        program.stepSimulation(1)
+      }
+
+      if (e.key == 'm') {
+        program.stepSimulation(10000, true)
+      }
+
+      if (e.key == ',') {
+        program.stepSimulation(100000, true)
+      }
+
+      if (e.key == 'c') {
+        compileButton.onclick()
+        compileButton.onclick()
+      }
+
+      if (e.key == 'ArrowUp') {
+        if (context.memory[context.pc - 1]) {
+          context.pc--
+          program.stepSimulation(0)
+        }
+        e.preventDefault()
+      }
+
+      if (e.key == 'ArrowDown') {
+        if (context.memory[context.pc + 1]) {
+          context.pc++
+          program.stepSimulation(0)
+        }
+        e.preventDefault()
+      }
+    }
+
+    if (compiling) {
+      if (e.key == 'r') {
+        runButton.onclick()
+      }
+
+      if (e.key == 'e') {
+        compileButton.onclick()
+      }
+    }
+  })
+
+  runButton.onclick()
+  if (program) {
+    program.stepSimulation(100000, true)
+    continuousButton.onclick()
+    focusButton.onclick()
+    window.scrollTo(0, 0)
+    console.log('Hello');
+  }
+
+  window.setTimeout(() => {
+    window.scrollTo(0, 0)
+  }, 50)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

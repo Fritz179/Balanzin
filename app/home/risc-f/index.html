@@ -13,35 +13,114 @@ include "memoryMapped.f"
 
 define __PRINT_MEMORY__ = false
 define __PRINT_RAM__ = true
-define __OUTPUT_VIZ__ = true
+define __OUTPUT_VIZ__ = false
 
-void function add() {
-  int_t asadfas = 9
-  return
-}
 
-void function main() {
-  :int_t stack = 0
+void function loadCharset() {
+  pixel_t* pixelDestination = PRAM_BEGIN
+  char_t* endPtr = charset_end
 
-  int_t num1 = 9
-  int_t num2 = 8
+  for (char_t* charPtr = charset; charPtr < endPtr; charPtr = charPtr + 1) {
+    char_t currChar = *charPtr
 
-  if (num1 > num2) {
-    num1 = 10
-  } else {
-    num1 = 55
-    int_t a = 9
-    int_t sadfasd = 99
-    a = num1
+    int_t mask = 1
+    asm { shift: }
+
+    pixel_t color = (pixel_t)currChar & (pixel_t)mask
+
+    if (color) {
+      color = 0xffff
+    }
+    // else pixel is 0 therfore is already black
+
+    *pixelDestination = color
+
+    pixelDestination = pixelDestination + 1
+    mask = mask + mask
+
+    asm { bnc shift }
   }
 
-  int_t num3 = num1 + num2
 
-  :int_t stack2 = num1
-  stack = num3
+  int_t len = 64
+  tile_t* __endPtr = TRAM_BEGIN + 64
+
+  for (tile_t* _tilePtr = TRAM_BEGIN; _tilePtr < __endPtr; _tilePtr = _tilePtr + 1) {
+    *_tilePtr = 0
+  }
+
   return
 }
 
+const char_t* msg = 'Hello there!'
+/*
+void function int_vec() {
+  char_t* keyboard = MM_KEYBOARD
+  tile_t* cursor = TRAM_BEGIN
+  tile_t underCursor = 0
+  tile_t caret = (tile_t)CURSOR_CHAR
+
+  asm {
+    loop:
+  }
+
+  char_t pressed = *keyboard
+  *keyboard = 0
+
+  *cursor = caret
+
+  if (pressed >= ' ') {
+    *cursor = (tile_t)pressed
+    cursor = cursor + 1
+    underCursor = *cursor
+    asm { jmp loop }
+  }
+
+  if (pressed == DEL_CHAR) {
+    *cursor = 0
+    cursor = cursor - 1
+  }
+
+  if (pressed == LEFT_ARROW_CHAR) {
+    *cursor = underCursor
+    cursor = cursor - 1
+    underCursor = *cursor
+  }
+
+  if (pressed == RIGHT_ARROW_CHAR) {
+    *cursor = underCursor
+    cursor = cursor + 1
+    underCursor = *cursor
+  }
+
+  asm { jmp loop }
+
+  return
+}
+*/
+/*
+void function setInt() {
+  int_t* int_vector = MM_INT_VEC
+  int_t vector = (int_t)int_vec
+  *int_vector = vector
+
+  return
+}
+*/
+
+void function main() {
+  loadCharset()
+
+  // setInt()
+
+
+  asm {
+    panic:
+    jmp panic
+  }
+
+  return
+}
 
 
 /*
