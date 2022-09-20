@@ -1,0 +1,12 @@
+import Vec2 from '../Vec2.js';
+import { Rect } from '../Shape.js';
+export default class DynamicRect extends Rect {
+    vel = new Vec2(0, 0);
+    get xv() { return this.vel.x; }
+    get yv() { return this.vel.y; }
+    set xv(x) { this.vel.x = x; }
+    set yv(y) { this.vel.y = y; }
+    solveCollision(_other) {
+        return true;
+    }
+}
