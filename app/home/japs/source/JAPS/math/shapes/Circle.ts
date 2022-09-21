@@ -60,7 +60,8 @@ export default class Circle implements Shape {
     assertUnimplemented('Circle vs Line')
   }
 
-  static intersectsPoint(circle: Circle, point: Point): never {
-    assertUnimplemented('Circle vs Point')
+  static intersectsPoint(circle: Circle, point: Point) {
+    const dist2 = (circle.x - point.x) ** 2 + (circle.y - point.y) ** 2
+    return dist2 < (circle.r ** 2)
   }
 }

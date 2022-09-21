@@ -1,21 +1,36 @@
 // npx tsc ./source/main.ts --outDir ./out --module es2022 --target es2022 --strict --strictNullChecks --forceConsistentCasingInFileNames --skipLibCheck -w
-import Timer from './Timer.js';
 import JAPS from './JAPS/JAPS.js';
-const japs = new JAPS(window.innerWidth, window.innerHeight);
-function update() {
-    japs.update();
+import { Rect, Circle, Line } from './JAPS/math/Shape.js';
+import Entity from './Entity.js';
+export default class Test extends JAPS {
+    constructor() {
+        super(200, 200);
+        this.keyboard.register(this, true);
+    }
+    onkey(key) {
+        console.log(key);
+        const { x, y } = this.mouse.position;
+        let shape = null;
+        if (key == 'r')
+            shape = new Rect(x, y, 20, 20);
+        if (key == 'c')
+            shape = new Circle(x, y, 20);
+        if (key == 'l')
+            shape = new Line(x, y, 20, 20);
+        if (shape) {
+            const entity = new Entity(shape);
+            entity.register(this, true);
+        }
+    }
+    click(x, y, _e) {
+        const num = Math.random();
+        let shape = new Rect(x, y, 20, 20);
+        if (num < 0.6)
+            shape = new Circle(x, y, 20);
+        if (num < 0.3)
+            shape = new Line(x, y, 20, 20);
+        const entity = new Entity(shape);
+        // entity.register(this, true)
+    }
 }
-function render() {
-    japs.render();
-}
-window.addEventListener('click', (e) => {
-    japs.mouseClick(e.x, e.y, e);
-});
-window.addEventListener('mousemove', (e) => {
-    japs.mouseMove(e.x, e.y, e);
-});
-window.addEventListener('keydown', (e) => {
-    japs.key(e.key);
-});
-const timer = new Timer(60, update, render);
-timer.start();
+const test = new Test();

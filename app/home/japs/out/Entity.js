@@ -1,11 +1,9 @@
-import { Rect, Line } from './math/Shape.js';
+import { Rect, Line } from './JAPS/math/Shape.js';
 export default class Entity {
     intersecting = 0;
     bb;
-    pos;
     constructor(shape) {
         this.bb = shape;
-        this.pos = this.bb.pos;
     }
     register(parent, registering) {
         parent.updater.register(this, registering);
@@ -15,7 +13,7 @@ export default class Entity {
     updateStart() {
         this.intersecting = 0;
     }
-    onCollision(other, solve) {
+    onCollision(other) {
         this.intersecting = 1;
         if (other instanceof Rect) {
             this.intersecting |= 1;
@@ -23,8 +21,6 @@ export default class Entity {
         if (other instanceof Line) {
             this.intersecting |= 2;
         }
-    }
-    updateEnd() {
     }
     render(renderer) {
         let fillStyle = '#000';

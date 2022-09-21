@@ -106,7 +106,12 @@ export default class Rect implements Shape {
     return true
   }
 
-  static intersectsPoint(self: Rect, other: Point): never {
-    assertUnimplemented('Rect vs Point')
+  static intersectsPoint(self: Rect, other: Point): boolean {
+    return !(
+      self.x1 > other.x ||
+      self.x2 < other.x ||
+      self.y1 > other.y ||
+      self.y2 < other.y
+    )
   }
 }

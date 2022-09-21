@@ -1,19 +1,18 @@
-import { Shape, Rect, Line } from './math/Shape.js'
-import Vec2 from './math/Vec2.js'
-import Renderer from './JAPS/JAPSRenderer.js'
+import { Shape, Rect, Line } from './JAPS/math/Shape.js'
+import Vec2 from './JAPS/math/Vec2.js'
+import Renderer from './JAPS/handlers/JAPSRenderer.js'
 
-import JABS from './JAPS/JAPS.js'
+import Game from './main.js'
+
 export default class Entity {
   intersecting = 0
   bb: Shape
-  pos: Vec2
 
   constructor(shape: Shape) {
     this.bb = shape
-    this.pos = this.bb.pos
   }
 
-  register(parent: JABS, registering: boolean) {
+  register(parent: Game, registering: boolean) {
     parent.updater.register(this, registering)
     parent.renderer.register(this, registering)
     parent.collider.register(this, registering)
@@ -23,7 +22,7 @@ export default class Entity {
     this.intersecting = 0
   }
 
-  onCollision(other: Shape, solve: () => void) {
+  onCollision(other: Shape) {
     this.intersecting = 1
 
     if (other instanceof Rect) {
@@ -33,10 +32,6 @@ export default class Entity {
     if (other instanceof Line) {
       this.intersecting |= 2
     }
-  }
-
-  updateEnd() {
-
   }
 
   render(renderer: Renderer) {

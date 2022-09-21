@@ -43,6 +43,6 @@ export default class Point implements Shape {
   }
 
   static intersectsPoint(self: Point, other: Point): boolean {
-    assertUnimplemented('Point vs Point')
+    return self.x == other.x && self.y == other.y
   }
 }

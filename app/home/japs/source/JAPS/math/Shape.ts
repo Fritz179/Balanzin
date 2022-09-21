@@ -55,11 +55,6 @@ abstract class DynamicShape {
   abstract solveCollision(other: Shape): boolean
 }
 
-// intersectionInfo
-class IntersectionInfo {
-
-}
-
 // Export all shapes types
 export {
   Shape,
@@ -72,6 +67,6 @@ export {
   DynamicShapeTypes,
   DynamicRect,
   DynamicCircle,
-  // Point,
-  // Line
+  // DynamicPoint,
+  // DynamicLine
 }

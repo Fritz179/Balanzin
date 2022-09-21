@@ -1,22 +1,37 @@
-import JAPSUpdater from './JAPSUpdater.js'
-import JAPSRenderer from './JAPSRenderer.js'
-import JapsCollider from './JAPSCollider.js'
-import { Shape, Rect, Circle, Line, Point } from '../math/Shape.js'
-import Entity from '../Entity.js'
-import Vec2 from '../math/Vec2.js'
+import JAPSUpdater from './handlers/JAPSUpdater.js'
+import JAPSRenderer from './handlers/JAPSRenderer.js'
+import JAPSCollider from './handlers/JAPSCollider.js'
+import JAPSKeyboard from './handlers/JAPSKeyboard.js'
+import JAPSMouse from './handlers/JAPSMouse.js'
+
+import { Rect } from './math/Shape.js'
+import { listen, unlisten } from './listen.js'
+import Timer from './Timer.js'
+
 
 const screen = document.getElementById('screen')! as HTMLCanvasElement
 
-export default class JAPS extends Rect {
+export class JAPS extends Rect {
   updater = new JAPSUpdater(this)
   renderer = new JAPSRenderer(this, screen)
-  collider = new JapsCollider(this)
-  mouse = new Vec2(0, 0)
+  collider = new JAPSCollider(this)
+  keyboard = new JAPSKeyboard(this)
+  mouse = new JAPSMouse(this)
+  timer = new Timer(60, this.update.bind(this), this.render.bind(this))
 
   constructor(w: number, h: number) {
     super(0, 0, w, h)
+    listen(this)
 
     this.renderer.setCanvasSize(w, h)
+  }
+
+  destroy() {
+    // Timer has requestAnimationFrame
+    this.timer.stop()
+
+    // Remove all listeners
+    unlisten()
   }
 
   update() {
@@ -30,33 +45,12 @@ export default class JAPS extends Rect {
   render() {
     this.renderer.render()
   }
+}
 
-  mouseClick(x: number, y: number, _e: MouseEvent) {
-    const num = Math.random()
+export default class Game extends JAPS {
+  constructor(w: number, h: number) {
+    super(w, h)
 
-    let shape: Shape = new Rect(x, y, 20, 20)
-    if (num < 0.6) shape = new Circle(x, y, 20)
-    if (num < 0.3) shape = new Line(x, y, 20, 20)
-
-    const entity = new Entity(shape)
-    // entity.register(this, true)
-  }
-
-  mouseMove(x: number, y: number, _e: MouseEvent) {
-    this.mouse.set(x, y)
-  }
-
-  key(key: string) {
-    const {x, y} = this.mouse
-
-    let shape: Shape | null = null
-    if (key == 'r') shape = new Rect(x, y, 20, 20)
-    if (key == 'c') shape = new Circle(x, y, 20)
-    if (key == 'l') shape = new Line(x, y, 20, 20)
-
-    if (shape) {
-      const entity = new Entity(shape)
-      entity.register(this, true)
-    }
+    this.timer.start()
   }
 }

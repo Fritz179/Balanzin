@@ -1,4 +1,4 @@
-export default function assert(condition: boolean, message?: string): asserts condition {
+export default function assert(condition: any, message?: string): asserts condition {
   if (!condition) {
     console.trace()
     throw message || 'Assertion failed!'
